@@ -17,7 +17,3 @@ html {
   overflow: hidden;
   font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
 }
-
-#app {
-  height: 100vh;
-}
