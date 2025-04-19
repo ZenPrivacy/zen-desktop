@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import './App.css';
 
+import { ThemeType, useTheme } from './common/ThemeManager';
 import { FilterLists } from './FilterLists';
 import { MyRules } from './MyRules';
 import { RequestLog } from './RequestLog';
@@ -13,6 +14,8 @@ import { ProxyState } from './types';
 
 function App() {
   const { t } = useTranslation();
+  const { effectiveTheme } = useTheme();
+
   useEffect(() => {
     FocusStyleManager.onlyShowFocusOnTabs();
   }, []);
@@ -21,7 +24,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'myRules' | 'settings'>('home');
 
   return (
-    <div id="App">
+    <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp5-dark' : ''}>
       <div className="heading">
         <h1 className="heading__logo">
           <Icon icon="shield" size={IconSize.LARGE} />
