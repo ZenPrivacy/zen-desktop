@@ -15,6 +15,7 @@ import { ExportLogsButton } from './ExportLogsButton';
 import { IgnoredHostsInput } from './IgnoredHostsInput';
 import { LocaleSelector } from './LocaleSelector';
 import { PortInput } from './PortInput';
+import { ThemeSelector } from './ThemeSelector';
 import { UninstallCADialog } from './UninstallCADialog';
 import { UpdatePolicyRadioGroup } from './UpdatePolicyRadioGroup';
 
@@ -55,6 +56,7 @@ export function SettingsManager({ proxyState }: SettingsManagerProps) {
           <LocaleSelector />
           <AutostartSwitch />
           {state.showUpdateRadio && <UpdatePolicyRadioGroup />}
+          <ThemeSelector />
           <ExportLogsButton />
         </div>
       </div>

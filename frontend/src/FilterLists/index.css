@@ -3,9 +3,13 @@
 }
 
 .filter-lists__list {
-  border-bottom: 1px dotted #fff;
+  border-bottom: 1px dotted #333;
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.bp5-dark .filter-lists__list {
+  border-bottom: 1px dotted #f5f5f5;
 }
 
 .filter-lists__list-header {
@@ -47,7 +51,7 @@
 .filter-lists__create-filter-list {
   border-bottom: 1px dotted #fff;
   padding-top: 10px;
-  padding-bottom: 10px; 
+  padding-bottom: 10px;
 }
 
 .filter-lists__list-delete {

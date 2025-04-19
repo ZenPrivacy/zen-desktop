@@ -3,6 +3,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from './App';
+import { ThemeProvider } from './common/ThemeManager';
 import ErrorBoundary from './ErrorBoundary';
 import { initI18n } from './i18n';
 import './style.css';
@@ -30,7 +31,9 @@ async function bootstrap() {
   root.render(
     <React.StrictMode>
       <ErrorBoundary>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </ErrorBoundary>
     </React.StrictMode>,
   );
