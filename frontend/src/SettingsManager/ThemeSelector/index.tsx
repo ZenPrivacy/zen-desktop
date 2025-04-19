@@ -8,7 +8,7 @@ export function ThemeSelector() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <FormGroup helperText={t('settings.theme.description')}>
+    <FormGroup>
       <RadioGroup
         label={t('settings.theme.chooseTheme')}
         onChange={(e: React.FormEvent<HTMLInputElement>) => {

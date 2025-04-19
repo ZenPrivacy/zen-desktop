@@ -104,6 +104,12 @@
       "advanced": "Advanced",
       "app": "App"
     },
+    "theme": {
+      "chooseTheme": "Choose a theme",
+      "dark": "Dark",
+      "light": "Light",
+      "system": "Follow system theme"
+    },
     "updates": {
       "automatic": "Automatic updates",
       "choosePolicy": "Choose how updates are installed",
