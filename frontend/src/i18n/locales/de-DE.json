@@ -105,10 +105,10 @@
       "app": "Anwendung"
     },
     "theme": {
-      "chooseTheme": "",
-      "dark": "",
-      "light": "",
-      "system": ""
+      "chooseTheme": "Design auswählen",
+      "dark": "Dunkel",
+      "light": "Hell",
+      "system": "Systemdesign verwenden"
     },
     "updates": {
       "automatic": "Automatische Updates",
