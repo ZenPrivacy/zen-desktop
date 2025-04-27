@@ -15,7 +15,7 @@ eesti.ee
 
 # Password managers
 1password.com
-pastpass.com
+lastpass.com
 passwords.google.com
 passwords.google
 bitwarden.com
@@ -37,6 +37,7 @@ bcc.kz
 bankffin.kz
 jusan.kz
 onlinebank.kz
+freedompay.kz
 
 # Payment processors
 paypal.com
