@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rulemodifiers"
+	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rulemodifiers/removejsconstant"
 )
 
 // Rule represents modifiers of a rule.
@@ -79,6 +80,8 @@ func (rm *Rule) ParseModifiers(modifiers string) error {
 			modifier = &rulemodifiers.HeaderModifier{}
 		case isKind("removeheader"):
 			modifier = &rulemodifiers.RemoveHeaderModifier{}
+		case isKind("remove-js-constant"):
+			modifier = &removejsconstant.Modifier{}
 		case isKind("all"):
 			// TODO: should act as "popup" modifier once it gets implemented
 			continue
