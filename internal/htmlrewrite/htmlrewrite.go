@@ -1,8 +1,8 @@
+// Package htmlrewrite provides utilities for streaming rewrites of HTML responses.
 package htmlrewrite
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -13,94 +13,61 @@ import (
 //
 // On error, the response body is unchanged and the caller may proceed as if the function had not been called.
 func PrependBodyContents(res *http.Response, prependWith []byte) error {
-	rawBodyReader, err := getRawBodyReader(res)
-	if err != nil {
-		return fmt.Errorf("get raw body reader: %w", err)
-	}
+	return RewriteBody(res, func(original io.ReadCloser, modified *io.PipeWriter) {
+		defer original.Close()
 
-	reader, writer := io.Pipe()
-
-	go func() {
-		defer rawBodyReader.Close()
-
-		z := html.NewTokenizer(rawBodyReader)
-
+		z := html.NewTokenizer(original)
 	outer:
 		for {
 			switch token := z.Next(); token {
 			case html.ErrorToken:
-				writer.CloseWithError(z.Err())
+				modified.CloseWithError(z.Err())
 				break outer
 			case html.StartTagToken:
-				writer.Write(z.Raw())
+				modified.Write(z.Raw())
 				if name, _ := z.TagName(); bytes.Equal(name, []byte("body")) {
-					writer.Write(prependWith)
-					writer.Write(z.Buffered())
+					modified.Write(prependWith)
+					modified.Write(z.Buffered())
 					// Directly copy the remaining content, without the overhead of tokenization.
-					_, err := io.Copy(writer, rawBodyReader)
-					writer.CloseWithError(err)
+					_, err := io.Copy(modified, original)
+					modified.CloseWithError(err)
 					break outer
 				}
 			default:
-				writer.Write(z.Raw())
+				modified.Write(z.Raw())
 			}
 		}
-	}()
-
-	setBody(res, reader)
-	return nil
+	})
 }
 
 // AppendHeadContents allows to append the contents of the <head> tag in an HTTP text/html response.
 //
 // On error, the response body is unchanged and the caller may proceed as if the function had not been called.
 func AppendHeadContents(res *http.Response, appendWith []byte) error {
-	rawBodyReader, err := getRawBodyReader(res)
-	if err != nil {
-		return fmt.Errorf("get raw body reader: %w", err)
-	}
+	return RewriteBody(res, func(original io.ReadCloser, modified *io.PipeWriter) {
+		defer original.Close()
 
-	reader, writer := io.Pipe()
-
-	go func() {
-		defer rawBodyReader.Close()
-
-		z := html.NewTokenizer(rawBodyReader)
-
+		z := html.NewTokenizer(original)
 	outer:
 		for {
 			switch token := z.Next(); token {
 			case html.ErrorToken:
-				writer.CloseWithError(z.Err())
+				modified.CloseWithError(z.Err())
 				break outer
 			case html.EndTagToken:
 				if name, _ := z.TagName(); bytes.Equal(name, []byte("head")) {
-					writer.Write(appendWith)
-					writer.Write(z.Raw())
-					writer.Write(z.Buffered())
+					modified.Write(appendWith)
+					modified.Write(z.Raw())
+					modified.Write(z.Buffered())
 					// Directly copy the remaining content, without the overhead of tokenization.
-					_, err := io.Copy(writer, rawBodyReader)
-					writer.CloseWithError(err)
+					_, err := io.Copy(modified, original)
+					modified.CloseWithError(err)
 					break outer
 				}
-				writer.Write(z.Raw())
+				modified.Write(z.Raw())
 			default:
-				writer.Write(z.Raw())
+				modified.Write(z.Raw())
 			}
 		}
-	}()
-
-	setBody(res, reader)
-	return nil
-}
-
-func setBody(res *http.Response, body io.ReadCloser) {
-	res.Body = body
-	// The resulting Content-Length cannot be determined after modifications.
-	// Transmit the response as chunked to allow for HTTP connection reuse without having to TCP FIN terminate the connection.
-	res.ContentLength = -1
-	res.Header.Del("Content-Length")
-	res.Header.Del("Content-Encoding")
-	res.TransferEncoding = []string{"chunked"}
-	res.Header.Set("Content-Type", "text/html;charset=utf-8")
+	})
 }
