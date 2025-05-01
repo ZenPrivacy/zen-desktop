@@ -1,4 +1,4 @@
-package htmlrewrite
+package httprewrite
 
 import (
 	"compress/flate"

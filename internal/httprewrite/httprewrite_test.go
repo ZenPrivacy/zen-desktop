@@ -1,4 +1,4 @@
-package htmlrewrite_test
+package httprewrite_test
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ZenPrivacy/zen-desktop/internal/htmlrewrite"
+	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
 )
 
 func TestAppendHeadContentsPublic(t *testing.T) {
@@ -53,7 +53,7 @@ func TestAppendHeadContentsPublic(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			res := newHTTPResponse(tt.original)
-			if err := htmlrewrite.AppendHeadContents(res, tt.appendWith); err != nil {
+			if err := httprewrite.AppendHeadContents(res, tt.appendWith); err != nil {
 				t.Fatalf("AppendHeadContents error: %v", err)
 			}
 			modifiedBody, err := io.ReadAll(res.Body)
@@ -114,7 +114,7 @@ func TestPrependBodyContentsPublic(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			res := newHTTPResponse(tt.original)
-			if err := htmlrewrite.PrependBodyContents(res, tt.prependWith); err != nil {
+			if err := httprewrite.PrependBodyContents(res, tt.prependWith); err != nil {
 				t.Fatalf("PrependBodyContents error: %v", err)
 			}
 			modifiedBody, err := io.ReadAll(res.Body)
