@@ -1,5 +1,5 @@
-// Package htmlrewrite provides utilities for streaming rewrites of HTML responses.
-package htmlrewrite
+// Package httprewrite provides utilities for streaming rewrites of HTTP responses.
+package httprewrite
 
 import (
 	"bytes"

@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/hostmatch"
-	"github.com/ZenPrivacy/zen-desktop/internal/htmlrewrite"
+	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 )
 
@@ -84,7 +84,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	// Appending the scriptlets bundle to the head of the document aligns with the behavior of uBlock Origin:
 	// - https://github.com/gorhill/uBlock/blob/d7ae3a185eddeae0f12d07149c1f0ddd11fd0c47/platform/firefox/vapi-background-ext.js#L373-L375
 	// - https://github.com/gorhill/uBlock/blob/d7ae3a185eddeae0f12d07149c1f0ddd11fd0c47/platform/chromium/vapi-background-ext.js#L223-L226
-	if err := htmlrewrite.AppendHeadContents(res, bytes.Join([][]byte{inj.bundle, ruleInjection.Bytes()}, nil)); err != nil {
+	if err := httprewrite.AppendHeadContents(res, bytes.Join([][]byte{inj.bundle, ruleInjection.Bytes()}, nil)); err != nil {
 		return fmt.Errorf("append head contents: %w", err)
 	}
 
