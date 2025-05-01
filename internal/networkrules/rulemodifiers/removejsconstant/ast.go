@@ -9,7 +9,12 @@ import (
 	"github.com/tdewolff/parse/v2/js"
 )
 
-func removeFromScript(script []byte, keys [][]string) ([]byte, error) {
+// stripKeys removes the specified key definitions from the JavaScript code.
+func stripKeys(script []byte, keys [][]string) ([]byte, error) {
+	// TODO performance optimizations:
+	// - prune multiple keys in one pass
+	// - check whether at least one key is present before parsing (trie, Aho-Corasick)
+
 	ast, err := js.Parse(parse.NewInput(bytes.NewReader(script)), js.Options{})
 	if err != nil {
 		return nil, fmt.Errorf("parse JS: %w", err)
@@ -26,18 +31,15 @@ func removeFromScript(script []byte, keys [][]string) ([]byte, error) {
 
 // prune mutates the AST in-place.
 //
-//	path[0] … top-level binding name
-//	path[1:] … property trail inside object literals
+// The path is a list of property names to traverse the object literal, where
+//   - path[0] is top-level binding name
+//   - path[1:] is property trail inside object literals
 func prune(root *js.AST, path []string) {
 	if len(path) == 0 {
 		return
 	}
 
-	// We only have to deal with the outermost BlockStmt in a script/program.
-	pruneBlock(&root.BlockStmt, path)
-}
-
-func pruneBlock(block *js.BlockStmt, path []string) {
+	block := root.BlockStmt
 	for i := 0; i < len(block.List); {
 		vd, ok := block.List[i].(*js.VarDecl)
 		if !ok {
