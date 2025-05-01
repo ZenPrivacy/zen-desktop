@@ -15,6 +15,26 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
+// RewriteBody allows the caller to modify the HTTP response body in a streaming manner.
+// It handles decompression and character set conversion to UTF-8 automatically.
+//
+// res is the HTTP response whose body will be rewritten.
+// processor is a function that receives the original body and a writer for the modified body.
+// The processor is responsible for closing both the original body and the writer.
+func RewriteBody(res *http.Response, processor func(original io.ReadCloser, modified *io.PipeWriter)) error {
+	rawBodyReader, err := getRawBodyReader(res)
+	if err != nil {
+		return fmt.Errorf("get raw body reader: %w", err)
+	}
+
+	reader, writer := io.Pipe()
+
+	go processor(rawBodyReader, writer)
+
+	setBody(res, reader)
+	return nil
+}
+
 // getRawBodyReader extracts an uncompressed, UTF-8 decoded body from a potentially compressed and non-UTF-8 encoded HTTP response.
 func getRawBodyReader(res *http.Response) (io.ReadCloser, error) {
 	encoding := res.Header.Get("Content-Encoding")
@@ -88,4 +108,17 @@ func (m *multiCloser) Close() error {
 		}
 	}
 	return finalErr.ErrorOrNil()
+}
+
+// setBody sets the response body and adjusts headers for chunked transfer encoding.
+//
+// In the context of this package, Content-Length cannot be determined ahead of time after modifications by [RewriteBody].
+// To get around this, the response is chunked to allow for HTTP connection reuse without having to TCP FIN terminate each connection.
+func setBody(res *http.Response, body io.ReadCloser) {
+	res.Body = body
+	res.ContentLength = -1
+	res.Header.Del("Content-Length")
+	res.Header.Del("Content-Encoding")
+	res.TransferEncoding = []string{"chunked"}
+	res.Header.Set("Content-Type", "text/html;charset=utf-8")
 }
