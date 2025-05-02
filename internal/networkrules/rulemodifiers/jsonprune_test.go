@@ -13,9 +13,9 @@ func TestJsonPruneModifier(t *testing.T) {
 	t.Run("ModifyRes", func(t *testing.T) {
 		t.Parallel()
 
-		mustParse := func(mod string) *JsonPruneModifier {
+		mustParse := func(mod string) *JSONPruneModifier {
 			t.Helper()
-			var m JsonPruneModifier
+			var m JSONPruneModifier
 			if err := m.Parse(mod); err != nil {
 				t.Fatalf("Parse failed: %v", err)
 			}
@@ -101,7 +101,7 @@ func TestJsonPruneModifier(t *testing.T) {
 
 		tests := []struct {
 			name     string
-			a        *JsonPruneModifier
+			a        *JSONPruneModifier
 			b        Modifier
 			expected bool
 		}{
@@ -136,9 +136,9 @@ func TestJsonPruneModifier(t *testing.T) {
 	})
 }
 
-func mustParseJsonPrune(t *testing.T, modifier string) *JsonPruneModifier {
+func mustParseJsonPrune(t *testing.T, modifier string) *JSONPruneModifier {
 	t.Helper()
-	var m JsonPruneModifier
+	var m JSONPruneModifier
 	if err := m.Parse(modifier); err != nil {
 		t.Fatalf("failed to parse modifier %q: %v", modifier, err)
 	}

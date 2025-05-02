@@ -11,24 +11,24 @@ import (
 	"github.com/spyzhov/ajson"
 )
 
-type JsonPruneModifier struct {
+type JSONPruneModifier struct {
 	// commands is a parsed sequence representing the JSONPath expression.
 	commands []string
 }
 
-var _ ModifyingModifier = (*JsonPruneModifier)(nil)
+var _ ModifyingModifier = (*JSONPruneModifier)(nil)
 
-var ErrInvalidJsonPruneModifier = errors.New("invalid jsonprune modifier")
+var ErrInvalidJSONPruneModifier = errors.New("invalid jsonprune modifier")
 
-func (m *JsonPruneModifier) Parse(modifier string) error {
+func (m *JSONPruneModifier) Parse(modifier string) error {
 	if !strings.HasPrefix(modifier, "jsonprune=") {
-		return ErrInvalidJsonPruneModifier
+		return ErrInvalidJSONPruneModifier
 	}
 	raw := strings.TrimPrefix(modifier, "jsonprune=")
 	raw = strings.TrimSpace(raw)
 
 	if raw == "" {
-		return ErrInvalidJsonPruneModifier
+		return ErrInvalidJSONPruneModifier
 	}
 
 	commands, err := ajson.ParseJSONPath(raw)
@@ -40,7 +40,7 @@ func (m *JsonPruneModifier) Parse(modifier string) error {
 	return nil
 }
 
-func (m *JsonPruneModifier) ModifyRes(res *http.Response) (modified bool, err error) {
+func (m *JSONPruneModifier) ModifyRes(res *http.Response) (modified bool, err error) {
 	if !isJSONResponse(res) {
 		return false, nil
 	}
@@ -81,12 +81,12 @@ func (m *JsonPruneModifier) ModifyRes(res *http.Response) (modified bool, err er
 	return touched, nil
 }
 
-func (m *JsonPruneModifier) ModifyReq(req *http.Request) bool {
+func (m *JSONPruneModifier) ModifyReq(req *http.Request) bool {
 	return false
 }
 
-func (m *JsonPruneModifier) Cancels(other Modifier) bool {
-	o, ok := other.(*JsonPruneModifier)
+func (m *JSONPruneModifier) Cancels(other Modifier) bool {
+	o, ok := other.(*JSONPruneModifier)
 	if !ok {
 		return false
 	}

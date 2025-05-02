@@ -80,7 +80,7 @@ func (rm *Rule) ParseModifiers(modifiers string) error {
 		case isKind("removeheader"):
 			modifier = &rulemodifiers.RemoveHeaderModifier{}
 		case isKind("jsonprune"):
-			modifier = &rulemodifiers.JsonPruneModifier{}
+			modifier = &rulemodifiers.JSONPruneModifier{}
 		case isKind("all"):
 			// TODO: should act as "popup" modifier once it gets implemented
 			continue
