@@ -2,6 +2,8 @@ package rulemodifiers
 
 import (
 	"errors"
+	"fmt"
+	"mime"
 	"net/http"
 	"strings"
 
@@ -10,7 +12,8 @@ import (
 )
 
 type JsonPruneModifier struct {
-	Path string
+	// commands is a parsed sequence representing the JSONPath expression.
+	commands []string
 }
 
 var _ ModifyingModifier = (*JsonPruneModifier)(nil)
@@ -22,36 +25,35 @@ func (m *JsonPruneModifier) Parse(modifier string) error {
 		return ErrInvalidJsonPruneModifier
 	}
 	raw := strings.TrimPrefix(modifier, "jsonprune=")
-
-	// Unescape \$ and \,
-	raw = strings.ReplaceAll(raw, `\,`, `,`)
-	raw = strings.ReplaceAll(raw, `\.`, `.`)
-	raw = strings.ReplaceAll(raw, `\$`, `$`)
 	raw = strings.TrimSpace(raw)
 
 	if raw == "" {
 		return ErrInvalidJsonPruneModifier
 	}
 
-	m.Path = raw
+	commands, err := ajson.ParseJSONPath(raw)
+	if err != nil {
+		return fmt.Errorf("parse JSONPath: %w", err)
+	}
+
+	m.commands = commands
 	return nil
 }
 
 func (m *JsonPruneModifier) ModifyRes(res *http.Response) (modified bool, err error) {
-	if !strings.Contains(res.Header.Get("Content-Type"), "application/json") {
+	if !isJSONResponse(res) {
 		return false, nil
 	}
 
 	var touched bool
-
 	err = httprewrite.BufferRewrite(res, func(src []byte) []byte {
 		root, err := ajson.Unmarshal(src)
 		if err != nil {
 			return src
 		}
 
-		nodes, err := root.JSONPath(m.Path)
-		if err != nil || len(nodes) == 0 {
+		nodes, err := ajson.ApplyJSONPath(root, m.commands)
+		if err != nil {
 			return src
 		}
 
@@ -73,7 +75,7 @@ func (m *JsonPruneModifier) ModifyRes(res *http.Response) (modified bool, err er
 	})
 
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("buffer rewrite: %w", err)
 	}
 
 	return touched, nil
@@ -84,8 +86,33 @@ func (m *JsonPruneModifier) ModifyReq(req *http.Request) bool {
 }
 
 func (m *JsonPruneModifier) Cancels(other Modifier) bool {
-	if o, ok := other.(*JsonPruneModifier); ok {
-		return m.Path == o.Path
+	o, ok := other.(*JsonPruneModifier)
+	if !ok {
+		return false
 	}
-	return false
+
+	if len(m.commands) != len(o.commands) {
+		return false
+	}
+
+	for i := range m.commands {
+		if m.commands[i] != o.commands[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isJSONResponse(res *http.Response) bool {
+	contentType := res.Header.Get("Content-Type")
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return false
+	}
+	if mediaType != "application/json" {
+		return false
+	}
+
+	return true
 }

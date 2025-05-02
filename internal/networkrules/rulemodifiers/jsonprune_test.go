@@ -31,35 +31,35 @@ func TestJsonPruneModifier(t *testing.T) {
 		}{
 			{
 				name:     "remove top-level field with escaped $",
-				modifier: `jsonprune=\$\.removeMe`,
+				modifier: `jsonprune=$.removeMe`,
 				input:    `{"removeMe":1,"keep":2}`,
 				want:     `{"keep":2}`,
 				modified: true,
 			},
 			{
 				name:     "remove nested field",
-				modifier: `jsonprune=\$\.a.b`,
+				modifier: `jsonprune=$.a.b`,
 				input:    `{"a":{"b":1,"c":2}}`,
 				want:     `{"a":{"c":2}}`,
 				modified: true,
 			},
 			{
 				name:     "remove from array",
-				modifier: `jsonprune=\$\.items[*].ad`,
+				modifier: `jsonprune=$.items[*].ad`,
 				input:    `{"items":[{"id":1,"ad":true},{"id":2,"ad":false}]}`,
 				want:     `{"items":[{"id":1},{"id":2}]}`,
 				modified: true,
 			},
 			{
 				name:     "non-matching path is no-op",
-				modifier: `jsonprune=\$\.notThere`,
+				modifier: `jsonprune=$.notThere`,
 				input:    `{"some":"thing"}`,
 				want:     `{"some":"thing"}`,
 				modified: false,
 			},
 			{
 				name:     "escaped comma inside path",
-				modifier: `jsonprune=\$..['adSlots','adPlacements']`,
+				modifier: `jsonprune=$..['adSlots','adPlacements']`,
 				input:    `{"adSlots":[1,2],"adPlacements":[3,4],"keep":true}`,
 				want:     `{"keep":true}`,
 				modified: true,
@@ -78,7 +78,10 @@ func TestJsonPruneModifier(t *testing.T) {
 					ContentLength: int64(len(tt.input)),
 				}
 
-				modified := mod.ModifyRes(res)
+				modified, err := mod.ModifyRes(res)
+				if err != nil {
+					t.Errorf("error modifying res: %v", err)
+				}
 				if modified != tt.modified {
 					t.Errorf("ModifyRes() = %v, want %v", modified, tt.modified)
 				}
@@ -98,25 +101,25 @@ func TestJsonPruneModifier(t *testing.T) {
 
 		tests := []struct {
 			name     string
-			a        JsonPruneModifier
+			a        *JsonPruneModifier
 			b        Modifier
 			expected bool
 		}{
 			{
 				name:     "same path cancels",
-				a:        JsonPruneModifier{Path: "$.a.b"},
-				b:        &JsonPruneModifier{Path: "$.a.b"},
+				a:        mustParseJsonPrune(t, `jsonprune=$.a.b`),
+				b:        mustParseJsonPrune(t, `jsonprune=$.a.b`),
 				expected: true,
 			},
 			{
 				name:     "different paths do not cancel",
-				a:        JsonPruneModifier{Path: "$.a"},
-				b:        &JsonPruneModifier{Path: "$.b"},
+				a:        mustParseJsonPrune(t, `jsonprune=$.a`),
+				b:        mustParseJsonPrune(t, `jsonprune=$.b`),
 				expected: false,
 			},
 			{
 				name:     "different types do not cancel",
-				a:        JsonPruneModifier{Path: "$.x"},
+				a:        mustParseJsonPrune(t, `jsonprune=$.x`),
 				b:        &RemoveHeaderModifier{HeaderName: "X-Test"},
 				expected: false,
 			},
@@ -131,4 +134,13 @@ func TestJsonPruneModifier(t *testing.T) {
 			})
 		}
 	})
+}
+
+func mustParseJsonPrune(t *testing.T, modifier string) *JsonPruneModifier {
+	t.Helper()
+	var m JsonPruneModifier
+	if err := m.Parse(modifier); err != nil {
+		t.Fatalf("failed to parse modifier %q: %v", modifier, err)
+	}
+	return &m
 }

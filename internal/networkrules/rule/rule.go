@@ -187,13 +187,29 @@ func (rm *Rule) ModifyRes(res *http.Response) (modified bool, err error) {
 }
 
 func splitModifiersEscaped(modifiers string) []string {
-	const placeholder = "<<--COMMA-->>"
-	modifiers = strings.ReplaceAll(modifiers, `\,`, placeholder)
-
-	parts := strings.Split(modifiers, ",")
-
-	for i := range parts {
-		parts[i] = strings.ReplaceAll(parts[i], placeholder, ",")
+	var res []string
+	var current string
+	var escaped bool
+	for _, c := range modifiers {
+		switch c {
+		case '\\':
+			escaped = !escaped
+			continue
+		case ',':
+			if escaped {
+				current += string(c)
+				escaped = false
+				continue
+			}
+			res = append(res, current)
+			current = ""
+		default:
+			current += string(c)
+			escaped = false
+		}
 	}
-	return parts
+	if len(current) > 0 {
+		res = append(res, current)
+	}
+	return res
 }
