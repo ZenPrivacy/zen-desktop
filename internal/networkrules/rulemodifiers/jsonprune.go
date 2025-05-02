@@ -1,13 +1,11 @@
 package rulemodifiers
 
 import (
-	"bytes"
 	"errors"
-	"io"
 	"net/http"
-	"strconv"
 	"strings"
 
+	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
 	"github.com/spyzhov/ajson"
 )
 
@@ -39,52 +37,46 @@ func (m *JsonPruneModifier) Parse(modifier string) error {
 	return nil
 }
 
-func (m *JsonPruneModifier) ModifyRes(res *http.Response) (modified bool) {
+func (m *JsonPruneModifier) ModifyRes(res *http.Response) (modified bool, err error) {
 	if !strings.Contains(res.Header.Get("Content-Type"), "application/json") {
-		return false
+		return false, nil
 	}
 
-	bodyBytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		return false
-	}
-	defer res.Body.Close()
+	var touched bool
 
-	root, err := ajson.Unmarshal(bodyBytes)
-	if err != nil {
-		res.Body = io.NopCloser(bytes.NewReader(bodyBytes))
-		return false
-	}
-
-	nodes, err := root.JSONPath(m.Path)
-	if err != nil {
-		res.Body = io.NopCloser(bytes.NewReader(bodyBytes))
-		return false
-	}
-
-	touched := false
-	for _, node := range nodes {
-		if err := node.Delete(); err == nil {
-			touched = true
+	err = httprewrite.BufferRewrite(res, func(src []byte) []byte {
+		root, err := ajson.Unmarshal(src)
+		if err != nil {
+			return src
 		}
-	}
 
-	if !touched {
-		res.Body = io.NopCloser(bytes.NewReader(bodyBytes))
-		return false
-	}
+		nodes, err := root.JSONPath(m.Path)
+		if err != nil || len(nodes) == 0 {
+			return src
+		}
 
-	newBody, err := ajson.Marshal(root)
+		for _, node := range nodes {
+			if err := node.Delete(); err == nil {
+				touched = true
+			}
+		}
+
+		if !touched {
+			return src
+		}
+
+		newBody, err := ajson.Marshal(root)
+		if err != nil {
+			return src
+		}
+		return newBody
+	})
+
 	if err != nil {
-		res.Body = io.NopCloser(bytes.NewReader(bodyBytes)) // fail-safe fallback
-		return false
+		return false, err
 	}
 
-	res.Body = io.NopCloser(bytes.NewReader(newBody))
-	res.ContentLength = int64(len(newBody))
-	res.Header.Set("Content-Length", strconv.Itoa(len(newBody)))
-
-	return true
+	return touched, nil
 }
 
 func (m *JsonPruneModifier) ModifyReq(req *http.Request) bool {
