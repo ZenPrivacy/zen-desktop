@@ -15,7 +15,6 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
-	"github.com/ZenPrivacy/zen-desktop/internal/jsonrewrite"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
@@ -63,11 +62,6 @@ type jsRuleInjector interface {
 	Inject(*http.Request, *http.Response) error
 }
 
-type jsonRewriteInjector interface {
-	AddRule(rule string) error
-	Inject(*http.Request, *http.Response) error
-}
-
 type filterListStore interface {
 	Get(url string) (io.ReadCloser, error)
 }
@@ -82,7 +76,6 @@ type Filter struct {
 	cosmeticRulesInjector cosmeticRulesInjector
 	cssRulesInjector      cssRulesInjector
 	jsRuleInjector        jsRuleInjector
-	jsonRewriteInjector   jsonRewriteInjector
 	eventsEmitter         filterEventsEmitter
 	filterListStore       filterListStore
 }
@@ -95,7 +88,7 @@ var (
 )
 
 // NewFilter creates and initializes a new filter.
-func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, jsonRewriteInjector jsonRewriteInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore) (*Filter, error) {
+func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore) (*Filter, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -117,9 +110,6 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 	if jsRuleInjector == nil {
 		return nil, errors.New("jsRuleInjector is nil")
 	}
-	if jsonRewriteInjector == nil {
-		return nil, errors.New("jsonRewriteInjector is nil")
-	}
 	if filterListStore == nil {
 		return nil, errors.New("filterListStore is nil")
 	}
@@ -131,7 +121,6 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 		cosmeticRulesInjector: cosmeticRulesInjector,
 		cssRulesInjector:      cssRulesInjector,
 		jsRuleInjector:        jsRuleInjector,
-		jsonRewriteInjector:   jsonRewriteInjector,
 		eventsEmitter:         eventsEmitter,
 		filterListStore:       filterListStore,
 	}
@@ -221,10 +210,6 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 		Therefore, we must first check for a scriptlet rule match before checking for a JS rule match.
 	*/
 	switch {
-	case jsonrewrite.RuleRegex.MatchString(rule):
-		if err := f.jsonRewriteInjector.AddRule(rule); err != nil {
-			return false, fmt.Errorf("add json rule: %w", err)
-		}
 	case scriptletRegex.MatchString(rule):
 		if err := f.scriptletsInjector.AddRule(rule, filterListTrusted); err != nil {
 			return false, fmt.Errorf("add scriptlet: %w", err)
@@ -298,12 +283,6 @@ func (f *Filter) HandleResponse(req *http.Request, res *http.Response) error {
 		}
 	}
 
-	if isJSONResponse(res) {
-		if err := f.jsonRewriteInjector.Inject(req, res); err != nil {
-			log.Printf("error injecting json-prune rules for %q: %v", logger.Redacted(req.URL), err)
-		}
-	}
-
 	appliedRules := f.networkRules.ModifyRes(req, res)
 	if len(appliedRules) > 0 {
 		f.eventsEmitter.OnFilterModify(req.Method, req.URL.String(), req.Header.Get("Referer"), appliedRules)
@@ -331,18 +310,4 @@ func isDocumentNavigation(req *http.Request, res *http.Response) bool {
 	}
 
 	return true
-}
-
-func isJSONResponse(res *http.Response) bool {
-	contentType := res.Header.Get("Content-Type")
-	if contentType == "" {
-		return false
-	}
-
-	mediaType, _, err := mime.ParseMediaType(contentType)
-	if err != nil {
-		return false
-	}
-
-	return mediaType == "application/json"
 }
