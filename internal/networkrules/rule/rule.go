@@ -36,7 +36,7 @@ func (rm *Rule) ParseModifiers(modifiers string) error {
 		return nil
 	}
 
-	for _, m := range strings.Split(modifiers, ",") {
+	for _, m := range splitModifiersEscaped(modifiers) {
 		if len(m) == 0 {
 			return fmt.Errorf("empty modifier")
 		}
@@ -82,6 +82,8 @@ func (rm *Rule) ParseModifiers(modifiers string) error {
 			modifier = &rulemodifiers.RemoveHeaderModifier{}
 		case isKind("remove-js-constant"):
 			modifier = &removejsconstant.Modifier{}
+		case isKind("jsonprune"):
+			modifier = &rulemodifiers.JSONPruneModifier{}
 		case isKind("all"):
 			// TODO: should act as "popup" modifier once it gets implemented
 			continue
@@ -185,4 +187,32 @@ func (rm *Rule) ModifyRes(res *http.Response) (modified bool, err error) {
 	}
 
 	return modified, nil
+}
+
+func splitModifiersEscaped(modifiers string) []string {
+	var res []string
+	var current string
+	var escaped bool
+	for _, c := range modifiers {
+		switch c {
+		case '\\':
+			escaped = !escaped
+			continue
+		case ',':
+			if escaped {
+				current += string(c)
+				escaped = false
+				continue
+			}
+			res = append(res, current)
+			current = ""
+		default:
+			current += string(c)
+			escaped = false
+		}
+	}
+	if len(current) > 0 {
+		res = append(res, current)
+	}
+	return res
 }
