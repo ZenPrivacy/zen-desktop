@@ -110,9 +110,6 @@ func isJSONResponse(res *http.Response) bool {
 	if err != nil {
 		return false
 	}
-	if mediaType != "application/json" {
-		return false
-	}
 
-	return true
+	return mediaType == "application/json"
 }
