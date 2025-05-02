@@ -30,7 +30,7 @@ type filterEventsEmitter interface {
 type networkRules interface {
 	ParseRule(rule string, filterName *string) (isException bool, err error)
 	ModifyReq(req *http.Request) (appliedRules []rule.Rule, shouldBlock bool, redirectURL string)
-	ModifyRes(req *http.Request, res *http.Response) []rule.Rule
+	ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error)
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
 }
@@ -283,7 +283,10 @@ func (f *Filter) HandleResponse(req *http.Request, res *http.Response) error {
 		}
 	}
 
-	appliedRules := f.networkRules.ModifyRes(req, res)
+	appliedRules, err := f.networkRules.ModifyRes(req, res)
+	if err != nil {
+		return fmt.Errorf("apply network rules: %v", err)
+	}
 	if len(appliedRules) > 0 {
 		f.eventsEmitter.OnFilterModify(req.Method, req.URL.String(), req.Header.Get("Referer"), appliedRules)
 	}

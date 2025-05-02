@@ -118,17 +118,17 @@ func (rm *RemoveHeaderModifier) ModifyReq(req *http.Request) (modified bool) {
 	return true
 }
 
-func (rm *RemoveHeaderModifier) ModifyRes(res *http.Response) (modified bool) {
+func (rm *RemoveHeaderModifier) ModifyRes(res *http.Response) (modified bool, err error) {
 	if rm.Kind != removeHeaderKindResponse {
-		return false
+		return false, nil
 	}
 	// Since rm.headerName is already in canonical form, we can use the map directly instead of the Get/Del API.
 	if len(res.Header[rm.HeaderName]) == 0 {
-		return false
+		return false, nil
 	}
 
 	delete(res.Header, rm.HeaderName)
-	return true
+	return true, nil
 }
 
 func (rm *RemoveHeaderModifier) Cancels(modifier Modifier) bool {
