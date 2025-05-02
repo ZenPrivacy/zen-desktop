@@ -170,12 +170,16 @@ func (rm *Rule) ModifyReq(req *http.Request) (modified bool) {
 }
 
 // ModifyRes modifies a response. Returns true if the response was modified.
-func (rm *Rule) ModifyRes(res *http.Response) (modified bool) {
+func (rm *Rule) ModifyRes(res *http.Response) (modified bool, err error) {
 	for _, modifier := range rm.ModifyingModifiers {
-		if modifier.ModifyRes(res) {
+		m, err := modifier.ModifyRes(res)
+		if err != nil {
+			return false, fmt.Errorf("modify response: %w", err)
+		}
+		if m {
 			modified = true
 		}
 	}
 
-	return modified
+	return modified, nil
 }
