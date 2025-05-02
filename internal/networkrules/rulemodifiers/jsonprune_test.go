@@ -107,19 +107,19 @@ func TestJsonPruneModifier(t *testing.T) {
 		}{
 			{
 				name:     "same path cancels",
-				a:        mustParseJsonPrune(t, `jsonprune=$.a.b`),
-				b:        mustParseJsonPrune(t, `jsonprune=$.a.b`),
+				a:        mustParseJSONPrune(t, `jsonprune=$.a.b`),
+				b:        mustParseJSONPrune(t, `jsonprune=$.a.b`),
 				expected: true,
 			},
 			{
 				name:     "different paths do not cancel",
-				a:        mustParseJsonPrune(t, `jsonprune=$.a`),
-				b:        mustParseJsonPrune(t, `jsonprune=$.b`),
+				a:        mustParseJSONPrune(t, `jsonprune=$.a`),
+				b:        mustParseJSONPrune(t, `jsonprune=$.b`),
 				expected: false,
 			},
 			{
 				name:     "different types do not cancel",
-				a:        mustParseJsonPrune(t, `jsonprune=$.x`),
+				a:        mustParseJSONPrune(t, `jsonprune=$.x`),
 				b:        &RemoveHeaderModifier{HeaderName: "X-Test"},
 				expected: false,
 			},
@@ -136,7 +136,7 @@ func TestJsonPruneModifier(t *testing.T) {
 	})
 }
 
-func mustParseJsonPrune(t *testing.T, modifier string) *JSONPruneModifier {
+func mustParseJSONPrune(t *testing.T, modifier string) *JSONPruneModifier {
 	t.Helper()
 	var m JSONPruneModifier
 	if err := m.Parse(modifier); err != nil {

@@ -81,7 +81,7 @@ func (m *JSONPruneModifier) ModifyRes(res *http.Response) (modified bool, err er
 	return touched, nil
 }
 
-func (m *JSONPruneModifier) ModifyReq(req *http.Request) bool {
+func (m *JSONPruneModifier) ModifyReq(*http.Request) bool {
 	return false
 }
 
