@@ -3,6 +3,7 @@ package removejsconstant
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"mime"
@@ -42,27 +43,25 @@ func (*Modifier) ModifyReq(*http.Request) bool {
 	return false
 }
 
-func (rc *Modifier) ModifyRes(res *http.Response) bool {
+func (rc *Modifier) ModifyRes(res *http.Response) (bool, error) {
 	contentType := res.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
-		return false
+		return false, nil
 	}
 	switch mediaType {
 	case "text/html":
 		if err := removeFromInlineHTML(res, rc.keys); err != nil {
-			log.Printf("remove-js-constant error: %v", err)
-			return false
+			return false, fmt.Errorf("remove from inline HTML: %v", err)
 		}
-		return true
+		return true, nil
 	case "text/javascript":
 		if err := removeFromJS(res, rc.keys); err != nil {
-			log.Printf("remove-js-constant error: %v", err)
-			return false
+			return false, fmt.Errorf("remove from JS: %v", err)
 		}
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
 func (rc *Modifier) Cancels(modifier rulemodifiers.Modifier) bool {
@@ -89,7 +88,7 @@ func (rc *Modifier) Cancels(modifier rulemodifiers.Modifier) bool {
 
 // removeFromInlineHTML removes the specified JS constants from inline scripts in a HTML response.
 func removeFromInlineHTML(res *http.Response, keys [][]string) error {
-	return httprewrite.RewriteBody(res, func(original io.ReadCloser, modified *io.PipeWriter) {
+	return httprewrite.StreamRewrite(res, func(original io.ReadCloser, modified *io.PipeWriter) {
 		defer original.Close()
 
 		z := html.NewTokenizer(original)
@@ -129,23 +128,12 @@ func removeFromInlineHTML(res *http.Response, keys [][]string) error {
 
 // removeFromJS removes the specified JS constant from a JS response.
 func removeFromJS(res *http.Response, keys [][]string) error {
-	return httprewrite.RewriteBody(res, func(original io.ReadCloser, modified *io.PipeWriter) {
-		defer original.Close()
-
-		script, err := io.ReadAll(original)
-		if err != nil {
-			modified.CloseWithError(err)
-			return
-		}
-		newScript, err := stripKeys(script, keys)
+	return httprewrite.BufferRewrite(res, func(src []byte) []byte {
+		newScript, err := stripKeys(src, keys)
 		if err != nil {
 			log.Printf("error removing JS constant for %q: %v", res.Request.URL, err)
-			modified.Write(script)
-			modified.Close()
-			return
+			return src
 		}
-
-		modified.Write(newScript)
-		modified.Close()
+		return newScript
 	})
 }

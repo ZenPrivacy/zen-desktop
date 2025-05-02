@@ -125,8 +125,9 @@ func (rm *RemoveParamModifier) ModifyReq(req *http.Request) (modified bool) {
 	return modified
 }
 
-func (rm *RemoveParamModifier) ModifyRes(*http.Response) (modified bool) {
-	return false
+// ModifyRes implements [ModifyingModifier].
+func (rm *RemoveParamModifier) ModifyRes(*http.Response) (modified bool, err error) {
+	return false, nil
 }
 
 func (rm *RemoveParamModifier) Cancels(modifier Modifier) bool {

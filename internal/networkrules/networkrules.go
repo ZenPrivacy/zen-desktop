@@ -1,9 +1,9 @@
 package networkrules
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
-	"slices"
 	"strings"
 	"sync"
 
@@ -78,27 +78,33 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 	})
 }
 
-func (nr *NetworkRules) ModifyRes(req *http.Request, res *http.Response) []rule.Rule {
+func (nr *NetworkRules) ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error) {
 	regularRules := nr.regularRuleTree.FindMatchingRulesRes(req, res)
 	if len(regularRules) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	exceptions := nr.exceptionRuleTree.FindMatchingRulesRes(req, res)
-	for _, ex := range exceptions {
-		if slices.ContainsFunc(regularRules, ex.Cancels) {
-			return nil
-		}
-	}
 
 	var appliedRules []rule.Rule
+outer:
 	for _, r := range regularRules {
-		if r.ModifyRes(res) {
+		for _, ex := range exceptions {
+			if ex.Cancels(r) {
+				continue outer
+			}
+		}
+
+		m, err := r.ModifyRes(res)
+		if err != nil {
+			return nil, fmt.Errorf("apply %q: %v", r.RawRule, err)
+		}
+		if m {
 			appliedRules = append(appliedRules, *r)
 		}
 	}
 
-	return appliedRules
+	return appliedRules, nil
 }
 
 func (nr *NetworkRules) ModifyReq(req *http.Request) (appliedRules []rule.Rule, shouldBlock bool, redirectURL string) {

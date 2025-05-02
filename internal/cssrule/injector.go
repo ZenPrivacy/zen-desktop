@@ -73,7 +73,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	// Why append and not prepend?
 	// When multiple CSS rules define an !important property, conflicts are resolved first by specificity and then by the order of the CSS declarations.
 	// Appending ensures our rules take precedence.
-	if err := httprewrite.AppendHeadContents(res, ruleInjection.Bytes()); err != nil {
+	if err := httprewrite.AppendHTMLHeadContents(res, ruleInjection.Bytes()); err != nil {
 		return fmt.Errorf("prepend head contents: %w", err)
 	}
 

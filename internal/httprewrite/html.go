@@ -1,4 +1,3 @@
-// Package httprewrite provides utilities for streaming rewrites of HTTP responses.
 package httprewrite
 
 import (
@@ -9,11 +8,11 @@ import (
 	"golang.org/x/net/html"
 )
 
-// PrependBodyContents allows to prepend the contents of the <body> tag in an HTTP text/html response.
+// PrependHTMLBodyContents allows to prepend the contents of the <body> tag in an HTTP text/html response.
 //
 // On error, the response body is unchanged and the caller may proceed as if the function had not been called.
-func PrependBodyContents(res *http.Response, prependWith []byte) error {
-	return RewriteBody(res, func(original io.ReadCloser, modified *io.PipeWriter) {
+func PrependHTMLBodyContents(res *http.Response, prependWith []byte) error {
+	return StreamRewrite(res, func(original io.ReadCloser, modified *io.PipeWriter) {
 		defer original.Close()
 
 		z := html.NewTokenizer(original)
@@ -40,11 +39,11 @@ func PrependBodyContents(res *http.Response, prependWith []byte) error {
 	})
 }
 
-// AppendHeadContents allows to append the contents of the <head> tag in an HTTP text/html response.
+// AppendHTMLHeadContents allows to append the contents of the <head> tag in an HTTP text/html response.
 //
 // On error, the response body is unchanged and the caller may proceed as if the function had not been called.
-func AppendHeadContents(res *http.Response, appendWith []byte) error {
-	return RewriteBody(res, func(original io.ReadCloser, modified *io.PipeWriter) {
+func AppendHTMLHeadContents(res *http.Response, appendWith []byte) error {
+	return StreamRewrite(res, func(original io.ReadCloser, modified *io.PipeWriter) {
 		defer original.Close()
 
 		z := html.NewTokenizer(original)

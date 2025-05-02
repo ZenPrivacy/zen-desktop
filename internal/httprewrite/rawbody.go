@@ -1,11 +1,13 @@
 package httprewrite
 
 import (
+	"bytes"
 	"compress/flate"
 	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"strings"
 
@@ -15,44 +17,85 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-// RewriteBody allows the caller to modify the HTTP response body in a streaming manner.
-// It handles decompression and character set conversion to UTF-8 automatically.
+// StreamRewrite decodes the HTTP response body and passes it to the processor
+// for transformation in a streaming fashion.
 //
-// res is the HTTP response whose body will be rewritten.
-// processor is a function that receives the original body and a writer for the modified body.
-// The processor is responsible for closing both the original body and the writer.
-func RewriteBody(res *http.Response, processor func(original io.ReadCloser, modified *io.PipeWriter)) error {
-	rawBodyReader, err := getRawBodyReader(res)
+// It automatically handles decompression and character set conversion to UTF-8.
+// The processor receives the unpacked (decompressed and decoded) response body as an io.ReadCloser and
+// writes the transformed output to the provided io.PipeWriter. The processor
+// is responsible for closing both streams.
+func StreamRewrite(res *http.Response, processor func(src io.ReadCloser, dst *io.PipeWriter)) error {
+	rawBodyReader, mimeType, err := getRawBodyReader(res)
 	if err != nil {
-		return fmt.Errorf("get raw body reader: %w", err)
+		return fmt.Errorf("get raw body reader: %v", err)
 	}
 
 	reader, writer := io.Pipe()
 
 	go processor(rawBodyReader, writer)
 
-	setBody(res, reader)
+	res.Body = reader
+	// Content-Length cannot be determined ahead of time.
+	// To get around this, the response is chunked to allow for HTTP connection reuse without having to TCP FIN terminate each connection.
+	res.ContentLength = -1
+	res.Header.Del("Content-Length")
+	res.Header.Del("Content-Encoding")
+	res.TransferEncoding = []string{"chunked"}
+	res.Header.Set("Content-Type", fmt.Sprintf("%s; charset=utf-8", mimeType))
+	return nil
+}
+
+// BufferRewrite reads and decodes the HTTP response body, applies a transformation
+// to it using the provided processor function, and replaces the original body
+// with the transformed version.
+//
+// It automatically handles decompression and character set conversion to UTF-8.
+// The processor receives the fully buffered, unpacked (decompressed and decoded) body as input and returns
+// a modified byte slice.
+func BufferRewrite(res *http.Response, processor func(src []byte) []byte) error {
+	rawBodyReader, mimeType, err := getRawBodyReader(res)
+	if err != nil {
+		return fmt.Errorf("get raw body reader: %v", err)
+	}
+
+	rawBody, err := io.ReadAll(rawBodyReader)
+	if err != nil {
+		return fmt.Errorf("read body: %v", err)
+	}
+
+	processedBody := processor(rawBody)
+
+	res.Body = io.NopCloser(bytes.NewReader(processedBody))
+	res.ContentLength = int64(len(processedBody))
+	res.Header.Set("Content-Length", fmt.Sprint(len(processedBody)))
+	res.TransferEncoding = nil
+	res.Header.Del("Content-Encoding")
+	res.Header.Set("Content-Type", fmt.Sprintf("%s; charset=utf-8", mimeType))
 	return nil
 }
 
 // getRawBodyReader extracts an uncompressed, UTF-8 decoded body from a potentially compressed and non-UTF-8 encoded HTTP response.
-func getRawBodyReader(res *http.Response) (io.ReadCloser, error) {
+func getRawBodyReader(res *http.Response) (body io.ReadCloser, mimeType string, err error) {
 	encoding := res.Header.Get("Content-Encoding")
 	contentType := res.Header.Get("Content-Type")
-	if encoding == "" && strings.Contains(contentType, "charset=utf-8") {
-		// We've been here before, skip costly operations.
-		return res.Body, nil
+	mimeType, params, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return nil, "", fmt.Errorf("parse content type %q: %v", contentType, err)
+	}
+	if encoding == "" && strings.ToLower(params["charset"]) == "utf-8" {
+		// The body is already UTF-8 encoded and not compressed.
+		return res.Body, mimeType, nil
 	}
 
 	decompressedReader, err := decompressReader(res.Body, encoding)
 	if err != nil {
-		return nil, fmt.Errorf("create decompressed reader for encoding %q: %w", encoding, err)
+		return nil, "", fmt.Errorf("create decompressed reader for encoding %q: %v", encoding, err)
 	}
 
 	decodedReader, err := charset.NewReader(decompressedReader, contentType)
 	if err != nil {
 		decompressedReader.Close()
-		return nil, fmt.Errorf("create decoded reader for content type %q: %w", contentType, err)
+		return nil, "", fmt.Errorf("create decoded reader for content type %q: %v", contentType, err)
 	}
 
 	return struct {
@@ -61,7 +104,7 @@ func getRawBodyReader(res *http.Response) (io.ReadCloser, error) {
 	}{
 		decodedReader,
 		&multiCloser{[]io.Closer{decompressedReader, res.Body}},
-	}, nil
+	}, mimeType, nil
 }
 
 // decompressReader decompresses a reader using the specified compression algorithm.
@@ -72,8 +115,7 @@ func decompressReader(reader io.ReadCloser, compressionAlg string) (io.ReadClose
 	case "gzip":
 		gzipReader, err := gzip.NewReader(reader)
 		if err != nil {
-			reader.Close()
-			return nil, fmt.Errorf("create gzip reader: %w", err)
+			return nil, fmt.Errorf("create gzip reader: %v", err)
 		}
 		return gzipReader, nil
 	case "deflate":
@@ -83,8 +125,7 @@ func decompressReader(reader io.ReadCloser, compressionAlg string) (io.ReadClose
 	case "zstd":
 		zstdReader, err := zstd.NewReader(reader)
 		if err != nil {
-			zstdReader.Close()
-			return nil, fmt.Errorf("create zstd reader: %w", err)
+			return nil, fmt.Errorf("create zstd reader: %v", err)
 		}
 		return io.NopCloser(zstdReader), nil
 	case "":
@@ -108,17 +149,4 @@ func (m *multiCloser) Close() error {
 		}
 	}
 	return finalErr.ErrorOrNil()
-}
-
-// setBody sets the response body and adjusts headers for chunked transfer encoding.
-//
-// In the context of this package, Content-Length cannot be determined ahead of time after modifications by [RewriteBody].
-// To get around this, the response is chunked to allow for HTTP connection reuse without having to TCP FIN terminate each connection.
-func setBody(res *http.Response, body io.ReadCloser) {
-	res.Body = body
-	res.ContentLength = -1
-	res.Header.Del("Content-Length")
-	res.Header.Del("Content-Encoding")
-	res.TransferEncoding = []string{"chunked"}
-	res.Header.Set("Content-Type", "text/html;charset=utf-8")
 }
