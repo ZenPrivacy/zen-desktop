@@ -73,7 +73,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	}
 	injection = append(injection, injectionEnd...)
 
-	if err := httprewrite.PrependBodyContents(res, injection); err != nil {
+	if err := httprewrite.PrependHTMLBodyContents(res, injection); err != nil {
 		return fmt.Errorf("prepend body contents: %w", err)
 	}
 
