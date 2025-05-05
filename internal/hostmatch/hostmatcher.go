@@ -78,27 +78,36 @@ func (hm *HostMatcher[T]) AddExceptionRule(hostnamePatterns string, data T) erro
 }
 
 func (hm *HostMatcher[T]) Get(hostname string) []T {
-	primaryResults := hm.primaryStore.Get(hostname)
-	generic := make([]T, len(hm.generic)+len(primaryResults))
-	copy(generic, hm.generic)
-	copy(generic[len(hm.generic):], primaryResults)
+	primary := hm.primaryStore.Get(hostname)
+	exceptions := hm.exceptionStore.Get(hostname)
 
-	exceptionResults := hm.exceptionStore.Get(hostname)
-	exceptions := make([]T, len(hm.genericExceptions)+len(exceptionResults))
-	copy(exceptions, hm.genericExceptions)
-	copy(exceptions[len(hm.genericExceptions):], exceptionResults)
-
-	exceptionRuleMap := make(map[T]struct{}, len(exceptions))
-	for _, exception := range exceptions {
-		exceptionRuleMap[exception] = struct{}{}
+	if len(hm.genericExceptions) == 0 && len(exceptions) == 0 {
+		// Optimize the most common case.
+		res := make([]T, len(hm.generic)+len(primary))
+		copy(res, hm.generic)
+		copy(res[len(hm.generic):], primary)
+		return res
 	}
 
-	filtered := make([]T, 0, len(generic))
-	for _, rule := range generic {
-		if _, ok := exceptionRuleMap[rule]; !ok {
-			filtered = append(filtered, rule)
+	exceptionMap := make(map[T]struct{}, len(hm.genericExceptions)+len(exceptions))
+	for _, ex := range hm.genericExceptions {
+		exceptionMap[ex] = struct{}{}
+	}
+	for _, ex := range exceptions {
+		exceptionMap[ex] = struct{}{}
+	}
+
+	var res []T
+	for _, r := range hm.generic {
+		if _, excluded := exceptionMap[r]; !excluded {
+			res = append(res, r)
+		}
+	}
+	for _, r := range primary {
+		if _, excluded := exceptionMap[r]; !excluded {
+			res = append(res, r)
 		}
 	}
 
-	return filtered
+	return res
 }
