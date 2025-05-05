@@ -9,6 +9,8 @@ import (
 // TODO: rethink and reimplement trusted rule handling.
 
 var (
+	RuleRegex = regexp.MustCompile(`(?:#@?%#\/\/scriptlet)|(?:#@?#\+js)`)
+
 	canonicalPrimary        = regexp.MustCompile(`(.*)#%#\/\/scriptlet\((.+)\)`)
 	canonicalExceptionRegex = regexp.MustCompile(`(.*)#@%#\/\/scriptlet\((.+)\)`)
 	ublockPrimaryRegex      = regexp.MustCompile(`(.*)##\+js\((.+)\)`)

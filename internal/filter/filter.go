@@ -18,6 +18,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
+	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
 )
 
 // filterEventsEmitter emits filter events.
@@ -83,8 +84,6 @@ type Filter struct {
 var (
 	// ignoreLineRegex matches comments and [Adblock Plus 2.0]-style headers.
 	ignoreLineRegex = regexp.MustCompile(`^(?:!|\[|#[^#%@$])`)
-	// scriptletRegex matches scriptlet rules.
-	scriptletRegex = regexp.MustCompile(`(?:#%#\/\/scriptlet)|(?:##\+js)`)
 )
 
 // NewFilter creates and initializes a new filter.
@@ -210,7 +209,7 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 		Therefore, we must first check for a scriptlet rule match before checking for a JS rule match.
 	*/
 	switch {
-	case scriptletRegex.MatchString(rule):
+	case scriptlet.RuleRegex.MatchString(rule):
 		if err := f.scriptletsInjector.AddRule(rule, filterListTrusted); err != nil {
 			return false, fmt.Errorf("add scriptlet: %w", err)
 		}
