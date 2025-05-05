@@ -9,6 +9,9 @@ import (
 // TODO: rethink and reimplement trusted rule handling.
 
 var (
+	// RuleRegex matches patterns for scriptlet rules in two formats:
+	// 1. `#%#//scriptlet` or `#@%#//scriptlet` for canonical rules.
+	// 2. `##+js` or `#@#+js` for uBlock-style rules.
 	RuleRegex = regexp.MustCompile(`(?:#@?%#\/\/scriptlet)|(?:#@?#\+js)`)
 
 	canonicalPrimary        = regexp.MustCompile(`(.*)#%#\/\/scriptlet\((.+)\)`)
