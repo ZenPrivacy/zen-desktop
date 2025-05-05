@@ -272,6 +272,12 @@
         "name": "🇻🇳VN: ABPVN List",
         "enabled": false,
         "type": "regional"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
+        "name": "Zens First Party Ads Filter List",
+        "enabled": false,
+        "type": "regional"
       }
     ]
   },
