@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import './App.css';
 
 import { ThemeType, useTheme } from './common/ThemeManager';
+import { DonateButton } from './DonateButton';
 import { FilterLists } from './FilterLists';
 import { MyRules } from './MyRules';
 import { RequestLog } from './RequestLog';
@@ -30,6 +31,7 @@ function App() {
           <Icon icon="shield" size={IconSize.LARGE} />
           ZEN
         </h1>
+        <DonateButton />
       </div>
       <ButtonGroup fill minimal className="tabs">
         <Button icon="circle" active={activeTab === 'home'} onClick={() => setActiveTab('home')}>
