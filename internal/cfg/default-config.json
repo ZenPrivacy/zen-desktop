@@ -275,8 +275,8 @@
       },
       {
         "url": "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
-        "name": "Zens First Party Ads Filter List",
-        "enabled": false,
+        "name": "Zen - Ads",
+        "enabled": true,
         "type": "regional"
       }
     ]
