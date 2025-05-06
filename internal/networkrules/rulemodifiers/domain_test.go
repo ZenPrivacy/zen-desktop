@@ -2,6 +2,7 @@ package rulemodifiers
 
 import (
 	"net/http"
+	"net/url"
 	"regexp"
 	"testing"
 )
@@ -53,7 +54,12 @@ func TestDomainModifier(t *testing.T) {
 
 		modifier := "domain=~example.com|~example.org"
 		m := newDomainModifier(t, modifier)
-		reqWithoutReferer := &http.Request{}
+		reqWithoutReferer := &http.Request{
+			URL: &url.URL{
+				Scheme: "https",
+				Host:   "somethingelse.com",
+			},
+		}
 
 		want := true
 		if got := m.ShouldMatchReq(reqWithoutReferer); got != want {
@@ -74,6 +80,27 @@ func TestDomainModifier(t *testing.T) {
 		m := DomainModifier{}
 		if err := m.Parse("domain=example.com|~example.org"); err == nil {
 			t.Error("domainModifier.Parse(\"domain=example.com|~example.org\") = nil, want error")
+		}
+	})
+
+	t.Run("Should not match inverted domains when request URL matches and no Referer is present", func(t *testing.T) {
+		t.Parallel()
+
+		modifier := "domain=~google.*"
+		m := newDomainModifier(t, modifier)
+
+		req := &http.Request{
+			URL: &url.URL{
+				Scheme: "https",
+				Host:   "www.google.com",
+			},
+		}
+
+		want := false
+		got := m.ShouldMatchReq(req)
+
+		if got != want {
+			t.Errorf("domainModifier{%q}.ShouldMatchReq() = %v, want %v", modifier, got, want)
 		}
 	})
 
