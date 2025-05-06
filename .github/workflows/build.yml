@@ -156,7 +156,7 @@ jobs:
       attestations: write
       # https://github.com/softprops/action-gh-release/issues/236
       contents: write
-    name: Release
+    name: Attest & Release
     needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
     steps:
