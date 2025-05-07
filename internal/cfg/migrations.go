@@ -84,13 +84,23 @@ var migrations = map[string]func(c *Config) error{
 	},
 	"v0.10.0": func(c *Config) error {
 		for i, list := range c.Filter.FilterLists {
-			if list.URL == "https://raw.githubusercontent.com/hufilter/hufilter/master/hufilter.txt" || list.URL == "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt" {
+			if list.URL == "https://raw.githubusercontent.com/hufilter/hufilter/master/hufilter.txt" {
 				c.Filter.FilterLists[i].URL = "https://filters.hufilter.hu/hufilter-adguard.txt"
 				log.Printf("v0.10.0 migration: updating Hungarian filter list's URL")
 			}
 		}
 		if err := c.Save(); err != nil {
 			return fmt.Errorf("save config: %v", err)
+		}
+		errStr := c.AddFilterList(FilterList{
+			Name:    "Zen - Ads",
+			Type:    "regional",
+			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
+			Enabled: true,
+		})
+		if errStr != "" {
+			err := errors.New(errStr)
+			return err
 		}
 		return nil
 	},
