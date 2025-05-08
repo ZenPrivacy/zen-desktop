@@ -9,6 +9,7 @@ import { jsonPruneXHRResponse } from './json-prune-xhr-response';
 import { noProtectedAudience } from './no-protected-audience';
 import { noTopics } from './no-topics';
 import { nowebrtc } from './nowebrtc';
+import { preventAddEventListener } from './prevent-add-event-listener';
 import { preventFetch } from './prevent-fetch';
 import { preventSetInterval } from './prevent-set-interval';
 import { preventSetTimeout } from './prevent-set-timeout';
@@ -43,6 +44,7 @@ const scriptletNameToFunction = new Map<string, Function>([
   ['nowoif', preventWindowOpen],
   ['prevent-setTimeout', preventSetTimeout],
   ['prevent-setInterval', preventSetInterval],
+  ['prevent-addEventListener', preventAddEventListener],
   ['no-topics', noTopics],
   ['no-protected-audience', noProtectedAudience],
 ]);
