@@ -5,7 +5,7 @@
         "url": "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
         "name": "Zen - Ads",
         "enabled": true,
-        "type": "regional"
+        "type": "ads"
       },
       {
         "url": "https://easylist.to/easylist/easylist.txt",
