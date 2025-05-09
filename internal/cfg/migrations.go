@@ -94,13 +94,12 @@ var migrations = map[string]func(c *Config) error{
 		}
 		errStr := c.AddFilterList(FilterList{
 			Name:    "Zen - Ads",
-			Type:    "regional",
+			Type:    "ads",
 			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
 			Enabled: true,
 		})
 		if errStr != "" {
-			err := errors.New(errStr)
-			return err
+			return fmt.Errorf("add \"Zen - Ads\" filter list: %s", errStr)
 		}
 		return nil
 	},
