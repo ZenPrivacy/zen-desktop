@@ -26,6 +26,17 @@ tasks:
         vars:
           FILENAME: build/bin/Zen.dmg
 
+  prod-noupdate:
+    desc: Create a production build of the application with self-updates disabled. Only recommended for use in CI/CD pipelines. Doesn't include a DMG installer.
+    cmds:
+      - task: app-noupdate
+      - task: codesign
+        vars:
+          FILENAME: build/bin/Zen.app
+      - task: notarize
+        vars:
+          FILENAME: build/bin/Zen.app
+
   deps:
     desc: Install the dependencies required to create a production build.
     cmds:
@@ -35,6 +46,11 @@ tasks:
     desc: Build the .app application bundle. The .app file will be placed in the build/bin directory.
     cmds:
       - wails build -platform "darwin/{{default .ARCH64 .ARCH}}" -m -skipbindings -ldflags "-X 'github.com/ZenPrivacy/zen-desktop/internal/cfg.Version={{.GIT_TAG}}'" -tags prod
+
+  app-noupdate:
+    desc: Build the .app application bundle with self-updates disabled. The .app file will be placed in the build/bin directory.
+    cmds:
+      - wails build -platform "darwin/{{default .ARCH64 .ARCH}}" -m -skipbindings -ldflags "-X 'github.com/ZenPrivacy/zen-desktop/internal/cfg.Version={{.GIT_TAG}}' -X 'github.com/ZenPrivacy/zen-desktop/internal/selfupdate.NoSelfUpdate=true'" -tags prod
 
   dmg:
     desc: Create a DMG installer for the application. The DMG file will be placed in the build/bin directory.

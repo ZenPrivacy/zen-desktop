@@ -88,8 +88,7 @@ jobs:
           CERTIFICATE=$CERTIFICATE \
           CERTIFICATE_PWD=$CERTIFICATE_PWD \
           task build:setup-keychain
-      - name: Build macOS App & Installer
-        if: runner.os == 'macOS'
+      - name: Build & archive macOS artifacts
         env:
           CERTIFICATE_NAME: ${{ secrets.PROD_MACOS_CERTIFICATE_NAME }}
           NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
@@ -101,10 +100,15 @@ jobs:
           NOTARIZATION_TEAM_ID=$NOTARIZATION_TEAM_ID \
           NOTARIZATION_PWD=$NOTARIZATION_PWD \
           task build:prod ARCH=${{ matrix.arch }}
-      - name: Archive macOS artifacts
-        run: |
           tar -czvf Zen_darwin_${{ matrix.arch }}.tar.gz -C build/bin Zen.app
           mv build/bin/Zen.dmg build/bin/Zen-${{ matrix.arch }}.dmg
+
+          CERTIFICATE_NAME=$CERTIFICATE_NAME \
+          NOTARIZATION_APPLE_ID=$NOTARIZATION_APPLE_ID \
+          NOTARIZATION_TEAM_ID=$NOTARIZATION_TEAM_ID \
+          NOTARIZATION_PWD=$NOTARIZATION_PWD \
+          task build:prod-noupdate ARCH=${{ matrix.arch }}
+          tar -czvf Zen_darwin_${{ matrix.arch }}_noselfupdate.tar.gz -C build/bin Zen.app
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -112,6 +116,7 @@ jobs:
           path: |
             Zen_darwin_${{ matrix.arch }}.tar.gz
             build/bin/Zen-${{ matrix.arch }}.dmg
+            Zen_darwin_${{ matrix.arch }}_noselfupdate.tar.gz
 
   build-windows:
     name: Build Windows (${{ matrix.arch }})
