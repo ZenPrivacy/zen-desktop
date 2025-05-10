@@ -12,8 +12,8 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hectane/go-acl v0.0.0-20230122075934-ca0b05cb1adb
 	github.com/klauspost/compress v1.17.9
-	github.com/tdewolff/parse/v2 v2.7.23
 	github.com/spyzhov/ajson v0.9.6
+	github.com/tdewolff/parse/v2 v2.7.23
 	github.com/wailsapp/wails/v2 v2.9.3
 	golang.org/x/net v0.38.0
 	golang.org/x/sys v0.31.0
