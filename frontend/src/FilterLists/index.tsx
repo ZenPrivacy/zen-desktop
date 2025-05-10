@@ -1,4 +1,4 @@
-import { Spinner, SpinnerSize, Switch, Button, MenuItem, Popover, Menu, Tag } from '@blueprintjs/core';
+import { Spinner, SpinnerSize, Switch, Button, MenuItem, Popover, Menu, Tag, Tooltip } from '@blueprintjs/core';
 import { Select } from '@blueprintjs/select';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import { type cfg } from '../../wailsjs/go/models';
 import './index.css';
 
 import { AppToaster } from '../common/toaster';
+import { useProxyState } from '../context/ProxyStateContext';
 
 import { CreateFilterList } from './CreateFilterList';
 import { ExportFilterList } from './ExportFilterList';
@@ -113,6 +114,7 @@ function ListItem({
   onChange?: () => void;
 }) {
   const { t } = useTranslation();
+  const { isProxyRunning } = useProxyState();
   const [switchLoading, setSwitchLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -120,24 +122,26 @@ function ListItem({
     <div className="filter-lists__list">
       <div className="filter-lists__list-header">
         <h3 className="filter-lists__list-name">{filterList.name}</h3>
-        <Switch
-          checked={filterList.enabled}
-          disabled={switchLoading}
-          onChange={async (e) => {
-            setSwitchLoading(true);
-            const err = await ToggleFilterList(filterList.url, e.currentTarget.checked);
-            if (err) {
-              AppToaster.show({
-                message: t('filterLists.toggleError', { error: err }),
-                intent: 'danger',
-              });
-            }
-            setSwitchLoading(false);
-            onChange?.();
-          }}
-          large
-          className="filter-lists__list-switch"
-        />
+        <Tooltip content={t('common.stopProxyToToggleFilter') as string} disabled={!isProxyRunning} placement="left">
+          <Switch
+            checked={filterList.enabled}
+            disabled={switchLoading || isProxyRunning}
+            onChange={async (e) => {
+              setSwitchLoading(true);
+              const err = await ToggleFilterList(filterList.url, e.currentTarget.checked);
+              if (err) {
+                AppToaster.show({
+                  message: t('filterLists.toggleError', { error: err }),
+                  intent: 'danger',
+                });
+              }
+              setSwitchLoading(false);
+              onChange?.();
+            }}
+            size="large"
+            className="filter-lists__list-switch"
+          />
+        </Tooltip>
       </div>
       {filterList.trusted ? (
         <Tag intent="success" className="filter-lists__list-trusted">
@@ -148,27 +152,30 @@ function ListItem({
       <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
 
       {showDelete && (
-        <Button
-          icon="trash"
-          intent="danger"
-          small
-          className="filter-lists__list-delete"
-          loading={deleteLoading}
-          onClick={async () => {
-            setDeleteLoading(true);
-            const err = await RemoveFilterList(filterList.url);
-            if (err) {
-              AppToaster.show({
-                message: t('filterLists.removeError', { error: err }),
-                intent: 'danger',
-              });
-            }
-            setDeleteLoading(false);
-            onChange?.();
-          }}
-        >
-          {t('filterLists.delete')}
-        </Button>
+        <Tooltip content={t('common.stopProxyToDeleteFilter') as string} disabled={!isProxyRunning} placement="right">
+          <Button
+            icon="trash"
+            intent="danger"
+            size="small"
+            className="filter-lists__list-delete"
+            disabled={isProxyRunning}
+            loading={deleteLoading}
+            onClick={async () => {
+              setDeleteLoading(true);
+              const err = await RemoveFilterList(filterList.url);
+              if (err) {
+                AppToaster.show({
+                  message: t('filterLists.removeError', { error: err }),
+                  intent: 'danger',
+                });
+              }
+              setDeleteLoading(false);
+              onChange?.();
+            }}
+          >
+            {t('filterLists.delete')}
+          </Button>
+        </Tooltip>
       )}
     </div>
   );

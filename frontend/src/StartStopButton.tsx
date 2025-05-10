@@ -7,15 +7,10 @@ import { EventsOn } from '../wailsjs/runtime/runtime';
 
 import { BrowserLink } from './common/BrowserLink';
 import { AppToaster } from './common/toaster';
-import { ProxyState } from './types';
+import { useProxyState } from './context/ProxyStateContext';
 
 const PROXY_CHANNEL = 'proxy:action';
 const LINUX_PROXY_GUIDE_URL = 'https://github.com/ZenPrivacy/zen-desktop/blob/master/docs/external/linux-proxy-conf.md';
-
-export interface StartStopButtonProps {
-  proxyState: ProxyState;
-  setProxyState: (state: ProxyState) => void;
-}
 
 enum ProxyActionKind {
   Starting = 'starting',
@@ -32,8 +27,9 @@ interface ProxyAction {
   error?: string;
 }
 
-export function StartStopButton({ proxyState, setProxyState }: StartStopButtonProps) {
+export function StartStopButton() {
   const { t } = useTranslation();
+  const { proxyState, setProxyState } = useProxyState();
 
   useEffect(() => {
     const cancel = EventsOn(PROXY_CHANNEL, (action: ProxyAction) => {

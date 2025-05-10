@@ -8,7 +8,7 @@ import { IsNoSelfUpdate } from '../../wailsjs/go/app/App';
 import { GetVersion } from '../../wailsjs/go/cfg/Config';
 import { BrowserOpenURL } from '../../wailsjs/runtime';
 import { BrowserLink } from '../common/BrowserLink';
-import { ProxyState } from '../types';
+import { useProxyState } from '../context/ProxyStateContext';
 
 import { AutostartSwitch } from './AutostartSwitch';
 import { ExportLogsButton } from './ExportLogsButton';
@@ -22,16 +22,14 @@ import { UpdatePolicyRadioGroup } from './UpdatePolicyRadioGroup';
 const GITHUB_URL = 'https://github.com/ZenPrivacy/zen-desktop';
 const CHANGELOG_URL = `${GITHUB_URL}/blob/master/CHANGELOG.md`;
 
-export interface SettingsManagerProps {
-  proxyState: ProxyState;
-}
-export function SettingsManager({ proxyState }: SettingsManagerProps) {
+export function SettingsManager() {
   const { t } = useTranslation();
   const [state, setState] = useState({
     version: '',
     updatePolicy: '',
     showUpdateRadio: false,
   });
+  const { proxyState } = useProxyState();
 
   useEffect(() => {
     (async () => {
@@ -48,7 +46,7 @@ export function SettingsManager({ proxyState }: SettingsManagerProps) {
   return (
     <div className="settings-manager">
       <div className="settings-manager__section--app">
-        <Tag large intent="primary" fill className="settings-manager__section-header">
+        <Tag size="large" intent="primary" fill className="settings-manager__section-header">
           {t('settings.sections.app')}
         </Tag>
 
@@ -62,7 +60,7 @@ export function SettingsManager({ proxyState }: SettingsManagerProps) {
       </div>
 
       <div className="settings-manager__section--advanced">
-        <Tag large intent="warning" fill className="settings-manager__section-header">
+        <Tag size="large" intent="warning" fill className="settings-manager__section-header">
           {t('settings.sections.advanced')}
         </Tag>
 
@@ -86,8 +84,8 @@ export function SettingsManager({ proxyState }: SettingsManagerProps) {
         </div>
         <div>© 2025 Zen Privacy Project Developers</div>
         <Button
-          minimal
-          small
+          variant="minimal"
+          size="small"
           icon="git-branch"
           className="settings-manager__about-github-button"
           onClick={() => BrowserOpenURL(GITHUB_URL)}

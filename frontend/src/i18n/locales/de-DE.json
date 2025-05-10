@@ -126,5 +126,12 @@
     "stop": "Stoppen",
     "stopError": "Proxy kann nicht gestoppt werden: {{error}}",
     "unsupportedDEGuide": "Die automatische System-Proxy-Konfiguration wird derzeit nur unter GNOME unterstützt.<br />Bitte folgen Sie <guide-link>dieser Anleitung</guide-link>, um den Proxy pro Anwendung festzulegen."
+  },
+  "common": {
+    "stopProxyToModify": "Stoppen Sie den Proxy, um diese Einstellung zu ändern",
+    "stopProxyToAddFilter": "Stoppen Sie den Proxy, um eine neue Filterliste hinzuzufügen",
+    "stopProxyToDeleteFilter": "Stoppen Sie den Proxy, um diese Filterliste zu löschen",
+    "stopProxyToToggleFilter": "Stoppen Sie den Proxy, um diese Filterliste zu aktivieren/deaktivieren",
+    "stopProxyToEditRules": "Stoppen Sie den Proxy, um benutzerdefinierte Regeln zu ändern"
   }
 }

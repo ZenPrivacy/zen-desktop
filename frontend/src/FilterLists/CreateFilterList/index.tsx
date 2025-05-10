@@ -5,14 +5,16 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AddFilterList } from '../../../wailsjs/go/cfg/Config';
 import { AppToaster } from '../../common/toaster';
+import { useProxyState } from '../../context/ProxyStateContext';
 import { FilterListType } from '../types';
-
 import './index.css';
 
 export function CreateFilterList({ onAdd }: { onAdd: () => void }) {
   const { t } = useTranslation();
+  const { isProxyRunning } = useProxyState();
   const urlRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+
   const [trusted, setTrusted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -62,42 +64,45 @@ export function CreateFilterList({ onAdd }: { onAdd: () => void }) {
         />
       </FormGroup>
 
-      <Button
-        icon="add"
-        intent="primary"
-        fill
-        onClick={async () => {
-          if (!urlRef.current?.checkValidity()) {
-            urlRef.current?.focus();
-            return;
-          }
-          const url = urlRef.current?.value;
-          const name = nameRef.current?.value || url;
+      <Tooltip content={t('common.stopProxyToAddFilter') as string} disabled={!isProxyRunning} placement="top">
+        <Button
+          icon="add"
+          intent="primary"
+          fill
+          disabled={isProxyRunning}
+          onClick={async () => {
+            if (!urlRef.current?.checkValidity()) {
+              urlRef.current?.focus();
+              return;
+            }
+            const url = urlRef.current?.value;
+            const name = nameRef.current?.value || url;
 
-          setLoading(true);
-          const err = await AddFilterList({
-            url,
-            name,
-            type: FilterListType.CUSTOM,
-            enabled: true,
-            trusted,
-          });
-          if (err) {
-            AppToaster.show({
-              message: t('createFilterList.addError', { error: err }),
-              intent: 'danger',
+            setLoading(true);
+            const err = await AddFilterList({
+              url,
+              name,
+              type: FilterListType.CUSTOM,
+              enabled: true,
+              trusted,
             });
-          }
-          setLoading(false);
-          urlRef.current!.value = '';
-          nameRef.current!.value = '';
-          setTrusted(false);
-          onAdd();
-        }}
-        loading={loading}
-      >
-        {t('createFilterList.addList')}
-      </Button>
+            if (err) {
+              AppToaster.show({
+                message: t('createFilterList.addError', { error: err }),
+                intent: 'danger',
+              });
+            }
+            setLoading(false);
+            urlRef.current!.value = '';
+            nameRef.current!.value = '';
+            setTrusted(false);
+            onAdd();
+          }}
+          loading={loading}
+        >
+          {t('createFilterList.addList')}
+        </Button>
+      </Tooltip>
     </div>
   );
 }
