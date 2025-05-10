@@ -27,19 +27,15 @@ export function preventAddEventListener(event = '', search = '') {
   const handler: ProxyHandler<any> = {
     apply(target, thisArg, args) {
       const [eventType, eventListener] = args;
-
       const listenerStr = funcToString(eventListener);
-      const eventMatches = !!(event && eventRe?.test(eventType));
-      const searchMatches = !!(search && searchRe?.test(listenerStr));
 
       let shouldBlock = false;
-
-      if (event && !search) {
-        shouldBlock = eventMatches;
-      } else if (!event && search) {
-        shouldBlock = searchMatches;
-      } else if (event && search) {
-        shouldBlock = eventMatches && searchMatches;
+      if (eventRe && !searchRe) {
+        shouldBlock = eventRe.test(eventType);
+      } else if (searchRe && !eventRe) {
+        shouldBlock = searchRe.test(eventType);
+      } else if (eventRe && searchRe) {
+        shouldBlock = eventRe.test(eventType) && searchRe.test(listenerStr);
       }
 
       if (shouldBlock) {
