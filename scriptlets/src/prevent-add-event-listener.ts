@@ -1,7 +1,7 @@
 import { createLogger } from './helpers/logger';
 import { parseRegexpFromString, parseRegexpLiteral } from './helpers/parseRegexp';
 
-const logger = createLogger('prevent-set-timeout');
+const logger = createLogger('prevent-addEventListener');
 
 const funcToString = (eventHandler: EventListenerOrEventListenerObject): string => {
   try {
@@ -28,8 +28,9 @@ export function preventAddEventListener(event = '', search = '') {
     apply(target, thisArg, args) {
       const [eventType, eventListener] = args;
 
+      const listenerStr = funcToString(eventListener);
       const eventMatches = !!(event && eventRe?.test(eventType));
-      const searchMatches = !!(search && searchRe?.test(funcToString(eventListener)));
+      const searchMatches = !!(search && searchRe?.test(listenerStr));
 
       let shouldBlock = false;
 
@@ -42,7 +43,7 @@ export function preventAddEventListener(event = '', search = '') {
       }
 
       if (shouldBlock) {
-        logger.info(`Blocked addEventListener("${eventType}", ${funcToString(eventListener)})`);
+        logger.info(`Blocked addEventListener("${eventType}", ${listenerStr})`);
         return;
       }
 
