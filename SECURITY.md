@@ -25,4 +25,4 @@ You should receive an initial response within 72 hours. If you don't hear back, 
 
 After you make a report, we will work with you to confirm it and assess its impact. Once we've been able to confirm the issue, we'll work to remediate it. We ask that you keep your report confidential for 90 days after you make it, to give us a chance to remediate the issue and protect our users.
 
-After we’ve fixed the issue - or after 90 days, whichever comes first - we will publish a summary of the vulnerability and the actions taken. You are then free to publish your own disclosure.
+After we've fixed the issue - or after 90 days, whichever comes first - we will publish a summary of the vulnerability and the actions taken. You are then free to publish your own disclosure.
