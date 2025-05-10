@@ -6,7 +6,7 @@ Zen's security is of critical importance. Since it's designed to handle all HTTP
 
 Zen is open-source and developed in public. One of the key strengths of open-source software is that it allows for public scrutiny and peer review. I personally appreciate the way Meredith Whittaker, the president of Signal, articulates this in the context of Signal: [YouTube link (14:34)](https://www.youtube.com/live/AyH7zoP-JOg?t=874s), and I believe her argument applies just as strongly to our project.
 
-Security is always a work in progress, and we encourage **informed and good-faith** discussions and suggestions. In case you have an idea or expertise you'd like to share - reach us out in public or in private and we'll be happy to discuss. Please note that this invitation does not apply to vulnerability reports. If you believe you've found a vulnerability in Zen, please follow the responsible disclosure process outlined in [SECURITY.md](/SECURITY.md).
+Security is always a work in progress, and we encourage **informed and good-faith** discussions and suggestions. In case you have an idea or expertise you'd like to share - reach out to us in public or in private and we'll be happy to discuss. Please note that this invitation does not apply to vulnerability reports. If you believe you've found a vulnerability in Zen, please follow the responsible disclosure process outlined in [SECURITY.md](/SECURITY.md).
 
 ## Application-level security
 
