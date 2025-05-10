@@ -24,6 +24,10 @@ export function preventAddEventListener(event = '', search = '') {
   const eventRe = parseRegexpLiteral(event) || parseRegexpFromString(event);
   const searchRe = parseRegexpLiteral(search) || parseRegexpFromString(search);
 
+  if (!eventRe && !searchRe) {
+    return;
+  }
+
   const handler: ProxyHandler<any> = {
     apply(target, thisArg, args) {
       const [eventType, eventListener] = args;
