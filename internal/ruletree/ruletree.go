@@ -40,29 +40,29 @@ var (
 
 func NewRuleTree[T Data]() *RuleTree[T] {
 	return &RuleTree[T]{
-		root: node[T]{},
+		root: node[T]{interner: NewTokenInterner()},
 	}
 }
 
 func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
-	var tokens []string
+	var rawTokens []string
 	var modifiers string
 	var rootKeyKind nodeKind
 	if match := reDomainName.FindStringSubmatch(urlPattern); match != nil {
 		rootKeyKind = nodeKindDomain
-		tokens = tokenize(match[1])
+		rawTokens = tokenize(match[1])
 		modifiers = match[2]
 	} else if match := reExactAddress.FindStringSubmatch(urlPattern); match != nil {
 		rootKeyKind = nodeKindAddressRoot
-		tokens = tokenize(match[1])
+		rawTokens = tokenize(match[1])
 		modifiers = match[2]
 	} else if match := reAddressParts.FindStringSubmatch(urlPattern); match != nil {
 		rootKeyKind = nodeKindExactMatch
-		tokens = tokenize(match[1])
+		rawTokens = tokenize(match[1])
 		modifiers = match[2]
 	} else if match := reGeneric.FindStringSubmatch(urlPattern); match != nil {
 		rootKeyKind = nodeKindGeneric
-		tokens = []string{}
+		rawTokens = []string{}
 		modifiers = match[1]
 	} else {
 		return errors.New("unknown rule format")
@@ -81,14 +81,22 @@ func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
 	} else {
 		node = rt.root.findOrAddChild(nodeKey{kind: rootKeyKind})
 	}
-	for _, token := range tokens {
-		switch token {
+
+	var tokenIDs []uint32
+	for _, tok := range rawTokens {
+		tokenIDs = append(tokenIDs, rt.root.interner.Intern(tok))
+	}
+
+	for i, raw := range rawTokens {
+		switch raw {
 		case "^":
 			node = node.findOrAddChild(nodeKey{kind: nodeKindSeparator})
 		case "*":
 			node = node.findOrAddChild(nodeKey{kind: nodeKindWildcard})
 		default:
-			node = node.findOrAddChild(nodeKey{kind: nodeKindExactMatch, token: token})
+			// exact‐match: use the interned ID
+			id := tokenIDs[i]
+			node = node.findOrAddChild(nodeKey{kind: nodeKindExactMatch, tokenID: id})
 		}
 	}
 

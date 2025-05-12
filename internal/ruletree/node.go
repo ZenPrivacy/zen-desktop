@@ -20,12 +20,12 @@ const (
 )
 
 // nodeKey uniquely identifies a node within the trie.
-// It comprises the node's kind and the token that the node represents.
+// It comprises the node's kind and the ID of the token that the node represents.
 // The token is included only for nodes of the type 'nodeKindExactMatch'.
 // Nodes of other kinds represent the roots of subtrees without including a token.
 type nodeKey struct {
-	kind  nodeKind
-	token string
+	kind    nodeKind
+	tokenID uint32
 }
 
 // arrNode is a node in the trie that is stored in an array.
@@ -44,6 +44,7 @@ const nodeChildrenMaxArrSize = 8
 // node represents a node in the rule trie.
 // Nodes can be both vertices that only represent a subtree and leaves that represent a rule.
 type node[T Data] struct {
+	interner    *TokenInterner
 	childrenArr []arrNode[T]
 	childrenMap map[nodeKey]*node[T]
 	// childrenMu protects childrenArr and childrenMap from concurrent access.
@@ -80,7 +81,9 @@ func (n *node[T]) findOrAddChild(key nodeKey) *node[T] {
 		return child
 	}
 
-	newNode := &node[T]{}
+	newNode := &node[T]{
+		interner: n.interner,
+	}
 	n.childrenMap[key] = newNode
 	return newNode
 }
@@ -134,7 +137,9 @@ func (n *node[T]) TraverseFindMatchingRulesReq(req *http.Request, tokens []strin
 		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode)...)
 	}
 	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode)...)
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, token: tokens[0]}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode)...)
+
+	id := n.interner.Intern(tokens[0])
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode)...)
 
 	return rules
 }
@@ -165,7 +170,9 @@ func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []stri
 		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode)...)
 	}
 	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode)...)
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, token: tokens[0]}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode)...)
+
+	id := n.interner.Intern(tokens[0])
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode)...)
 
 	return rules
 }
