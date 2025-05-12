@@ -66,7 +66,9 @@ func (n *node[T]) findOrAddChild(key nodeKey) *node[T] {
 			}
 		}
 		if len(n.childrenArr) < nodeChildrenMaxArrSize {
-			newNode := &node[T]{}
+			newNode := &node[T]{
+				interner: n.interner,
+			}
 			n.childrenArr = append(n.childrenArr, arrNode[T]{key: key, node: newNode})
 			return newNode
 		}
