@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   build-linux:
+    if: false
     name: Build Linux (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -55,6 +56,7 @@ jobs:
             Zen_linux_${{ matrix.arch }}_noselfupdate.tar.gz
 
   build-macos:
+    if: false
     name: Build macOS (${{ matrix.arch }})
     runs-on: macos-latest
     strategy:

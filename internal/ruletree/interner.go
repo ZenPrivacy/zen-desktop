@@ -1,6 +1,9 @@
 package ruletree
 
-import "sync"
+import (
+	"log"
+	"sync"
+)
 
 // TokenInterner hands out a small integer for each unique string.
 type TokenInterner struct {
@@ -25,6 +28,7 @@ func (in *TokenInterner) Intern(s string) uint32 {
 	}
 	id := in.next
 	in.next++
+	log.Printf("next token ID = %d\n", in.next)
 	in.ids[s] = id
 	in.names = append(in.names, s)
 	return id
