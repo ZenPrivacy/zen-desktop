@@ -1,6 +1,7 @@
 package ruletree
 
 import (
+	"log"
 	"sync"
 )
 
@@ -26,7 +27,7 @@ func (in *TokenInterner) Intern(s string) uint32 {
 	}
 	id := in.next
 	in.next++
-	// log.Printf("next token ID = %d\n", in.next)
+	log.Printf("next token ID = %d\n", in.next)
 	in.ids[s] = id
 	return id
 }
