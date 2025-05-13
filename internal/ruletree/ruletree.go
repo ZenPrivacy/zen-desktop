@@ -82,7 +82,7 @@ func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
 		node = rt.root.findOrAddChild(nodeKey{kind: rootKeyKind})
 	}
 
-	tokenIDs := make([]uint32, 20)
+	tokenIDs := make([]uint32, 0, 20)
 	for _, tok := range rawTokens {
 		tokenIDs = append(tokenIDs, rt.root.interner.Intern(tok))
 	}

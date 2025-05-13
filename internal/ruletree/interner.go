@@ -1,16 +1,14 @@
 package ruletree
 
 import (
-	"log"
 	"sync"
 )
 
 // TokenInterner hands out a small integer for each unique string.
 type TokenInterner struct {
-	mu    sync.Mutex
-	next  uint32
-	ids   map[string]uint32
-	names []string // optional reverse lookup if you ever need the string
+	mu   sync.Mutex
+	next uint32
+	ids  map[string]uint32
 }
 
 func NewTokenInterner() *TokenInterner {
@@ -28,18 +26,7 @@ func (in *TokenInterner) Intern(s string) uint32 {
 	}
 	id := in.next
 	in.next++
-	log.Printf("next token ID = %d\n", in.next)
+	// log.Printf("next token ID = %d\n", in.next)
 	in.ids[s] = id
-	in.names = append(in.names, s)
 	return id
-}
-
-// Name returns the original string for an ID (if you ever need it).
-func (in *TokenInterner) Name(id uint32) string {
-	in.mu.Lock()
-	defer in.mu.Unlock()
-	if int(id) < len(in.names) {
-		return in.names[id]
-	}
-	return ""
 }
