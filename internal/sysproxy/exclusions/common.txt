@@ -44,6 +44,7 @@ paypal.com
 stripe.com
 square.com
 venmo.com
+sis.redsys.es
 
 # Messengers
 whatsapp.net
