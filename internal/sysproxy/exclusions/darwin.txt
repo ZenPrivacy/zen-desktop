@@ -152,3 +152,22 @@ apple-relay.apple.com
 # Associated domains
 app-site-association.cdn-apple.com
 app-site-association.networking.apple
+
+# Apple Pay, and likely other services (not present in the support article, found via manual debugging)
+pr-pod1-smp-device.apple.com
+pr-pod2-smp-device.apple.com
+pr-pod3-smp-device.apple.com
+pr-pod4-smp-device.apple.com
+pr-pod5-smp-device.apple.com
+pr-pod6-smp-device.apple.com
+pr-pod7-smp-device.apple.com
+pr-pod8-smp-device.apple.com
+pr-pod9-smp-device.apple.com
+pr-pod10-smp-device.apple.com
+pr-pod11-smp-device.apple.com
+pr-pod12-smp-device.apple.com
+pr-pod13-smp-device.apple.com
+pr-pod14-smp-device.apple.com
+pr-pod15-smp-device.apple.com
+smp-paymentservices.apple.com
+cn-smp-paymentservices.apple.com

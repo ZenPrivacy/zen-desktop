@@ -42,8 +42,10 @@ freedompay.kz
 # Payment processors
 paypal.com
 stripe.com
+m.stripe.network
 square.com
 venmo.com
+sis.redsys.es
 
 # Messengers
 whatsapp.net
