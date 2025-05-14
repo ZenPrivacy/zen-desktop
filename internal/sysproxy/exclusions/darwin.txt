@@ -169,3 +169,5 @@ pr-pod12-smp-device.apple.com
 pr-pod13-smp-device.apple.com
 pr-pod14-smp-device.apple.com
 pr-pod15-smp-device.apple.com
+smp-paymentservices.apple.com
+cn-smp-paymentservices.apple.com
