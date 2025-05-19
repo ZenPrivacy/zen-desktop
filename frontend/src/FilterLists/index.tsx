@@ -34,9 +34,7 @@ export function FilterLists() {
   };
 
   useEffect(() => {
-    (() => {
-      fetchLists();
-    })();
+    fetchLists();
   }, []);
 
   const [type, setType] = useState<FilterListType>(FilterListType.GENERAL);
