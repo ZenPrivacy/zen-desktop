@@ -312,13 +312,13 @@ func (a *App) ExportCustomFilterLists() error {
 		return errors.New("no file selected")
 	}
 
-	customFilterLists := a.config.GetTargetTypeFilterLists(cfg.FilterListTypeCustom)
+	lists := a.config.GetCustomFilterLists()
 
-	if len(customFilterLists) == 0 {
+	if len(lists) == 0 {
 		return errors.New("no custom filter lists to export")
 	}
 
-	data, err := json.MarshalIndent(customFilterLists, "", "  ")
+	data, err := json.MarshalIndent(lists, "", "  ")
 	if err != nil {
 		log.Printf("failed to marshal filter lists: %v", err)
 		return err

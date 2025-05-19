@@ -37,13 +37,9 @@ const (
 	UpdatePolicyDisabled  UpdatePolicyType = "disabled"
 )
 
-var UpdatePolicyEnum = []struct {
-	Value  UpdatePolicyType
-	TSName string
-}{
-	{UpdatePolicyAutomatic, "AUTOMATIC"},
-	{UpdatePolicyPrompt, "PROMPT"},
-	{UpdatePolicyDisabled, "DISABLED"},
+type BuiltInPref struct {
+	URL     string `json:"url"`
+	Enabled bool   `json:"enabled"`
 }
 
 // Config stores and manages the configuration for the application.
@@ -53,8 +49,15 @@ type Config struct {
 	sync.RWMutex
 
 	Filter struct {
+		// FilterLists was a unified list of filter lists, including built-in and custom lists.
+		//
+		// Deprecated: FilterLists exists to facilitate a migration for users upgrading from pre-v0.11.0. Use CustomLists and BuiltInConfig instead.
 		FilterLists []FilterList `json:"filterLists"`
-		MyRules     []string     `json:"myRules"`
+		// CustomLists are user-defined lists.
+		CustomLists []FilterList `json:"customLists"`
+		// BuiltInPrefs stores user preferences for built-in filter lists. Enabled has a priority over builtInFilterList.DefaultEnabled.
+		BuiltInPrefs []BuiltInPref `json:"builtInConfig"`
+		MyRules      []string      `json:"myRules"`
 	} `json:"filter"`
 	Certmanager struct {
 		CAInstalled bool `json:"caInstalled"`
@@ -187,93 +190,156 @@ func (c *Config) Save() error {
 	return nil
 }
 
-// GetFilterLists returns the list of enabled filter lists.
+func (c *Config) isCustomURL(url string) bool {
+	for _, list := range c.Filter.CustomLists {
+		if list.URL == url {
+			return true
+		}
+	}
+	return false
+}
+
+// GetFilterLists returns the list of filter lists.
 func (c *Config) GetFilterLists() []FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
-	return c.Filter.FilterLists
+	res := make([]FilterList, 0, len(c.Filter.CustomLists)+len(builtInFilterLists))
+	for _, builtIn := range builtInFilterLists {
+		enabled := builtIn.DefaultEnabled
+		for _, pref := range c.Filter.BuiltInPrefs {
+			if pref.URL != builtIn.URL {
+				continue
+			}
+			enabled = pref.Enabled
+			break
+		}
+		res = append(res, FilterList{
+			Name:    builtIn.Name,
+			Type:    builtIn.Type,
+			URL:     builtIn.URL,
+			Enabled: enabled,
+			Trusted: builtIn.Trusted,
+		})
+	}
+
+	res = append(res, c.Filter.CustomLists...)
+	return res
 }
 
-// AddFilterList adds a new filter list to the list of enabled filter lists.
-func (c *Config) AddFilterList(list FilterList) string {
+// AddFilterList adds a filter list to the custom filter lists.
+func (c *Config) AddFilterList(list FilterList) error {
 	c.Lock()
 	defer c.Unlock()
 
-	for _, existingList := range c.Filter.FilterLists {
-		if existingList.URL == list.URL {
-			return fmt.Sprintf("filter list with the URL '%s' already exists", list.URL)
-		}
+	if isBuiltInURL(list.URL) {
+		return errors.New("this list already exists in the built-in configuration")
+	}
+	if c.isCustomURL(list.URL) {
+		return errors.New("this list already exists in the custom configuration")
 	}
 
-	c.Filter.FilterLists = append(c.Filter.FilterLists, list)
+	c.Filter.CustomLists = append(c.Filter.CustomLists, list)
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
-		return err.Error()
+		return fmt.Errorf("save: %v", err)
 	}
-	return ""
+	return nil
 }
 
+// AddFilterLists adds multiple filter lists to the configuration.
 func (c *Config) AddFilterLists(lists []FilterList) error {
 	c.Lock()
 	defer c.Unlock()
 
-	c.Filter.FilterLists = append(c.Filter.FilterLists, lists...)
+	newLists := make([]FilterList, 0, len(lists))
+	for _, list := range lists {
+		if isBuiltInURL(list.URL) {
+			log.Printf("adding filter lists: list %s already exists in the built-in configuration", list.URL)
+			continue
+		}
+		if c.isCustomURL(list.URL) {
+			log.Printf("adding filter lists: list %s already exists in the custom configuration", list.URL)
+			continue
+		}
+
+		newLists = append(newLists, list)
+	}
+
+	c.Filter.CustomLists = append(c.Filter.CustomLists, newLists...)
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
-		return err
+		return fmt.Errorf("save: %v", err)
 	}
 	return nil
 }
 
 // RemoveFilterList removes a filter list from the list of enabled filter lists.
-func (c *Config) RemoveFilterList(url string) string {
+func (c *Config) RemoveFilterList(url string) error {
 	c.Lock()
 	defer c.Unlock()
 
-	for i, filterList := range c.Filter.FilterLists {
-		if filterList.URL == url {
+	var found bool
+	for i, list := range c.Filter.CustomLists {
+		if list.URL == url {
 			c.Filter.FilterLists = append(c.Filter.FilterLists[:i], c.Filter.FilterLists[i+1:]...)
+			found = true
 			break
 		}
 	}
+	if !found {
+		return errors.New("filter list not found")
+	}
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
-		return err.Error()
+		return fmt.Errorf("save: %v", err)
 	}
-	return ""
+	return nil
 }
 
-// ToggleFilterList toggles the enabled state of a filter list.
-func (c *Config) ToggleFilterList(url string, enabled bool) string {
+func (c *Config) ToggleFilterList(url string, enabled bool) error {
 	c.Lock()
 	defer c.Unlock()
 
-	for i, filterList := range c.Filter.FilterLists {
-		if filterList.URL == url {
-			c.Filter.FilterLists[i].Enabled = enabled
-			break
+	if c.toggleBuiltIn(url, enabled) || c.toggleCustom(url, enabled) {
+		if err := c.Save(); err != nil {
+			log.Printf("failed to save config: %v", err)
+			return fmt.Errorf("save: %v", err)
 		}
+		return nil
 	}
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err.Error()
-	}
-	return ""
+	return errors.New("filter list not found")
 }
 
-// GetTargetTypeFilterLists returns the list of filter lists with particular type.
-func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterList {
+func (c *Config) toggleBuiltIn(url string, enabled bool) bool {
+	if !isBuiltInURL(url) {
+		return false
+	}
+	for i, pref := range c.Filter.BuiltInPrefs {
+		if pref.URL == url {
+			c.Filter.BuiltInPrefs[i].Enabled = enabled
+			return true
+		}
+	}
+	c.Filter.BuiltInPrefs = append(c.Filter.BuiltInPrefs, BuiltInPref{URL: url, Enabled: enabled})
+	return true
+}
+
+func (c *Config) toggleCustom(url string, enabled bool) bool {
+	for i, list := range c.Filter.CustomLists {
+		if list.URL == url {
+			c.Filter.CustomLists[i].Enabled = enabled
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Config) GetCustomFilterLists() []FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
-	var filterLists []FilterList
-	for _, filterList := range c.Filter.FilterLists {
-		if filterList.Type == targetType {
-			filterLists = append(filterLists, filterList)
-		}
-	}
-	return filterLists
+	return c.Filter.CustomLists
 }
 
 func (c *Config) GetMyRules() []string {
