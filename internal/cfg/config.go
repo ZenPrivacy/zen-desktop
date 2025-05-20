@@ -37,6 +37,21 @@ const (
 	UpdatePolicyDisabled  UpdatePolicyType = "disabled"
 )
 
+type CustomFilterList struct {
+	Name    string `json:"name"`
+	URL     string `json:"url"`
+	Enabled bool   `json:"enabled"`
+	Trusted bool   `json:"trusted"`
+}
+
+type FilterList struct {
+	Name    string         `json:"name"`
+	Type    FilterListType `json:"type"`
+	URL     string         `json:"url"`
+	Enabled bool           `json:"enabled"`
+	Trusted bool           `json:"trusted"`
+}
+
 type BuiltInPref struct {
 	URL     string `json:"url"`
 	Enabled bool   `json:"enabled"`
@@ -54,8 +69,8 @@ type Config struct {
 		// Deprecated: FilterLists exists to facilitate a migration for users upgrading from pre-v0.11.0. Use CustomLists and BuiltInConfig instead.
 		FilterLists []FilterList `json:"filterLists"`
 		// CustomLists are user-defined lists.
-		CustomLists []FilterList `json:"customLists"`
-		// BuiltInPrefs stores user preferences for built-in filter lists. Enabled has a priority over builtInFilterList.DefaultEnabled.
+		CustomLists []CustomFilterList `json:"customLists"`
+		// BuiltInPrefs stores user preferences for built-in filter lists. BuiltInPref.Enabled has a priority over builtInFilterList.DefaultEnabled.
 		BuiltInPrefs []BuiltInPref `json:"builtInConfig"`
 		MyRules      []string      `json:"myRules"`
 	} `json:"filter"`
@@ -73,14 +88,6 @@ type Config struct {
 
 	// firstLaunch is true if the application is being run for the first time.
 	firstLaunch bool
-}
-
-type FilterList struct {
-	Name    string         `json:"name"`
-	Type    FilterListType `json:"type"`
-	URL     string         `json:"url"`
-	Enabled bool           `json:"enabled"`
-	Trusted bool           `json:"trusted"`
 }
 
 func (f *FilterList) UnmarshalJSON(data []byte) error {
@@ -223,12 +230,21 @@ func (c *Config) GetFilterLists() []FilterList {
 		})
 	}
 
-	res = append(res, c.Filter.CustomLists...)
+	for _, custom := range c.Filter.CustomLists {
+		res = append(res, FilterList{
+			Name:    custom.Name,
+			Type:    FilterListTypeCustom,
+			URL:     custom.URL,
+			Enabled: custom.Enabled,
+			Trusted: custom.Trusted,
+		})
+	}
+
 	return res
 }
 
-// AddFilterList adds a filter list to the custom filter lists.
-func (c *Config) AddFilterList(list FilterList) error {
+// AddCustomFilterList adds a custom filter lists to the configuration.
+func (c *Config) AddCustomFilterList(list CustomFilterList) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -266,7 +282,8 @@ func (c *Config) AddFilterLists(lists []FilterList) error {
 		newLists = append(newLists, list)
 	}
 
-	c.Filter.CustomLists = append(c.Filter.CustomLists, newLists...)
+	// todo fix
+	// c.Filter.CustomLists = append(c.Filter.CustomLists, newLists...)
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
 		return fmt.Errorf("save: %v", err)
@@ -274,15 +291,15 @@ func (c *Config) AddFilterLists(lists []FilterList) error {
 	return nil
 }
 
-// RemoveFilterList removes a filter list from the list of enabled filter lists.
-func (c *Config) RemoveFilterList(url string) error {
+// RemoveCustomFilterList removes a custom filter list from the configuration.
+func (c *Config) RemoveCustomFilterList(url string) error {
 	c.Lock()
 	defer c.Unlock()
 
 	var found bool
 	for i, list := range c.Filter.CustomLists {
 		if list.URL == url {
-			c.Filter.FilterLists = append(c.Filter.FilterLists[:i], c.Filter.FilterLists[i+1:]...)
+			c.Filter.CustomLists = append(c.Filter.CustomLists[:i], c.Filter.CustomLists[i+1:]...)
 			found = true
 			break
 		}
@@ -335,7 +352,7 @@ func (c *Config) toggleCustom(url string, enabled bool) bool {
 	return false
 }
 
-func (c *Config) GetCustomFilterLists() []FilterList {
+func (c *Config) GetCustomFilterLists() []CustomFilterList {
 	c.RLock()
 	defer c.RUnlock()
 

@@ -3,11 +3,13 @@
 import {cfg} from '../models';
 import {sync} from '../models';
 
-export function AddFilterList(arg1:cfg.FilterList):Promise<string>;
+export function AddCustomFilterList(arg1:cfg.CustomFilterList):Promise<void>;
 
 export function AddFilterLists(arg1:Array<cfg.FilterList>):Promise<void>;
 
 export function GetCAInstalled():Promise<boolean>;
+
+export function GetCustomFilterLists():Promise<Array<cfg.CustomFilterList>>;
 
 export function GetFilterLists():Promise<Array<cfg.FilterList>>;
 
@@ -21,8 +23,6 @@ export function GetPACPort():Promise<number>;
 
 export function GetPort():Promise<number>;
 
-export function GetTargetTypeFilterLists(arg1:cfg.FilterListType):Promise<Array<cfg.FilterList>>;
-
 export function GetUpdatePolicy():Promise<cfg.UpdatePolicyType>;
 
 export function GetVersion():Promise<string>;
@@ -35,7 +35,7 @@ export function RLocker():Promise<sync.Locker>;
 
 export function RUnlock():Promise<void>;
 
-export function RemoveFilterList(arg1:string):Promise<string>;
+export function RemoveCustomFilterList(arg1:string):Promise<void>;
 
 export function RunMigrations():Promise<void>;
 
@@ -53,7 +53,7 @@ export function SetPort(arg1:number):Promise<string>;
 
 export function SetUpdatePolicy(arg1:cfg.UpdatePolicyType):Promise<void>;
 
-export function ToggleFilterList(arg1:string,arg2:boolean):Promise<string>;
+export function ToggleFilterList(arg1:string,arg2:boolean):Promise<void>;
 
 export function TryLock():Promise<boolean>;
 

@@ -5,6 +5,24 @@ export namespace cfg {
 	    PROMPT = "prompt",
 	    DISABLED = "disabled",
 	}
+	export class CustomFilterList {
+	    name: string;
+	    url: string;
+	    enabled: boolean;
+	    trusted: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomFilterList(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.url = source["url"];
+	        this.enabled = source["enabled"];
+	        this.trusted = source["trusted"];
+	    }
+	}
 	export class FilterList {
 	    name: string;
 	    type: string;

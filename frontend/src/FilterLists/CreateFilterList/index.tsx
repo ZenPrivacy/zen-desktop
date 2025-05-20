@@ -3,10 +3,9 @@ import { InfoSign } from '@blueprintjs/icons';
 import { useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { AddFilterList } from '../../../wailsjs/go/cfg/Config';
+import { AddCustomFilterList } from '../../../wailsjs/go/cfg/Config';
 import { AppToaster } from '../../common/toaster';
 import { useProxyState } from '../../context/ProxyStateContext';
-import { FilterListType } from '../types';
 import './index.css';
 
 export function CreateFilterList({ onAdd }: { onAdd: () => void }) {
@@ -79,24 +78,25 @@ export function CreateFilterList({ onAdd }: { onAdd: () => void }) {
             const name = nameRef.current?.value || url;
 
             setLoading(true);
-            const err = await AddFilterList({
-              url,
-              name,
-              type: FilterListType.CUSTOM,
-              enabled: true,
-              trusted,
-            });
-            if (err) {
+            try {
+              await AddCustomFilterList({
+                url,
+                name,
+                enabled: true,
+                trusted,
+              });
+            } catch (ex) {
               AppToaster.show({
-                message: t('createFilterList.addError', { error: err }),
+                message: t('createFilterList.addError', { error: ex }),
                 intent: 'danger',
               });
+            } finally {
+              setLoading(false);
+              urlRef.current!.value = '';
+              nameRef.current!.value = '';
+              setTrusted(false);
+              onAdd();
             }
-            setLoading(false);
-            urlRef.current!.value = '';
-            nameRef.current!.value = '';
-            setTrusted(false);
-            onAdd();
           }}
           loading={loading}
         >

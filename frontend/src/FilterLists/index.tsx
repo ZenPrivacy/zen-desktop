@@ -3,7 +3,7 @@ import { Select } from '@blueprintjs/select';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { GetFilterLists, RemoveFilterList, ToggleFilterList } from '../../wailsjs/go/cfg/Config';
+import { GetFilterLists, RemoveCustomFilterList, ToggleFilterList } from '../../wailsjs/go/cfg/Config';
 // eslint-disable-next-line import/order
 import { type cfg } from '../../wailsjs/go/models';
 
@@ -126,15 +126,17 @@ function ListItem({
             disabled={switchLoading || isProxyRunning}
             onChange={async (e) => {
               setSwitchLoading(true);
-              const err = await ToggleFilterList(filterList.url, e.currentTarget.checked);
-              if (err) {
+              try {
+                await ToggleFilterList(filterList.url, e.currentTarget.checked);
+              } catch (ex) {
                 AppToaster.show({
-                  message: t('filterLists.toggleError', { error: err }),
+                  message: t('filterLists.toggleError', { error: ex }),
                   intent: 'danger',
                 });
+              } finally {
+                setSwitchLoading(false);
+                onChange?.();
               }
-              setSwitchLoading(false);
-              onChange?.();
             }}
             size="large"
             className="filter-lists__list-switch"
@@ -149,7 +151,7 @@ function ListItem({
 
       <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
 
-      {showDelete && (
+      {showDelete ? (
         <Tooltip content={t('common.stopProxyToDeleteFilter') as string} disabled={!isProxyRunning} placement="right">
           <Button
             icon="trash"
@@ -160,21 +162,24 @@ function ListItem({
             loading={deleteLoading}
             onClick={async () => {
               setDeleteLoading(true);
-              const err = await RemoveFilterList(filterList.url);
-              if (err) {
+              try {
+                await RemoveCustomFilterList(filterList.url);
+              } catch (ex) {
+                console.error(ex);
                 AppToaster.show({
-                  message: t('filterLists.removeError', { error: err }),
+                  message: t('filterLists.removeError', { error: ex }),
                   intent: 'danger',
                 });
+              } finally {
+                setDeleteLoading(false);
+                onChange?.();
               }
-              setDeleteLoading(false);
-              onChange?.();
             }}
           >
             {t('filterLists.delete')}
           </Button>
         </Tooltip>
-      )}
+      ) : null}
     </div>
   );
 }
