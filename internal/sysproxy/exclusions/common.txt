@@ -81,6 +81,24 @@ pypi.org
 crates.io
 rubygems.org
 
+# OpenAI from here: https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
+openai.com
+chatgpt.com
+oaiusercontent.com
+oaistatic.com
+statsig.com
+statsigapi.net
+featuregates.org
+intercomcdn.com
+js.intercomcdn.com
+intercom.io
+js.stripe.com
+challenges.cloudflare.com
+rum.browser-intake-datadoghq.com
+o33249.ingest.sentry.io
+prodregistryv2.org
+featureassets.org
+
 # Issues
 # https://github.com/ZenPrivacy/zen-desktop/pull/223
 account.booking.com
