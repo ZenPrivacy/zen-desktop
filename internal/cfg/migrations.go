@@ -91,22 +91,22 @@ func (c *Config) RunMigrations() {
 
 	lastMigrationV, err := semver.ParseTolerant(lastMigration)
 	if err != nil {
-		log.Printf("error parsing last migration(%s): %v\n", lastMigration, err)
+		log.Printf("error parsing last migration(%s): %v", lastMigration, err)
 		return
 	}
 
 	for version, migration := range migrations {
 		versionV, err := semver.ParseTolerant(version)
 		if err != nil {
-			log.Printf("error parsing migration version(%s): %v\n", version, err)
+			log.Printf("error parsing migration version(%s): %v", version, err)
 			continue
 		}
 
 		if lastMigrationV.LT(versionV) {
 			if err := migration(c); err != nil {
-				log.Printf("error running migration(%s): %v\n", version, err)
+				log.Printf("error running migration(%s): %v", version, err)
 			} else {
-				log.Printf("ran migration %s\n", version)
+				log.Printf("ran migration %s", version)
 			}
 		}
 	}
