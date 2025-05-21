@@ -6,8 +6,8 @@ export function AddCustomFilterList(arg1) {
   return window['go']['cfg']['Config']['AddCustomFilterList'](arg1);
 }
 
-export function AddFilterLists(arg1) {
-  return window['go']['cfg']['Config']['AddFilterLists'](arg1);
+export function AddCustomFilterLists(arg1) {
+  return window['go']['cfg']['Config']['AddCustomFilterLists'](arg1);
 }
 
 export function GetCAInstalled() {

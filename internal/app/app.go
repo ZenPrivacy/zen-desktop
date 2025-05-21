@@ -292,8 +292,20 @@ func (a *App) OpenLogsDirectory() error {
 }
 
 // ExportCustomFilterListsToFile exports the custom filter lists to a file.
-func (a *App) ExportCustomFilterLists() error {
+func (a *App) ExportCustomFilterLists() (err error) {
 	<-a.startupDone
+
+	defer func() {
+		if err != nil {
+			log.Printf("error exporting custom filter lists: %v", err)
+		}
+	}()
+
+	lists := a.config.GetCustomFilterLists()
+
+	if len(lists) == 0 {
+		return errors.New("no custom filter lists to export")
+	}
 
 	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
 		Title:           "Export Custom Filter Lists",
@@ -304,37 +316,30 @@ func (a *App) ExportCustomFilterLists() error {
 	})
 
 	if err != nil {
-		log.Printf("failed to open file dialog: %v", err)
-		return err
-	}
-
-	if filePath == "" {
-		return errors.New("no file selected")
-	}
-
-	lists := a.config.GetCustomFilterLists()
-
-	if len(lists) == 0 {
-		return errors.New("no custom filter lists to export")
+		return fmt.Errorf("open file dialog: %v", err)
 	}
 
 	data, err := json.MarshalIndent(lists, "", "  ")
 	if err != nil {
-		log.Printf("failed to marshal filter lists: %v", err)
-		return err
+		return fmt.Errorf("marshal filter lists: %v", err)
 	}
 
 	if err := os.WriteFile(filePath, data, 0644); err != nil {
-		log.Printf("failed to write filter lists to file: %v", err)
-		return err
+		return fmt.Errorf("write file: %v", err)
 	}
 
 	return nil
 }
 
 // ImportCustomFilterLists imports the custom filter lists from a file.
-func (a *App) ImportCustomFilterLists() error {
+func (a *App) ImportCustomFilterLists() (err error) {
 	<-a.startupDone
+
+	defer func() {
+		if err != nil {
+			log.Printf("error importing custom filter lists: %v", err)
+		}
+	}()
 
 	filePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
 		Title: "Import Custom Filter Lists",
@@ -344,28 +349,21 @@ func (a *App) ImportCustomFilterLists() error {
 	})
 
 	if err != nil {
-		return err
+		return fmt.Errorf("open file dialog: %v", err)
 	}
 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Printf("failed to read filter lists file: %v", err)
-		return err
+		return fmt.Errorf("read file: %v", err)
 	}
 
-	var filterLists []cfg.FilterList
+	var filterLists []cfg.CustomFilterList
 	if err := json.Unmarshal(data, &filterLists); err != nil {
-		log.Printf("failed to unmarshal filter lists: %v", err)
-		return errors.New("incorrect filter lists format")
+		return fmt.Errorf("unmarshal filter lists: %v", err)
 	}
 
-	if len(filterLists) == 0 {
-		return errors.New("no custom filter lists to import")
-	}
-
-	if err := a.config.AddFilterLists(filterLists); err != nil {
-		log.Printf("failed to add filter lists: %v", err)
-		return err
+	if err := a.config.AddCustomFilterLists(filterLists); err != nil {
+		return fmt.Errorf("add custom filter lists: %v", err)
 	}
 
 	return nil

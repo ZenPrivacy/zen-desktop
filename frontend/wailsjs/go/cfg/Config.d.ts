@@ -5,7 +5,7 @@ import {sync} from '../models';
 
 export function AddCustomFilterList(arg1:cfg.CustomFilterList):Promise<void>;
 
-export function AddFilterLists(arg1:Array<cfg.FilterList>):Promise<void>;
+export function AddCustomFilterLists(arg1:Array<cfg.CustomFilterList>):Promise<void>;
 
 export function GetCAInstalled():Promise<boolean>;
 

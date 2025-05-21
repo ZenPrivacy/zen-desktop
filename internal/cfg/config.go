@@ -37,6 +37,7 @@ const (
 	UpdatePolicyDisabled  UpdatePolicyType = "disabled"
 )
 
+// CustomFilterList is a user-defined filter list.
 type CustomFilterList struct {
 	Name    string `json:"name"`
 	URL     string `json:"url"`
@@ -44,6 +45,26 @@ type CustomFilterList struct {
 	Trusted bool   `json:"trusted"`
 }
 
+func (f *CustomFilterList) UnmarshalJSON(data []byte) error {
+	type TempFilterList CustomFilterList
+	var temp TempFilterList
+
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	if temp.Name == "" {
+		return errors.New("name is required")
+	}
+	if temp.URL == "" {
+		return errors.New("URL is required")
+	}
+
+	*f = CustomFilterList(temp)
+	return nil
+}
+
+// FilterList represents a filter list (both built-in and user-defined) for the external API (consumed by the frontend).
 type FilterList struct {
 	Name    string         `json:"name"`
 	Type    FilterListType `json:"type"`
@@ -88,30 +109,6 @@ type Config struct {
 
 	// firstLaunch is true if the application is being run for the first time.
 	firstLaunch bool
-}
-
-func (f *FilterList) UnmarshalJSON(data []byte) error {
-	type TempFilterList FilterList
-	var temp TempFilterList
-
-	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
-	}
-
-	if temp.Name == "" {
-		return errors.New("name is required")
-	}
-
-	if temp.URL == "" {
-		return errors.New("URL is required")
-	}
-
-	if temp.Type == "" {
-		return errors.New("type is required")
-	}
-
-	*f = FilterList(temp)
-	return nil
 }
 
 func init() {
@@ -264,26 +261,25 @@ func (c *Config) AddCustomFilterList(list CustomFilterList) error {
 }
 
 // AddFilterLists adds multiple filter lists to the configuration.
-func (c *Config) AddFilterLists(lists []FilterList) error {
+func (c *Config) AddCustomFilterLists(lists []CustomFilterList) error {
 	c.Lock()
 	defer c.Unlock()
 
-	newLists := make([]FilterList, 0, len(lists))
+	newLists := make([]CustomFilterList, 0, len(lists))
 	for _, list := range lists {
 		if isBuiltInURL(list.URL) {
-			log.Printf("adding filter lists: list %s already exists in the built-in configuration", list.URL)
+			log.Printf("adding filter lists: list %s already exists in the built-in configuration, skipping", list.URL)
 			continue
 		}
 		if c.isCustomURL(list.URL) {
-			log.Printf("adding filter lists: list %s already exists in the custom configuration", list.URL)
+			log.Printf("adding filter lists: list %s already exists in the custom configuration, skipping", list.URL)
 			continue
 		}
 
 		newLists = append(newLists, list)
 	}
 
-	// todo fix
-	// c.Filter.CustomLists = append(c.Filter.CustomLists, newLists...)
+	c.Filter.CustomLists = append(c.Filter.CustomLists, newLists...)
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
 		return fmt.Errorf("save: %v", err)
