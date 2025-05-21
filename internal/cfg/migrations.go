@@ -40,6 +40,29 @@ var migrations = map[string]func(c *Config) error{
 
 		return nil
 	},
+	"v0.11.0": func(c *Config) error {
+		oldFilterLists := c.GetFilterLists()
+		var customFilterLists []CustomFilterList
+
+		for _, list := range oldFilterLists {
+			if list.Type == FilterListTypeCustom {
+				customFilterLists = append(customFilterLists, CustomFilterList{
+					Name:    list.Name,
+					URL:     list.URL,
+					Enabled: list.Enabled,
+					Trusted: list.Trusted,
+				})
+			}
+		}
+		if len(customFilterLists) == 0 {
+			return nil
+		}
+
+		if err := c.AddCustomFilterLists(customFilterLists); err != nil {
+			return fmt.Errorf("add custom filter lists: %v", err)
+		}
+		return nil
+	},
 }
 
 // RunMigrations runs the version-to-version migrations.
