@@ -6,8 +6,13 @@ import { createLogger } from './helpers/logger';
 import { jsonPrune } from './json-prune';
 import { jsonPruneFetchResponse } from './json-prune-fetch-response';
 import { jsonPruneXHRResponse } from './json-prune-xhr-response';
+import { noProtectedAudience } from './no-protected-audience';
+import { noTopics } from './no-topics';
 import { nowebrtc } from './nowebrtc';
+import { preventAddEventListener } from './prevent-add-event-listener';
 import { preventFetch } from './prevent-fetch';
+import { preventSetInterval } from './prevent-set-interval';
+import { preventSetTimeout } from './prevent-set-timeout';
 import { preventWindowOpen } from './prevent-window-open';
 import { preventXHR } from './prevent-xhr';
 import { setConstant } from './set-constant';
@@ -37,6 +42,11 @@ const scriptletNameToFunction = new Map<string, Function>([
   ['json-prune-xhr-response', jsonPruneXHRResponse],
   ['prevent-window-open', preventWindowOpen],
   ['nowoif', preventWindowOpen],
+  ['prevent-setTimeout', preventSetTimeout],
+  ['prevent-setInterval', preventSetInterval],
+  ['prevent-addEventListener', preventAddEventListener],
+  ['no-topics', noTopics],
+  ['no-protected-audience', noProtectedAudience],
 ]);
 
 export default function (name: string, ...args: string[]): void {

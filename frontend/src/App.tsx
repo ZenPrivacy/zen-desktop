@@ -4,31 +4,36 @@ import { useTranslation } from 'react-i18next';
 
 import './App.css';
 
+import { ThemeType, useTheme } from './common/ThemeManager';
+import { useProxyState } from './context/ProxyStateContext';
+import { DonateButton } from './DonateButton';
 import { FilterLists } from './FilterLists';
 import { MyRules } from './MyRules';
 import { RequestLog } from './RequestLog';
 import { SettingsManager } from './SettingsManager';
 import { StartStopButton } from './StartStopButton';
-import { ProxyState } from './types';
 
 function App() {
   const { t } = useTranslation();
+  const { effectiveTheme } = useTheme();
+
   useEffect(() => {
     FocusStyleManager.onlyShowFocusOnTabs();
   }, []);
+  const { proxyState } = useProxyState();
 
-  const [proxyState, setProxyState] = useState<ProxyState>('off');
   const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'myRules' | 'settings'>('home');
 
   return (
-    <div id="App">
+    <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp5-dark' : ''}>
       <div className="heading">
         <h1 className="heading__logo">
           <Icon icon="shield" size={IconSize.LARGE} />
           ZEN
         </h1>
+        <DonateButton />
       </div>
-      <ButtonGroup fill minimal className="tabs">
+      <ButtonGroup fill variant="minimal" className="tabs">
         <Button icon="circle" active={activeTab === 'home'} onClick={() => setActiveTab('home')}>
           {t('app.tabs.home')}
         </Button>
@@ -58,10 +63,10 @@ function App() {
         </div>
         {activeTab === 'filterLists' && <FilterLists />}
         {activeTab === 'myRules' && <MyRules />}
-        {activeTab === 'settings' && <SettingsManager proxyState={proxyState} />}
+        {activeTab === 'settings' && <SettingsManager />}
       </div>
 
-      <StartStopButton proxyState={proxyState} setProxyState={setProxyState} />
+      <StartStopButton />
     </div>
   );
 }

@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/anfragment/zen/internal/networkrules/rulemodifiers"
+	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rulemodifiers"
+	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rulemodifiers/removejsconstant"
 )
 
 // Rule represents modifiers of a rule.
@@ -35,7 +36,7 @@ func (rm *Rule) ParseModifiers(modifiers string) error {
 		return nil
 	}
 
-	for _, m := range strings.Split(modifiers, ",") {
+	for _, m := range splitModifiersEscaped(modifiers) {
 		if len(m) == 0 {
 			return fmt.Errorf("empty modifier")
 		}
@@ -79,6 +80,10 @@ func (rm *Rule) ParseModifiers(modifiers string) error {
 			modifier = &rulemodifiers.HeaderModifier{}
 		case isKind("removeheader"):
 			modifier = &rulemodifiers.RemoveHeaderModifier{}
+		case isKind("remove-js-constant"):
+			modifier = &removejsconstant.Modifier{}
+		case isKind("jsonprune"):
+			modifier = &rulemodifiers.JSONPruneModifier{}
 		case isKind("all"):
 			// TODO: should act as "popup" modifier once it gets implemented
 			continue
@@ -170,12 +175,44 @@ func (rm *Rule) ModifyReq(req *http.Request) (modified bool) {
 }
 
 // ModifyRes modifies a response. Returns true if the response was modified.
-func (rm *Rule) ModifyRes(res *http.Response) (modified bool) {
+func (rm *Rule) ModifyRes(res *http.Response) (modified bool, err error) {
 	for _, modifier := range rm.ModifyingModifiers {
-		if modifier.ModifyRes(res) {
+		m, err := modifier.ModifyRes(res)
+		if err != nil {
+			return false, fmt.Errorf("modify response: %w", err)
+		}
+		if m {
 			modified = true
 		}
 	}
 
-	return modified
+	return modified, nil
+}
+
+func splitModifiersEscaped(modifiers string) []string {
+	var res []string
+	var current string
+	var escaped bool
+	for _, c := range modifiers {
+		switch c {
+		case '\\':
+			escaped = !escaped
+			continue
+		case ',':
+			if escaped {
+				current += string(c)
+				escaped = false
+				continue
+			}
+			res = append(res, current)
+			current = ""
+		default:
+			current += string(c)
+			escaped = false
+		}
+	}
+	if len(current) > 0 {
+		res = append(res, current)
+	}
+	return res
 }

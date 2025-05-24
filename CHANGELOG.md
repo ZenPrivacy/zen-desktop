@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.10.0
+
+### What's New
+
+- **Stronger content-blocking engine**
+
+  - New rule modifiers: `jsonprune` and `remove-js-constant` enable detection-free YouTube ad-blocking.
+  - New scriptlets: `prevent-setTimeout`, `prevent-setInterval`, `prevent-addEventListener`, `no-topics`, and `no-protected-audience`.
+  - Improved filter list handling with on-disk caching and minor correctness/performance enhancements.
+
+- **Fresh Light theme**
+  Switch between dark and light modes to match your desktop or daylight.
+
+- **Expanded language support**
+  Сәлем! Hallo! Zen now speaks **Kazakh** and **German**. Want to contribute a new language or improve an existing one? Check out our contributing guidelines.
+
+- **Enhanced security & supply chain hardening**
+
+  - Automatic removal of Zen's root CA on Windows during uninstallation.
+  - Build artifact attestation for improved supply-chain security.
+
+- **UI & UX improvements**
+  Donate button, a quick link to the changelog, disabled controls when the proxy is active, and more.
+
+### New Contributors
+
+- **@pulkitgarg04** – updated Hungarian filter list URL
+- **@colinfrerichs** – config updates for v0.10.0
+
+**Full Changelog**: [github.com/ZenPrivacy/zen-desktop/compare/v0.9.0...v0.10.0](https://github.com/ZenPrivacy/zen-desktop/compare/v0.9.0...v0.10.0)
+
 ## v0.9.0
 
 ### What's New
@@ -16,10 +47,10 @@
 
 ### New Contributors
 
-- @kamalovk made their first contribution: <https://github.com/anfragment/zen/pull/269>
-- @TobseF made their first contribution: <https://github.com/anfragment/zen/pull/267>
+- @kamalovk made their first contribution: <https://github.com/ZenPrivacy/zen-desktop/pull/269>
+- @TobseF made their first contribution: <https://github.com/ZenPrivacy/zen-desktop/pull/267>
 
-**Full Changelog**: <https://github.com/anfragment/zen/compare/v0.8.0...v0.9.0>
+**Full Changelog**: <https://github.com/ZenPrivacy/zen-desktop/compare/v0.8.0...v0.9.0>
 
 ## v0.8.0
 
@@ -30,7 +61,7 @@
 
 Thank you for using Zen!
 
-**Full Changelog**: <https://github.com/anfragment/zen/compare/v0.7.2...v0.8.0>
+**Full Changelog**: <https://github.com/ZenPrivacy/zen-desktop/compare/v0.7.2...v0.8.0>
 
 ## v0.7.2
 
@@ -40,7 +71,7 @@ Thank you for using Zen!
 
 Thank you for using Zen!
 
-**Full Changelog**: <https://github.com/anfragment/zen/compare/v0.7.1...v0.7.2>
+**Full Changelog**: <https://github.com/ZenPrivacy/zen-desktop/compare/v0.7.1...v0.7.2>
 
 ## v0.7.1
 
@@ -50,7 +81,7 @@ Thank you for using Zen!
 
 Thank you for using Zen!
 
-**Full Changelog**: <https://github.com/anfragment/zen/compare/v0.7.0...v0.7.1>
+**Full Changelog**: <https://github.com/ZenPrivacy/zen-desktop/compare/v0.7.0...v0.7.1>
 
 ## v0.7.0
 
@@ -63,7 +94,7 @@ Thank you for using Zen!
 
 Happy 2025 and thank you for using Zen!
 
-**Full Changelog**: <https://github.com/anfragment/zen/compare/v0.6.1...v0.7.0>
+**Full Changelog**: <https://github.com/ZenPrivacy/zen-desktop/compare/v0.6.1...v0.7.0>
 
 ## v0.6.0
 
@@ -82,4 +113,4 @@ Warning: On macOS, the app will not function properly after the update. Please v
 
 Thank you for using Zen!
 
-**Full Changelog**: <https://github.com/anfragment/zen/compare/v0.5.0...v0.6.0>
+**Full Changelog**: <https://github.com/ZenPrivacy/zen-desktop/compare/v0.5.0...v0.6.0>

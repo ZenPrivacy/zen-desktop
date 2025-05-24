@@ -1,20 +1,16 @@
-import { Button, Text } from '@blueprintjs/core';
+import { Button } from '@blueprintjs/core';
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { StartProxy, StopProxy } from '../wailsjs/go/app/App';
-import { BrowserOpenURL, EventsOn } from '../wailsjs/runtime/runtime';
+import { EventsOn } from '../wailsjs/runtime/runtime';
 
+import { BrowserLink } from './common/BrowserLink';
 import { AppToaster } from './common/toaster';
-import { ProxyState } from './types';
+import { useProxyState } from './context/ProxyStateContext';
 
 const PROXY_CHANNEL = 'proxy:action';
-const LINUX_PROXY_GUIDE_URL = 'https://github.com/anfragment/zen/blob/master/docs/external/linux-proxy-conf.md';
-
-export interface StartStopButtonProps {
-  proxyState: ProxyState;
-  setProxyState: (state: ProxyState) => void;
-}
+const LINUX_PROXY_GUIDE_URL = 'https://github.com/ZenPrivacy/zen-desktop/blob/master/docs/external/linux-proxy-conf.md';
 
 enum ProxyActionKind {
   Starting = 'starting',
@@ -31,8 +27,9 @@ interface ProxyAction {
   error?: string;
 }
 
-export function StartStopButton({ proxyState, setProxyState }: StartStopButtonProps) {
+export function StartStopButton() {
   const { t } = useTranslation();
+  const { proxyState, setProxyState } = useProxyState();
 
   useEffect(() => {
     const cancel = EventsOn(PROXY_CHANNEL, (action: ProxyAction) => {
@@ -67,15 +64,16 @@ export function StartStopButton({ proxyState, setProxyState }: StartStopButtonPr
           AppToaster.show({
             message: (
               <div>
-                {t('startStopButton.gnomeNote')} <br />
-                {t('startStopButton.followGuide')}{' '}
-                <Text onClick={() => BrowserOpenURL(LINUX_PROXY_GUIDE_URL)} className="inline_text_link">
-                  {t('startStopButton.thisGuide')}
-                </Text>{' '}
-                {t('startStopButton.perAppBasis')}
+                <Trans
+                  i18nKey="startStopButton.unsupportedDEGuide"
+                  components={{
+                    'guide-link': <BrowserLink href={LINUX_PROXY_GUIDE_URL} />,
+                    br: <br />,
+                  }}
+                />
               </div>
             ),
-            intent: 'danger',
+            intent: 'warning',
           });
           break;
 

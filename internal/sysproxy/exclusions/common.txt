@@ -15,7 +15,7 @@ eesti.ee
 
 # Password managers
 1password.com
-pastpass.com
+lastpass.com
 passwords.google.com
 passwords.google
 bitwarden.com
@@ -37,12 +37,15 @@ bcc.kz
 bankffin.kz
 jusan.kz
 onlinebank.kz
+freedompay.kz
 
 # Payment processors
 paypal.com
 stripe.com
+m.stripe.network
 square.com
 venmo.com
+sis.redsys.es
 
 # Messengers
 whatsapp.net
@@ -78,6 +81,11 @@ pypi.org
 crates.io
 rubygems.org
 
+# OpenAI from here: https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
+ios.chat.openai.com
+ab.chatgpt.com
+oaiusercontent.com
+
 # Issues
-# https://github.com/anfragment/zen/pull/223
+# https://github.com/ZenPrivacy/zen-desktop/pull/223
 account.booking.com

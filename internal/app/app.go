@@ -11,20 +11,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anfragment/zen/internal/certgen"
-	"github.com/anfragment/zen/internal/certstore"
-	"github.com/anfragment/zen/internal/cfg"
-	"github.com/anfragment/zen/internal/cosmetic"
-	"github.com/anfragment/zen/internal/cssrule"
-	"github.com/anfragment/zen/internal/filter"
-	"github.com/anfragment/zen/internal/jsrule"
-	"github.com/anfragment/zen/internal/logger"
-	"github.com/anfragment/zen/internal/networkrules"
-	"github.com/anfragment/zen/internal/proxy"
-	"github.com/anfragment/zen/internal/scriptlet"
-	"github.com/anfragment/zen/internal/selfupdate"
-	"github.com/anfragment/zen/internal/sysproxy"
-	"github.com/anfragment/zen/internal/systray"
+	"github.com/ZenPrivacy/zen-desktop/internal/certgen"
+	"github.com/ZenPrivacy/zen-desktop/internal/certstore"
+	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
+	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
+	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/filter"
+	"github.com/ZenPrivacy/zen-desktop/internal/filter/filterliststore"
+	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/logger"
+	"github.com/ZenPrivacy/zen-desktop/internal/networkrules"
+	"github.com/ZenPrivacy/zen-desktop/internal/proxy"
+	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
+	"github.com/ZenPrivacy/zen-desktop/internal/selfupdate"
+	"github.com/ZenPrivacy/zen-desktop/internal/sysproxy"
+	"github.com/ZenPrivacy/zen-desktop/internal/systray"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -43,9 +44,10 @@ type App struct {
 	proxyOn            bool
 	systemProxyManager *sysproxy.Manager
 	// proxyMu ensures that proxy is only started or stopped once at a time.
-	proxyMu    sync.Mutex
-	certStore  *certstore.DiskCertStore
-	systrayMgr *systray.Manager
+	proxyMu         sync.Mutex
+	certStore       *certstore.DiskCertStore
+	systrayMgr      *systray.Manager
+	filterListStore *filterliststore.FilterListStore
 }
 
 // NewApp initializes the app.
@@ -61,6 +63,10 @@ func NewApp(name string, config *cfg.Config, startOnDomReady bool) (*App, error)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cert store: %v", err)
 	}
+	filterListStore, err := filterliststore.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create filter list store: %v", err)
+	}
 
 	systemProxyManager := sysproxy.NewManager(config.GetPACPort())
 
@@ -71,6 +77,7 @@ func NewApp(name string, config *cfg.Config, startOnDomReady bool) (*App, error)
 		certStore:          certStore,
 		startOnDomReady:    startOnDomReady,
 		systemProxyManager: systemProxyManager,
+		filterListStore:    filterListStore,
 	}, nil
 }
 
@@ -179,7 +186,7 @@ func (a *App) StartProxy() (err error) {
 	cssRulesInjector := cssrule.NewInjector()
 	jsRuleInjector := jsrule.NewInjector()
 
-	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, a.eventsHandler)
+	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, a.eventsHandler, a.filterListStore)
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}
@@ -267,7 +274,6 @@ func (a *App) StopProxy() (err error) {
 
 // UninstallCA uninstalls the CA.
 func (a *App) UninstallCA() error {
-	<-a.startupDone
 	if err := a.certStore.UninstallCA(); err != nil {
 		log.Printf("failed to uninstall CA: %v", err)
 		return err

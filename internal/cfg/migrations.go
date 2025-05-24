@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/anfragment/zen/internal/autostart"
+	"github.com/ZenPrivacy/zen-desktop/internal/autostart"
 	"github.com/blang/semver"
 )
 
@@ -29,7 +29,7 @@ var migrations = map[string]func(c *Config) error{
 		return nil
 	},
 	"v0.6.0": func(c *Config) error {
-		// https://github.com/anfragment/zen/issues/146
+		// https://github.com/ZenPrivacy/zen-desktop/issues/146
 		errStr := c.ToggleFilterList("https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_2_Base/filter.txt", true)
 		if errStr != "" {
 			return errors.New(errStr)
@@ -37,7 +37,7 @@ var migrations = map[string]func(c *Config) error{
 		return nil
 	},
 	"v0.7.0": func(c *Config) error {
-		// https://github.com/anfragment/zen/issues/147#issuecomment-2521317897
+		// https://github.com/ZenPrivacy/zen-desktop/issues/147#issuecomment-2521317897
 		c.Lock()
 		defer c.Unlock()
 		for i, list := range c.Filter.FilterLists {
@@ -80,6 +80,27 @@ var migrations = map[string]func(c *Config) error{
 			}
 		}
 
+		return nil
+	},
+	"v0.10.0": func(c *Config) error {
+		for i, list := range c.Filter.FilterLists {
+			if list.URL == "https://raw.githubusercontent.com/hufilter/hufilter/master/hufilter.txt" {
+				c.Filter.FilterLists[i].URL = "https://filters.hufilter.hu/hufilter-adguard.txt"
+				log.Printf("v0.10.0 migration: updating Hungarian filter list's URL")
+			}
+		}
+		if err := c.Save(); err != nil {
+			return fmt.Errorf("save config: %v", err)
+		}
+		errStr := c.AddFilterList(FilterList{
+			Name:    "Zen - Ads",
+			Type:    "ads",
+			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
+			Enabled: true,
+		})
+		if errStr != "" {
+			return fmt.Errorf("add \"Zen - Ads\" filter list: %s", errStr)
+		}
 		return nil
 	},
 }

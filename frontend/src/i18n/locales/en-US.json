@@ -23,6 +23,7 @@
     "example": "Example filter list",
     "trustedListsWarning": "Trusted lists can use powerful blocking capabilities, such as <code>trusted-</code> scriptlets and JavaScript rules but <strong>may disrupt privacy and security</strong> if hijacked by a malicious party. Only enable this option for lists from sources you trust."
   },
+  "donate": "Donate",
   "exportFilterList": {
     "errorMessage": "Failed to export filter lists: {{error}}",
     "export": "Export",
@@ -79,7 +80,6 @@
   "settings": {
     "about": {
       "changelog": "changelog",
-      "github": "GitHub",
       "tagline": "Your Comprehensive Ad-Blocker and Privacy Guard",
       "version": "Version"
     },
@@ -105,6 +105,12 @@
       "advanced": "Advanced",
       "app": "App"
     },
+    "theme": {
+      "chooseTheme": "Choose a theme",
+      "dark": "Dark",
+      "light": "Light",
+      "system": "Follow system theme"
+    },
     "updates": {
       "automatic": "Automatic updates",
       "choosePolicy": "Choose how updates are installed",
@@ -115,13 +121,17 @@
     }
   },
   "startStopButton": {
-    "followGuide": "Follow",
-    "gnomeNote": "System proxy configuration is currently only supported on GNOME.",
-    "perAppBasis": "to set the proxy on a per-app basis.",
     "start": "Start",
     "startError": "Failed to start proxy: {{error}}",
     "stop": "Stop",
     "stopError": "Failed to stop proxy: {{error}}",
-    "thisGuide": "this guide"
+    "unsupportedDEGuide": "Automatic system proxy configuration is currently only supported on GNOME.<br />Please follow <guide-link>this guide</guide-link> to set the proxy on a per-app basis."
+  },
+  "common": {
+    "stopProxyToModify": "Stop the proxy to modify this setting",
+    "stopProxyToAddFilter": "Stop the proxy to add a new filter list",
+    "stopProxyToDeleteFilter": "Stop the proxy to delete this filter list",
+    "stopProxyToToggleFilter": "Stop the proxy to enable/disable this filter list",
+    "stopProxyToEditRules": "Stop the proxy to modify custom rules"
   }
 }

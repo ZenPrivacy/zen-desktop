@@ -4,8 +4,8 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { marked } from 'marked';
 import { convert } from 'html-to-text';
 import semver from 'semver';
-const GITHUB_REPO_OWNER = 'anfragment';
-const GITHUB_REPO = 'zen';
+const GITHUB_REPO_OWNER = 'ZenPrivacy';
+const GITHUB_REPO = 'zen-desktop';
 const PLATFORM_ASSETS = {
     darwin: {
         arm64: 'Zen_darwin_arm64.tar.gz',
@@ -48,7 +48,10 @@ const s3Client = new S3Client({
         process.exit(0);
     }
     const octokit = new Octokit();
-    const res = await octokit.rest.repos.getLatestRelease({ owner: GITHUB_REPO_OWNER, repo: GITHUB_REPO });
+    const res = await octokit.rest.repos.getLatestRelease({
+        owner: GITHUB_REPO_OWNER,
+        repo: GITHUB_REPO,
+    });
     if (res.status !== 200) {
         console.error('API returned non-200 status, dumping response:\n', JSON.stringify(res, null, 2));
         process.exit(1);
@@ -73,7 +76,11 @@ const s3Client = new S3Client({
             if (asset === undefined) {
                 throw new Error(`${assetName} missing from release assets`);
             }
-            const manifest = await createManifestForSysArch({ releaseBody, releaseVersion, asset });
+            const manifest = await createManifestForSysArch({
+                releaseBody,
+                releaseVersion,
+                asset,
+            });
             const op = process.argv.includes('--dry-run') ? printManifestS3OpDryRun : uploadManifestToBucket;
             await op({ manifest, platform, arch });
         }

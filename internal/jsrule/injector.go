@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/anfragment/zen/internal/hostmatch"
-	"github.com/anfragment/zen/internal/htmlrewrite"
-	"github.com/anfragment/zen/internal/logger"
+	"github.com/ZenPrivacy/zen-desktop/internal/hostmatch"
+	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
+	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 )
 
 type store interface {
@@ -73,7 +73,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	}
 	injection = append(injection, injectionEnd...)
 
-	if err := htmlrewrite.PrependBodyContents(res, injection); err != nil {
+	if err := httprewrite.PrependHTMLBodyContents(res, injection); err != nil {
 		return fmt.Errorf("prepend body contents: %w", err)
 	}
 

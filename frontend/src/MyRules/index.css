@@ -10,5 +10,11 @@
 
 .my-rules__textarea {
   font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
-  font-size: .9em;
+  font-size: 0.9em;
+  height: 100% !important;
+}
+
+.my-rules__tooltip {
+  height: 100%;
+  width: 100%;
 }

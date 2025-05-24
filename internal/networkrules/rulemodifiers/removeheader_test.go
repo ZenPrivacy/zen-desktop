@@ -94,7 +94,11 @@ func TestRemoveHeaderModifier(t *testing.T) {
 		}
 
 		res := &http.Response{Header: http.Header{"Refresh": []string{"value1", "value2"}}}
-		if !rm.ModifyRes(res) {
+		m, err := rm.ModifyRes(res)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !m {
 			t.Error("expected response to be modified")
 		}
 
@@ -112,7 +116,11 @@ func TestRemoveHeaderModifier(t *testing.T) {
 		}
 
 		res := &http.Response{Header: http.Header{}}
-		if rm.ModifyRes(res) {
+		m, err := rm.ModifyRes(res)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if m {
 			t.Error("expected response to not be modified")
 		}
 	})

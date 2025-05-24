@@ -53,13 +53,16 @@ func (m *DomainModifier) Parse(modifier string) error {
 
 func (m *DomainModifier) ShouldMatchReq(req *http.Request) bool {
 	var hostname string
+	referer := req.Header.Get("Referer")
 	// Allow empty "Referer" header to make inverted rules work.
-	if referer := req.Header.Get("Referer"); referer != "" {
+	if referer != "" {
 		url, err := url.Parse(referer)
 		if err != nil {
 			return false
 		}
 		hostname = url.Hostname()
+	} else {
+		hostname = req.URL.Hostname()
 	}
 
 	matches := false

@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anfragment/zen/internal/logger"
+	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 )
 
 // certGenerator is an interface capable of generating certificates for the proxy.
@@ -277,7 +277,10 @@ func (p *Proxy) proxyConnect(w http.ResponseWriter, connReq *http.Request) {
 		removeHopHeaders(resp.Header)
 
 		if err := p.filter.HandleResponse(req, resp); err != nil {
-			log.Printf("error handling response by filter for %s, %v", logger.Redacted(req.URL), err)
+			log.Printf("error handling response by filter for %q: %v", logger.Redacted(req.URL), err)
+			if err := resp.Body.Close(); err != nil {
+				log.Printf("closing body for %q: %v", logger.Redacted(req.URL), err)
+			}
 			response := fmt.Sprintf("HTTP/1.1 502 Bad Gateway\r\n\r\n%s", err.Error())
 			tlsConn.Write([]byte(response))
 			break
