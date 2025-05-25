@@ -1,13 +1,11 @@
 package scriptlet_test
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
 	"golang.org/x/net/html"
@@ -170,12 +168,9 @@ func TestInject_NoncePriority(t *testing.T) {
 				t.Fatalf("failed to add rule: %v", err)
 			}
 
-			start := time.Now()
 			if err := i.Inject(req, res); err != nil {
 				t.Fatalf("inject: %v", err)
 			}
-			fmt.Println(time.Since(start))
-			t.Error("test")
 
 			nonce := nonceFromBody(t, res.Body)
 			if tc.wantNonce && nonce == "" {
