@@ -89,7 +89,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/AnXh3L0/blocklist/master/albanian-easylist-addition/Albania.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"al", "xk"},
+		Locales:        []string{"sq", "sr-XK"},
 	},
 	{
 		Name:           "🇪🇬EG 🇸🇦SA 🇲🇦MA 🇩🇿DZ: Liste AR",
@@ -97,7 +97,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://easylist-downloads.adblockplus.org/Liste_AR.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"eg", "sa", "ma", "dz"},
+		Locales:        []string{"ar"},
 	},
 	{
 		Name:           "🇧🇬BG: Bulgarian Adblock List",
@@ -113,7 +113,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://filters.adtidy.org/extension/ublock/filters/224.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"cn", "tw"},
+		Locales:        []string{"zh", "ug-CN"},
 	},
 	{
 		Name:           "🇨🇿CZ 🇸🇰SK: Easylist Czech and Slovak Filter List",
@@ -121,7 +121,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/tomasko126/easylistczechandslovak/master/filters.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"cz", "sk"},
+		Locales:        []string{"cs", "sk"},
 	},
 	{
 		Name:           "🇩🇪DE 🇨🇭CH 🇦🇹AT: EasyList Germany",
@@ -129,7 +129,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://easylist.to/easylistgermany/easylistgermany.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"de", "ch", "at"},
+		Locales:        []string{"de", "fr-CH", "it-CH", "rm-CH"},
 	},
 	{
 		Name:           "🇪🇪EE: Eesti saitidele kohandatud filter",
@@ -137,7 +137,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://adblock.ee/list.php",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"ee"},
+		Locales:        []string{"et"},
 	},
 	{
 		Name:           "🇫🇮FI: Adblock List for Finland",
@@ -145,7 +145,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/finnish-easylist-addition/finnish-easylist-addition/gh-pages/Finland_adb.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"fi"},
+		Locales:        []string{"fi", "sv-FI"},
 	},
 	{
 		Name:           "🇫🇷FR 🇨🇦CA: AdGuard French filter",
@@ -153,7 +153,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://filters.adtidy.org/extension/ublock/filters/16.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"fr", "ca"},
+		Locales:        []string{"fr"},
 	},
 	{
 		Name:           "🇬🇷GR 🇨🇾CY: Greek AdBlock Filter",
@@ -161,7 +161,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://www.void.gr/kargig/void-gr-filters.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"gr", "cy"},
+		Locales:        []string{"el"},
 	},
 	{
 		Name:           "🇭🇷HR 🇷🇸RS: Dandelion Sprout's Serbo-Croatian filters",
@@ -169,7 +169,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/SerboCroatianList.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"hr", "rs"},
+		Locales:        []string{"hr", "sr"},
 	},
 	{
 		Name:           "🇭🇺HU: hufilter",
@@ -185,7 +185,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/ABPindo/indonesianadblockrules/master/subscriptions/abpindo.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"id", "my"},
+		Locales:        []string{"id", "ms"},
 	},
 	{
 		Name:           "🇮🇳IN 🇱🇰LK 🇳🇵NP: IndianList",
@@ -193,7 +193,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://easylist-downloads.adblockplus.org/indianlist.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"in", "lk", "np"},
+		Locales:        []string{"in", "hi", "si-LK", "ta-LK", "ne"},
 	},
 	{
 		Name:           "🇮🇷IR: PersianBlocker",
@@ -201,12 +201,12 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/MasterKia/PersianBlocker/main/PersianBlocker.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"ir"},
+		Locales:        []string{"fa", "ps", "tg"},
 	},
 	{
-		Name:           "🇮🇸IS: Icelandic ABP List",
+		Name:           "🇮🇸IS: Adblock listi fyrir íslenskar vefsíður",
 		Type:           "regional",
-		URL:            "https://adblock.gardar.net/is.abp.txt",
+		URL:            "https://raw.githubusercontent.com/brave/adblock-lists/master/custom/is.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
 		Locales:        []string{"is"},
@@ -217,7 +217,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/easylist/EasyListHebrew/master/EasyListHebrew.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"il"},
+		Locales:        []string{"he"},
 	},
 	{
 		Name:           "🇮🇹IT: EasyList Italy",
@@ -233,7 +233,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://filters.adtidy.org/extension/ublock/filters/7.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"jp"},
+		Locales:        []string{"ja"},
 	},
 	{
 		Name:           "🇰🇷KR: Fanboy's Korean",
@@ -241,7 +241,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://www.fanboy.co.nz/fanboy-korean.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"kr"},
+		Locales:        []string{"ko"},
 	},
 	{
 		Name:           "🇱🇹LT: EasyList Lithuania",
@@ -273,7 +273,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "http://easylist-downloads.adblockplus.org/easylistdutch.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"nl", "be"},
+		Locales:        []string{"nl", "de-BE", "fr-BE", "nl-BE"},
 	},
 	{
 		Name:           "🇳🇴NO 🇩🇰DK 🇮🇸IS: Dandelion Sprouts nordiske filtre for ryddigere nettsider",
@@ -281,7 +281,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/NorwegianList.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"no", "dk", "is"},
+		Locales:        []string{"nb-NO", "nn-NO", "no-NO", "da", "is"},
 	},
 	{
 		Name:           "🇵🇱PL: Oficjalne Polskie Filtry do AdBlocka, uBlocka Origin i AdGuarda",
@@ -305,15 +305,15 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/tcptomato/ROad-Block/master/road-block-filters-light.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"ro", "md"},
+		Locales:        []string{"ro"},
 	},
 	{
 		Name:           "🇷🇺RU 🇺🇦UA 🇺🇿UZ 🇰🇿KZ: RU AdList",
 		Type:           "regional",
-		URL:            "https://easylist-downloads.adblockplus.org/ruadlist.txt",
+		URL:            "https://raw.githubusercontent.com/dimisa-RUAdList/RUAdListCDN/refs/heads/main/lists/ruadlist.ubo.min.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"ru", "ua", "uz", "kz"},
+		Locales:        []string{"ru", "uk", "uz", "kk"},
 	},
 	{
 		Name:           "🇪🇸ES 🇦🇷AR 🇲🇽MX 🇨🇴CO: EasyList Spanish",
@@ -321,7 +321,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://easylist-downloads.adblockplus.org/easylistspanish.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"es", "ar", "mx", "co"},
+		Locales:        []string{"es"},
 	},
 	{
 		Name:           "🇪🇸ES 🇦🇷AR 🇧🇷BR 🇵🇹PT: AdGuard Spanish/Portuguese",
@@ -329,7 +329,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://filters.adtidy.org/extension/ublock/filters/9.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"es", "ar", "br", "pt"},
+		Locales:        []string{"es", "pt"},
 	},
 	{
 		Name:           "🇸🇮SI: Slovenian List",
@@ -337,7 +337,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/betterwebleon/slovenian-list/master/filters.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"si"},
+		Locales:        []string{"sl"},
 	},
 	{
 		Name:           "🇸🇪SE: Frellwit's Swedish Filter",
@@ -369,7 +369,7 @@ var builtInFilterLists = []builtInFilterList{
 		URL:            "https://raw.githubusercontent.com/abpvn/abpvn/master/filter/abpvn_ublock.txt",
 		HomepageURL:    "",
 		DefaultEnabled: false,
-		Locales:        []string{"vn"},
+		Locales:        []string{"vi"},
 	},
 }
 
