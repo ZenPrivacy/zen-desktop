@@ -127,13 +127,18 @@ func addNonceToCSP(h http.Header, nonce string) {
 
 	parts := strings.Split(lines[lineIdx], ";")
 	for i, p := range parts {
-		d := strings.TrimSpace(strings.ToLower(p))
-		if strings.HasPrefix(d, dirMatch) {
-			if !strings.Contains(p, token) {
-				parts[i] = strings.TrimSpace(p) + token
-			}
-			break
+		if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(p)), dirMatch) {
+			continue
 		}
+
+		switch {
+		case strings.Contains(p, token):
+		case strings.Contains(strings.ToLower(p), "'none'"):
+			parts[i] = strings.Replace(p, "'none'", token, 1)
+		default:
+			parts[i] = strings.TrimSpace(p) + token
+		}
+		break
 	}
 	h[key][lineIdx] = strings.Join(parts, "; ")
 }

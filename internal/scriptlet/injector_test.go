@@ -1,9 +1,10 @@
 package scriptlet_test
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -105,17 +106,73 @@ func TestInjectorPublic(t *testing.T) {
 			t.Errorf("failed to inject: %v", err)
 		}
 
-		if !hasScriptTag(t, res.Body) {
+		// Snapshot the body because res.Body is a forward-only stream.
+		// Both hasScriptTag and nonceFromBody reads it.
+		raw, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("read body: %v", err)
+		}
+		res.Body.Close()
+
+		if !hasScriptTag(t, io.NopCloser(bytes.NewReader(raw))) {
 			t.Fatalf("expected response body to contain at least one <script> tag, got 0")
 		}
 
-		if nonce := nonceFromBody(t, res.Body); nonce != "" {
+		if nonce := nonceFromBody(t, io.NopCloser(bytes.NewReader(raw))); nonce != "" {
 			t.Fatalf("unexpected nonce attribute %q in <script>", nonce)
 		}
 	})
-}
 
-var nonceRx = regexp.MustCompile(`<script[^>]*\snonce="([^"]+)"`)
+	t.Run("replace 'none' with nonce in highest-priority directive", func(t *testing.T) {
+		t.Parallel()
+
+		i := newInjector(t)
+		err := i.AddRule(`example.com#%#//scriptlet('prevent-xhr', 'example.com')`, false)
+		if err != nil {
+			t.Fatalf("failed to add rule: %v", err)
+		}
+
+		req, err := http.NewRequest("GET", "http://example.com", nil)
+		if err != nil {
+			t.Fatalf("failed to create request: %v", err)
+		}
+		res := newBlankHTTPResponse(t)
+		res.Header.Add("Content-Security-Policy", "script-src-elem 'none'")
+
+		if err := i.Inject(req, res); err != nil {
+			t.Errorf("failed to inject: %v", err)
+		}
+
+		// Snapshot the body because res.Body is a forward-only stream.
+		// Both hasScriptTag and nonceFromBody reads it.
+		raw, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("read body: %v", err)
+		}
+		res.Body.Close()
+
+		if !hasScriptTag(t, io.NopCloser(bytes.NewReader(raw))) {
+			t.Fatalf("expected response body to contain at least one <script> tag, got 0")
+		}
+
+		nonce := nonceFromBody(t, io.NopCloser(bytes.NewReader(raw)))
+		if nonce == "" {
+			t.Fatalf("expected nonce attribute in <script>, got none")
+		}
+		token := "'nonce-" + nonce + "'"
+
+		csp := res.Header.Get("Content-Security-Policy")
+		fmt.Println("CSP", csp)
+		t.Error("sdf")
+
+		if !strings.Contains(csp, token) {
+			t.Fatalf("nonce token %q not found in header: %s", token, csp)
+		}
+		if strings.Contains(strings.ToLower(csp), "'none'") {
+			t.Fatalf("'none' should have been replaced, header still contains it: %s", csp)
+		}
+	})
+}
 
 func TestInject_NoncePriority(t *testing.T) {
 	t.Parallel()
@@ -127,7 +184,7 @@ func TestInject_NoncePriority(t *testing.T) {
 		wantDirective string
 	}{
 		{
-			name:          "script-src-elem wins",
+			name:          "script-src-elem is most specific",
 			csp:           "default-src 'self'; script-src 'self'; script-src-elem 'self'",
 			wantNonce:     true,
 			wantDirective: "script-src-elem",
@@ -232,17 +289,32 @@ func newInjector(t *testing.T) *scriptlet.Injector {
 	return injector
 }
 
-func nonceFromBody(t *testing.T, r io.Reader) string {
+func nonceFromBody(t *testing.T, body io.ReadCloser) string {
 	t.Helper()
-	raw, err := io.ReadAll(r)
+
+	doc, err := html.Parse(body)
 	if err != nil {
-		t.Fatalf("failed to read: %v", err)
+		t.Fatalf("failed to parse response body: %v", err)
 	}
-	m := nonceRx.FindSubmatch(raw)
-	if len(m) < 2 {
-		return ""
+
+	stack := []*html.Node{doc}
+	for len(stack) > 0 {
+		n := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		if n.Type == html.ElementNode && n.Data == "script" {
+			for _, attr := range n.Attr {
+				if attr.Key == "nonce" {
+					return attr.Val
+				}
+			}
+		}
+
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			stack = append(stack, c)
+		}
 	}
-	return string(m[1])
+	return ""
 }
 
 func dirHasNonce(h http.Header, dir, nonce string) bool {
