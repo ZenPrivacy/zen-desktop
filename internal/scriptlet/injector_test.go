@@ -2,7 +2,6 @@ package scriptlet_test
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -162,8 +161,6 @@ func TestInjectorPublic(t *testing.T) {
 		token := "'nonce-" + nonce + "'"
 
 		csp := res.Header.Get("Content-Security-Policy")
-		fmt.Println("CSP", csp)
-		t.Error("sdf")
 
 		if !strings.Contains(csp, token) {
 			t.Fatalf("nonce token %q not found in header: %s", token, csp)
