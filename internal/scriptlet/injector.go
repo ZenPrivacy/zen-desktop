@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/hostmatch"
 	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
@@ -71,9 +70,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	nonce := ""
 	if hasScriptControls(res.Header) {
 		nonce = uuid.NewString()
-		start := time.Now()
 		addNonceToCSP(res.Header, nonce)
-		fmt.Println(time.Since(start))
 	}
 
 	var injection bytes.Buffer
