@@ -2,18 +2,18 @@ package scriptlet
 
 import (
 	"bytes"
-	"crypto/sha256"
 	_ "embed"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/hostmatch"
 	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
+	"github.com/google/uuid"
 )
 
 var (
@@ -68,24 +68,28 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	var payload bytes.Buffer
-	payload.Write(inj.bundle)
-	payload.WriteString("(()=>{")
-	for _, lst := range argLists {
-		if err := lst.GenerateInjection(&payload); err != nil {
-			return err
-		}
-	}
-	payload.WriteString("})();")
-
-	payloadBytes := payload.Bytes()
+	nonce := ""
 	if hasScriptControls(res.Header) {
-		addHashToCSP(res.Header, sha256Base64(payloadBytes))
+		nonce = uuid.NewString()
+		start := time.Now()
+		addNonceToCSP(res.Header, nonce)
+		fmt.Println(time.Since(start))
 	}
 
 	var injection bytes.Buffer
-	injection.Write(scriptOpeningTag)
-	injection.Write(payloadBytes)
+	if nonce == "" {
+		injection.Write(scriptOpeningTag)
+	} else {
+		fmt.Fprintf(&injection, `<script nonce="%s">`, nonce)
+	}
+	injection.Write(inj.bundle)
+	injection.WriteString("(()=>{")
+	for _, lst := range argLists {
+		if err := lst.GenerateInjection(&injection); err != nil {
+			return err
+		}
+	}
+	injection.WriteString("})();")
 	injection.Write(scriptClosingTag)
 
 	// Appending the scriptlets bundle to the head of the document aligns with the behavior of uBlock Origin:
@@ -98,49 +102,49 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	return nil
 }
 
-func addHashToCSP(h http.Header, hash string) {
-	token := "'sha256-" + strings.TrimSpace(hash) + "'"
-
-	values := h.Values("Content-Security-Policy")
-	if len(values) == 0 {
+func addNonceToCSP(h http.Header, nonce string) {
+	const key = "Content-Security-Policy"
+	lines := h[key]
+	if len(lines) == 0 {
 		return
 	}
 
-	h.Del("Content-Security-Policy")
-	for _, csp := range values {
-		parts := strings.Split(csp, ";")
-		patched := false
+	token := " 'nonce-" + nonce + "'"
+	prio := []string{"script-src-elem", "script-src", "default-src"}
 
-		for i, p := range parts {
-			dir := strings.ToLower(strings.TrimSpace(p))
-			switch {
-			case strings.HasPrefix(dir, "script-src"):
-				if !strings.Contains(p, token) {
-					parts[i] = strings.TrimSpace(p) + " " + token
-				}
-				patched = true
-
-			case strings.HasPrefix(dir, "default-src"):
-				// if there is no script-src at all, we'll add the hash here
-				if !patched && !strings.Contains(p, token) {
-					parts[i] = strings.TrimSpace(p) + " " + token
-				}
+	lineIdx, dirMatch := -1, ""
+	for _, dir := range prio {
+		for i, l := range lines {
+			if strings.Contains(strings.ToLower(l), dir) {
+				lineIdx, dirMatch = i, dir
+				break
 			}
 		}
-
-		h.Add("Content-Security-Policy", strings.Join(parts, ";"))
+		if lineIdx != -1 {
+			break
+		}
 	}
-}
+	if lineIdx == -1 {
+		return
+	}
 
-func sha256Base64(b []byte) string {
-	sum := sha256.Sum256(b)
-	return base64.StdEncoding.EncodeToString(sum[:])
+	parts := strings.Split(lines[lineIdx], ";")
+	for i, p := range parts {
+		d := strings.TrimSpace(strings.ToLower(p))
+		if strings.HasPrefix(d, dirMatch) {
+			if !strings.Contains(p, token) {
+				parts[i] = strings.TrimSpace(p) + token
+			}
+			break
+		}
+	}
+	h[key][lineIdx] = strings.Join(parts, "; ")
 }
 
 func hasScriptControls(h http.Header) bool {
 	for _, csp := range h.Values("Content-Security-Policy") {
 		lc := strings.ToLower(csp)
-		if strings.Contains(lc, "script-src") || strings.Contains(lc, "default-src") {
+		if strings.Contains(lc, "script-src-elem") || strings.Contains(lc, "script-src") || strings.Contains(lc, "default-src") {
 			return true
 		}
 	}
