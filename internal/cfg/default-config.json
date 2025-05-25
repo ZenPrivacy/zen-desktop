@@ -154,8 +154,8 @@
         "type": "regional"
       },
       {
-        "url": "https://adblock.gardar.net/is.abp.txt",
-        "name": "🇮🇸IS: Icelandic ABP List",
+        "url": "https://raw.githubusercontent.com/brave/adblock-lists/master/custom/is.txt",
+        "name": "🇮🇸IS: Adblock listi fyrir íslenskar vefsíður",
         "enabled": false,
         "type": "regional"
       },
@@ -232,7 +232,7 @@
         "type": "regional"
       },
       {
-        "url": "https://easylist-downloads.adblockplus.org/ruadlist.txt",
+        "url": "https://raw.githubusercontent.com/dimisa-RUAdList/RUAdListCDN/refs/heads/main/lists/ruadlist.ubo.min.txt",
         "name": "🇷🇺RU 🇺🇦UA 🇺🇿UZ 🇰🇿KZ: RU AdList",
         "enabled": false,
         "type": "regional"
