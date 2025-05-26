@@ -81,9 +81,9 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	}
 	injection.Write(inj.bundle)
 	injection.WriteString("(()=>{")
-	for _, lst := range argLists {
-		if err := lst.GenerateInjection(&injection); err != nil {
-			return err
+	for _, argLst := range argLists {
+		if err := argLst.GenerateInjection(&injection); err != nil {
+			return fmt.Errorf("generate injection for scriptlet %q: %v", argLst, err)
 		}
 	}
 	injection.WriteString("})();")
@@ -106,19 +106,17 @@ func addNonceToCSP(h http.Header, nonce string) {
 		return
 	}
 
-	token := " 'nonce-" + nonce + "'"
+	// https://w3c.github.io/webappsec-csp/#directive-fallback-list
 	prio := []string{"script-src-elem", "script-src", "default-src"}
 
 	lineIdx, dirMatch := -1, ""
+outer:
 	for _, dir := range prio {
 		for i, l := range lines {
 			if strings.Contains(strings.ToLower(l), dir) {
 				lineIdx, dirMatch = i, dir
-				break
+				break outer
 			}
-		}
-		if lineIdx != -1 {
-			break
 		}
 	}
 	if lineIdx == -1 {
@@ -131,8 +129,8 @@ func addNonceToCSP(h http.Header, nonce string) {
 			continue
 		}
 
+		token := " 'nonce-" + nonce + "'"
 		switch {
-		case strings.Contains(p, token):
 		case strings.Contains(strings.ToLower(p), "'none'"):
 			parts[i] = strings.Replace(p, "'none'", token, 1)
 		default:
