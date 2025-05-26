@@ -2,48 +2,46 @@ import { createLogger } from './helpers/logger';
 
 const logger = createLogger('sanitize-clipboard');
 
-const JUNK_PARAMS = new Set<string>([
-  'utm_source',
-  'utm_medium',
-  'utm_campaign',
-  'utm_term',
-  'utm_content',
-  'utm_name',
-  'utm_id',
-  'utm_referrer',
-  'fbclid',
-  'gclid',
-  'ref',
-  'ref_src',
-  'si',
-  'mkt_tok',
-  'igshid',
-]);
+function cleanText(raw: string, params: string[]): string {
+  try {
+    const url = new URL(raw);
+    let touched = false;
 
-function cleanText(text: string) {
-  return text.replace(/https?:\/\/[^\s"']+/gi, (raw) => {
-    try {
-      const url = new URL(raw);
-      [...url.searchParams.keys()].forEach((k) => {
-        if (JUNK_PARAMS.has(k.toLowerCase())) url.searchParams.delete(k);
-      });
-      return url.toString();
-    } catch {
-      return raw;
+    for (const key of params) {
+      const k = key.toLowerCase();
+      if (url.searchParams.has(k)) {
+        url.searchParams.delete(k);
+        touched = true;
+      }
     }
-  });
+
+    return touched ? url.toString() : raw;
+  } catch {
+    return raw;
+  }
 }
 
-export function sanitizeClipboard() {
+export function sanitizeClipboard(params: string) {
+  if (typeof params !== 'string' || params.length === 0) {
+    logger.warn('params should be a non-empty string');
+    return;
+  }
+
+  const paramsToRemove = params.split(' ');
+
   if (navigator.clipboard) {
     const handler: ProxyHandler<any> = {
       async apply(target, thisArg, args) {
         const [payload] = args;
 
         const txt = await Promise.resolve(payload);
-        const cleaned = cleanText(String(txt));
-        logger.info(`Sanitized clipboard for: ${cleaned}`);
+        const cleaned = cleanText(String(txt), paramsToRemove);
 
+        if (cleaned === txt) {
+          return Reflect.apply(target, thisArg, args);
+        }
+
+        logger.info(`Sanitized clipboard for '${String(txt)}'`);
         return Reflect.apply(target, thisArg, [cleaned]);
       },
     };
@@ -70,14 +68,14 @@ export function sanitizeClipboard() {
     }
 
     if (!text) return;
-    const cleaned = cleanText(text);
+    const cleaned = cleanText(text, paramsToRemove);
     if (cleaned === text) return;
 
     if (e?.clipboardData) {
       e.clipboardData.setData('text/plain', cleaned);
       e.preventDefault();
 
-      logger.info(`Sanitized clipboard for ${text}`);
+      logger.info(`Sanitized clipboard for '${text}'`);
     }
   };
 
