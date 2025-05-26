@@ -118,6 +118,15 @@ var migrations = map[string]func(c *Config) error{
 		if err := c.Save(); err != nil {
 			return fmt.Errorf("save config: %v", err)
 		}
+		errStr := c.AddFilterList(FilterList{
+			Name:    "Zen - Privacy",
+			Type:    "privacy",
+			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt",
+			Enabled: true,
+		})
+		if errStr != "" {
+			return fmt.Errorf("add \"Zen - Privacy\" filter list: %s", errStr)
+		}
 		return nil
 	},
 }
