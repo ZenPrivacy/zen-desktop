@@ -15,6 +15,7 @@ import { preventSetInterval } from './prevent-set-interval';
 import { preventSetTimeout } from './prevent-set-timeout';
 import { preventWindowOpen } from './prevent-window-open';
 import { preventXHR } from './prevent-xhr';
+import { sanitizeClipboard } from './sanitize-clipboard';
 import { setConstant } from './set-constant';
 import { setLocalStorageItem } from './set-local-storage-item';
 import { setSessionStorageItem } from './set-session-storage-item';
@@ -47,6 +48,7 @@ const scriptletNameToFunction = new Map<string, Function>([
   ['prevent-addEventListener', preventAddEventListener],
   ['no-topics', noTopics],
   ['no-protected-audience', noProtectedAudience],
+  ['sanitize-clipboard', sanitizeClipboard],
 ]);
 
 export default function (name: string, ...args: string[]): void {
