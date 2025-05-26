@@ -1,21 +1,30 @@
 import { createLogger } from './helpers/logger';
+import { parseRegexpLiteral } from './helpers/parseRegexp';
 
 const logger = createLogger('sanitize-clipboard');
 
-function cleanText(raw: string, params: string[]): string {
+function cleanURL(raw: string, params: (string | RegExp)[]): string {
   try {
     const url = new URL(raw);
-    let touched = false;
+    let modified = false;
 
-    for (const key of params) {
-      const k = key.toLowerCase();
-      if (url.searchParams.has(k)) {
-        url.searchParams.delete(k);
-        touched = true;
+    for (const pattern of params) {
+      if (typeof pattern === 'string') {
+        if (url.searchParams.has(pattern)) {
+          url.searchParams.delete(pattern);
+          modified = true;
+        }
+      } else {
+        for (const key of Array.from(url.searchParams.keys())) {
+          if (pattern.test(key)) {
+            url.searchParams.delete(key);
+            modified = true;
+          }
+        }
       }
     }
 
-    return touched ? url.toString() : raw;
+    return modified ? url.toString() : raw;
   } catch {
     return raw;
   }
@@ -27,7 +36,7 @@ export function sanitizeClipboard(params: string) {
     return;
   }
 
-  const paramsToRemove = params.split(' ');
+  const paramsToRemove = params.split(' ').map((p) => parseRegexpLiteral(p) || p);
 
   if (navigator.clipboard) {
     const handler: ProxyHandler<any> = {
@@ -35,7 +44,7 @@ export function sanitizeClipboard(params: string) {
         const [payload] = args;
 
         const txt = await Promise.resolve(payload);
-        const cleaned = cleanText(String(txt), paramsToRemove);
+        const cleaned = cleanURL(String(txt), paramsToRemove);
 
         if (cleaned === txt) {
           return Reflect.apply(target, thisArg, args);
@@ -68,7 +77,7 @@ export function sanitizeClipboard(params: string) {
     }
 
     if (!text) return;
-    const cleaned = cleanText(text, paramsToRemove);
+    const cleaned = cleanURL(text, paramsToRemove);
     if (cleaned === text) return;
 
     if (e?.clipboardData) {
