@@ -21,6 +21,12 @@
         "trusted": true
       },
       {
+        "url": "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt",
+        "name": "Zen - Privacy",
+        "enabled": true,
+        "type": "privacy"
+      },
+      {
         "url": "https://easylist.to/easylist/easyprivacy.txt",
         "name": "EasyPrivacy",
         "enabled": true,
@@ -278,12 +284,6 @@
         "name": "🇻🇳VN: ABPVN List",
         "enabled": false,
         "type": "regional"
-      },
-      {
-        "url": "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt",
-        "name": "Zen - Privacy",
-        "enabled": true,
-        "type": "privacy"
       }
     ]
   },
