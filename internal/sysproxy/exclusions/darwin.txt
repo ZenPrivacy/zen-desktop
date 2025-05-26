@@ -3,6 +3,7 @@
 # The following hostnames are sourced from https://support.apple.com/en-gb/HT210060.
 # Only relevant hostnames used by macOS over :80 and :443 are included.
 # The article includes a "Recent changes" section that should be checked periodically for updates.
+# <apple-services>
 # Device setup
 albert.apple.com
 captive.apple.com
@@ -171,3 +172,13 @@ pr-pod14-smp-device.apple.com
 pr-pod15-smp-device.apple.com
 smp-paymentservices.apple.com
 cn-smp-paymentservices.apple.com
+# </apple-services>
+
+# <misc>
+# Opera GX installer (probably SSL pinning)
+api.config.opr.gg
+autoupdate.opera.com
+download.opera.com
+operacdn.com
+# </misc>
+
