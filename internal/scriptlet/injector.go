@@ -131,7 +131,7 @@ outer:
 
 		token := " 'nonce-" + nonce + "'"
 		switch {
-		case strings.Contains(strings.ToLower(p), "'unsafe-inline'"):
+		case strings.Contains(p, "'unsafe-inline'") && !strings.Contains(p, "'strict-dynamic'"):
 			// Intentionally empty. 'unsafe-inline' allows the execution of inline scripts, and is incompatible with 'nonce-' directives.
 		case strings.Contains(strings.ToLower(p), "'none'"):
 			parts[i] = strings.Replace(p, "'none'", token, 1)
