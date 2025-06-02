@@ -136,7 +136,8 @@ func (n *node[T]) TraverseFindMatchingRulesReq(req *http.Request, tokens []strin
 	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
 
 	id := interner.Intern(tokens[0])
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesReq(req, tokens[1:],
+		shouldUseNode, interner)...)
 
 	return rules
 }
@@ -169,7 +170,8 @@ func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []stri
 	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
 
 	id := interner.Intern(tokens[0])
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesRes(res, tokens[1:],
+		shouldUseNode, interner)...)
 
 	return rules
 }
