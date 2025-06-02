@@ -20,7 +20,8 @@ type Data interface {
 // It is safe for concurrent use.
 type RuleTree[T Data] struct {
 	// root is the root node of the trie that stores the rules.
-	root node[T]
+	root     node[T]
+	interner *TokenInterner
 }
 
 var (
@@ -40,7 +41,8 @@ var (
 
 func NewRuleTree[T Data]() *RuleTree[T] {
 	return &RuleTree[T]{
-		root: node[T]{interner: NewTokenInterner()},
+		root:     node[T]{},
+		interner: NewTokenInterner(),
 	}
 }
 
@@ -84,7 +86,7 @@ func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
 
 	tokenIDs := make([]uint32, 0, len(rawTokens))
 	for _, tok := range rawTokens {
-		tokenIDs = append(tokenIDs, rt.root.interner.Intern(tok))
+		tokenIDs = append(tokenIDs, rt.interner.Intern(tok))
 	}
 
 	for i, raw := range rawTokens {
@@ -131,13 +133,13 @@ func (rt *RuleTree[T]) FindMatchingRulesReq(req *http.Request) (data []T) {
 		// address root rules have to match the entire URL
 		// TODO: look into whether we can match the rule if the remaining tokens only contain the query
 		return len(t) == 0
-	})...)
+	}, rt.interner)...)
 
-	data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil)...)
+	data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
 	tokens = tokens[1:]
 
 	// protocol separator
-	data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil)...)
+	data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
 	tokens = tokens[1:]
 
 	// domain segments
@@ -146,16 +148,16 @@ func (rt *RuleTree[T]) FindMatchingRulesReq(req *http.Request) (data []T) {
 			break
 		}
 		if tokens[0] != "." {
-			data = append(data, rt.root.FindChild(nodeKey{kind: nodeKindDomain}).TraverseFindMatchingRulesReq(req, tokens, nil)...)
+			data = append(data, rt.root.FindChild(nodeKey{kind: nodeKindDomain}).TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
 		}
-		data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil)...)
+		data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
 		tokens = tokens[1:]
 	}
 
 	// rest of the URL
 	// TODO: handle query parameters
 	for len(tokens) > 0 {
-		data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil)...)
+		data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
 		tokens = tokens[1:]
 	}
 
@@ -184,13 +186,13 @@ func (rt *RuleTree[T]) FindMatchingRulesRes(req *http.Request, res *http.Respons
 	// address root
 	rules = append(rules, rt.root.FindChild(nodeKey{kind: nodeKindAddressRoot}).TraverseFindMatchingRulesRes(res, tokens, func(_ *node[T], t []string) bool {
 		return len(t) == 0
-	})...)
+	}, rt.interner)...)
 
-	rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil)...)
+	rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
 	tokens = tokens[1:]
 
 	// protocol separator
-	rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil)...)
+	rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
 	tokens = tokens[1:]
 
 	// domain segments
@@ -199,15 +201,15 @@ func (rt *RuleTree[T]) FindMatchingRulesRes(req *http.Request, res *http.Respons
 			break
 		}
 		if tokens[0] != "." {
-			rules = append(rules, rt.root.FindChild(nodeKey{kind: nodeKindDomain}).TraverseFindMatchingRulesRes(res, tokens, nil)...)
+			rules = append(rules, rt.root.FindChild(nodeKey{kind: nodeKindDomain}).TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
 		}
-		rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil)...)
+		rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
 		tokens = tokens[1:]
 	}
 
 	// rest of the URL
 	for len(tokens) > 0 {
-		rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil)...)
+		rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
 		tokens = tokens[1:]
 	}
 

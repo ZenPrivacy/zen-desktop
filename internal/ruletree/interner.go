@@ -1,7 +1,6 @@
 package ruletree
 
 import (
-	"log"
 	"sync"
 )
 
