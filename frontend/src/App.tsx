@@ -9,6 +9,7 @@ import { useProxyState } from './context/ProxyStateContext';
 import { DonateButton } from './DonateButton';
 import { FilterLists } from './FilterLists';
 import { MyRules } from './MyRules';
+import { ProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';
 import { SettingsManager } from './SettingsManager';
 import { StartStopButton } from './StartStopButton';
@@ -66,6 +67,7 @@ function App() {
         {activeTab === 'settings' && <SettingsManager />}
       </div>
 
+      <ProxyHotkey />
       <StartStopButton />
     </div>
   );
