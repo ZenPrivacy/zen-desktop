@@ -14,6 +14,7 @@ const items: LocaleItem[] = [
   { value: 'de-DE', label: 'Deutsch' },
   { value: 'kk-KZ', label: 'Қазақша' },
   { value: 'ru-RU', label: 'Русский' },
+  { value: 'zh-CN', label: 'Chinese' },
 ];
 
 export function LocaleSelector() {
