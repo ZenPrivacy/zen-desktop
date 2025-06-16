@@ -9,7 +9,7 @@ import { useProxyState } from './context/ProxyStateContext';
 import { DonateButton } from './DonateButton';
 import { FilterLists } from './FilterLists';
 import { MyRules } from './MyRules';
-import { ProxyHotkey } from './ProxyHotkey';
+import { useProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';
 import { SettingsManager } from './SettingsManager';
 import { StartStopButton } from './StartStopButton';
@@ -21,7 +21,9 @@ function App() {
   useEffect(() => {
     FocusStyleManager.onlyShowFocusOnTabs();
   }, []);
+
   const { proxyState } = useProxyState();
+  useProxyHotkey();
 
   const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'myRules' | 'settings'>('home');
 
@@ -66,8 +68,6 @@ function App() {
         {activeTab === 'myRules' && <MyRules />}
         {activeTab === 'settings' && <SettingsManager />}
       </div>
-
-      <ProxyHotkey />
       <StartStopButton />
     </div>
   );

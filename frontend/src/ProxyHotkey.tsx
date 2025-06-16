@@ -4,7 +4,7 @@ import { StartProxy, StopProxy } from '../wailsjs/go/app/App';
 
 import { useProxyState } from './context/ProxyStateContext';
 
-export function ProxyHotkey() {
+export function useProxyHotkey() {
   const { proxyState } = useProxyState();
   useEffect(() => {
     const spaceDown = (e: KeyboardEvent) => {
