@@ -1,5 +1,11 @@
 name: Build & Release
 
+env:
+  SIGNPATH_ORG_ID: 4e46fe22-9387-4cc4-b458-ca6542b30ae7
+  SIGNPATH_PROJECT_SLUG: zen-desktop
+  SIGNPATH_SIGNING_POLICY_SLUG: test-signing
+  SIGNPATH_ARTIFACT_CONFIG_SLUG: ci-bundle
+
 on:
   push:
     branches: [master]
@@ -140,20 +146,72 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build & Archive Windows binaries
+      - name: Build EXEs
         run: |
+          # build with self-update
           task build:prod ARCH=${{ matrix.arch }}
-          Compress-Archive -Path .\build\bin\Zen.exe -DestinationPath Zen_windows_${{ matrix.arch }}.zip
+          Copy-Item .\build\bin\Zen.exe .\build\bin\Zen-selfupdate.exe
+          Copy-Item .\build\bin\Zen-${{ matrix.arch }}-installer.exe .\build\bin\Zen-installer.exe
+
+          # build without self-update
           task build:prod-noupdate ARCH=${{ matrix.arch }}
-          Compress-Archive -Path .\build\bin\Zen.exe -DestinationPath Zen_windows_${{ matrix.arch }}_noselfupdate.zip
-      - name: Upload Windows artifacts
+          Copy-Item .\build\bin\Zen.exe .\build\bin\Zen-noselfupdate.exe
+
+      - name: Create ZIP for signing
+        run: |
+          Compress-Archive `
+            -Path .\build\bin\Zen-selfupdate.exe, .\build\bin\Zen-noselfupdate.exe, .\build\bin\Zen-installer.exe `
+            -DestinationPath Zen_all_${{ matrix.arch }}.zip
+
+      - name: Upload ZIP to GitHub (for SignPath)
+        id: unsigned
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-all-${{ matrix.arch }}
+          path: Zen_all_${{ matrix.arch }}.zip
+
+      - name: Prepare folder for signed output
+        run: New-Item -Path build/windows/zip_signed_output -ItemType Directory
+
+      - name: Sign with SignPath
+        uses: signpath/github-action-submit-signing-request@4f13d373e8f0cd8d3c0465ff4877feff27aed2ae # v1.2
+        with:
+          api-token:                    ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id:              ${{ env.SIGNPATH_ORG_ID }}
+          project-slug:                 ${{ env.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug:          ${{ env.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug:  ${{ env.SIGNPATH_ARTIFACT_CONFIG_SLUG }}
+          github-artifact-id:           ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion:          true
+          output-artifact-directory:    build/windows/zip_signed_output
+          parameters:
+            arch: ${{ matrix.arch }}
+            version: ${{ github.ref }}
+
+      - name: Extract signed bundle
+        run: |
+          Expand-Archive `
+            -Path build/windows/zip_signed_output/Zen_all_${{ matrix.arch }}.zip `
+            -DestinationPath build/windows/zip_signed_extract `
+            -Force
+          Move-Item build/windows/zip_signed_extract/Zen-installer.exe `
+                    ./Zen-${{ matrix.arch }}-installer.exe
+
+      - name: Re-package signed EXEs
+        run: |
+          Compress-Archive -Path build/windows/zip_signed_extract/Zen-selfupdate.exe `
+                          -DestinationPath Zen_windows_${{ matrix.arch }}.zip
+          Compress-Archive -Path build/windows/zip_signed_extract/Zen-noselfupdate.exe `
+                          -DestinationPath Zen_windows_${{ matrix.arch }}_noselfupdate.zip
+
+      - name: Upload final signed artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: windows-${{ matrix.arch }}
           path: |
             Zen_windows_${{ matrix.arch }}.zip
             Zen_windows_${{ matrix.arch }}_noselfupdate.zip
-            build/bin/Zen-${{ matrix.arch }}-installer.exe
+            Zen-${{ matrix.arch }}-installer.exe
 
   release:
     permissions:
