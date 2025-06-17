@@ -185,7 +185,7 @@ jobs:
           wait-for-completion:          true
           output-artifact-directory:    build/windows/zip_signed_output
           parameters: |
-            arch: ${{ matrix.arch }}
+            arch: "${{ matrix.arch }}"
             version: ${{ github.ref }}
 
       - name: Extract signed bundle
