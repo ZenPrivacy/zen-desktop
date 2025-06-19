@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/getlantern/elevate"
 )
 
 var (
@@ -15,6 +17,15 @@ var (
 	//go:embed exclusions/darwin.txt
 	platformSpecificExcludedHosts []byte
 )
+
+type command struct {
+	name string
+	args []string
+}
+
+func (c command) String() string {
+	return fmt.Sprintf("%s %s", c.name, strings.Join(c.args, " "))
+}
 
 // setSystemProxy sets the system proxy to the proxy address.
 func setSystemProxy(pacURL string) error {
@@ -43,19 +54,34 @@ func setSystemProxy(pacURL string) error {
 		return errors.New("no network service found")
 	}
 
-	cmd = exec.Command("networksetup", "-setwebproxystate", networkService, "off")
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("unset web proxy for network service %q: %v (%q)", networkService, err, out)
+	cmds := []command{
+		{
+			name: "networksetup",
+			args: []string{"-setwebproxystate", networkService, "off"},
+		},
+		{
+			name: "networksetup",
+			args: []string{"-setsecurewebproxystate", networkService, "off"},
+		},
+		{
+			name: "networksetup",
+			args: []string{"-setautoproxyurl", networkService, pacURL},
+		},
 	}
 
-	cmd = exec.Command("networksetup", "-setsecurewebproxystate", networkService, "off")
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("unset secure web proxy for network service %q: %v (%q)", networkService, err, out)
+	var retryCommands []string
+	for _, c := range cmds {
+		cmd := exec.Command(c.name, c.args...)
+		if _, err := cmd.CombinedOutput(); err != nil {
+			retryCommands = append(retryCommands, c.String())
+		}
 	}
 
-	cmd = exec.Command("networksetup", "-setautoproxyurl", networkService, pacURL)
-	if out, err = cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("set autoproxyurl to %q for network service %q: %v (%q)", pacURL, networkService, err, out)
+	if retryCommands != nil {
+		cmd = elevate.WithPrompt("System changes required to activate proxy").Command("sh", "-c", strings.Join(retryCommands, " "))
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("network setup with root privileges: %w (%q)", err, out)
+		}
 	}
 
 	// There's no need to set autoproxystate to on, as setting the URL already does that.
@@ -68,9 +94,22 @@ func unsetSystemProxy() error {
 		return errors.New("trying to unset system proxy without setting it first")
 	}
 
-	cmd := exec.Command("networksetup", "-setautoproxystate", networkService, "off")
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("set autoproxystate to off for network service %q: %v (%q)", networkService, err, out)
+	cmd := command{
+		name: "networksetup",
+		args: []string{"-setautoproxystate", networkService, "off"},
+	}
+
+	var retry bool
+	c := exec.Command(cmd.name, cmd.args...)
+	if _, err := c.CombinedOutput(); err != nil {
+		retry = true
+	}
+
+	if retry {
+		cmd := elevate.WithPrompt("System changes required to deactivate proxy").Command(cmd.name, cmd.args...)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("proxy deactivation with root privileges: %w (%q)", err, out)
+		}
 	}
 
 	networkService = ""
