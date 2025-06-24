@@ -193,7 +193,7 @@ jobs:
 
       - name: Debug CI
         run: |
-          ls -la build/windows/zip_signed_output
+          Get-ChildItem -Path build/windows/zip_signed_output
 
       - name: Extract signed bundle
         run: |
