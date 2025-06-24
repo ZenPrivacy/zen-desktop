@@ -174,7 +174,7 @@ jobs:
             build/bin/Zen-installer.exe
 
       - name: Prepare folder for signed output
-        run: New-Item -Path build/windows/zip_signed_output -ItemType Directory
+        run: New-Item -Path build/windows/signed -ItemType Directory
 
       - name: Sign with SignPath
         uses: signpath/github-action-submit-signing-request@4f13d373e8f0cd8d3c0465ff4877feff27aed2ae # v1.2
@@ -186,29 +186,18 @@ jobs:
           artifact-configuration-slug:  ${{ env.SIGNPATH_ARTIFACT_CONFIG_SLUG }}
           github-artifact-id:           ${{ steps.unsigned.outputs.artifact-id }}
           wait-for-completion:          true
-          output-artifact-directory:    build/windows/zip_signed_output
+          output-artifact-directory:    build/windows/signed
           parameters: |
             arch: "${{ matrix.arch }}"
             version: "${{ github.ref }}"
 
-      - name: Debug CI
+      - name: Prepare final signed artifacts
         run: |
-          Get-ChildItem -Path build/windows/zip_signed_output
-
-      - name: Extract signed bundle
-        run: |
-          Expand-Archive `
-            -Path build/windows/zip_signed_output/Zen_all_${{ matrix.arch }}.zip `
-            -DestinationPath build/windows/zip_signed_extract `
-            -Force
-          Move-Item build/windows/zip_signed_extract/Zen-installer.exe `
-                    ./Zen-${{ matrix.arch }}-installer.exe
-
-      - name: Re-package signed EXEs
-        run: |
-          Compress-Archive -Path build/windows/zip_signed_extract/Zen-selfupdate.exe `
+          Move-Item -Path build/windows/signed/Zen-installer.exe `
+                          -Destination Zen-${{ matrix.arch }}-installer.exe
+          Compress-Archive -Path build/windows/signed/Zen-selfupdate.exe `
                           -DestinationPath Zen_windows_${{ matrix.arch }}.zip
-          Compress-Archive -Path build/windows/zip_signed_extract/Zen-noselfupdate.exe `
+          Compress-Archive -Path build/windows/signed/Zen-noselfupdate.exe `
                           -DestinationPath Zen_windows_${{ matrix.arch }}_noselfupdate.zip
 
       - name: Upload final signed artifacts
