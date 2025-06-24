@@ -41,6 +41,14 @@ Unsure which version to download? Click on 'Start' and type 'View processor info
 
 Unsure which version to download? Learn at [Apple's website](https://support.apple.com/en-us/HT211814).
 
+#### 🍺 Homebrew
+
+Zen is available via [Homebrew](https://formulae.brew.sh/cask/zen-privacy) for both Intel and Apple Silicon. To install it, run:
+
+```bash
+brew install --cask zen-privacy
+```
+
 ### Linux
 
 - AUR: [👾 zen-adblocker-bin](https://aur.archlinux.org/packages/zen-adblocker-bin)

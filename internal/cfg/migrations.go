@@ -103,6 +103,32 @@ var migrations = map[string]func(c *Config) error{
 		}
 		return nil
 	},
+	"v0.11.0": func(c *Config) error {
+		for i, list := range c.Filter.FilterLists {
+			if list.URL == "https://adblock.gardar.net/is.abp.txt" {
+				c.Filter.FilterLists[i].URL = "https://raw.githubusercontent.com/brave/adblock-lists/master/custom/is.txt"
+				c.Filter.FilterLists[i].Name = "🇮🇸IS: Adblock listi fyrir íslenskar vefsíður"
+				log.Printf("v0.11.0 migration: updating the Icelandic list's URL and name")
+			}
+			if list.URL == "https://easylist-downloads.adblockplus.org/ruadlist.txt" {
+				c.Filter.FilterLists[i].URL = "https://raw.githubusercontent.com/dimisa-RUAdList/RUAdListCDN/refs/heads/main/lists/ruadlist.ubo.min.txt"
+				log.Printf("v0.11.0 migration: updating the RU AdList's URL")
+			}
+		}
+		if err := c.Save(); err != nil {
+			return fmt.Errorf("save config: %v", err)
+		}
+		errStr := c.AddFilterList(FilterList{
+			Name:    "Zen - Privacy",
+			Type:    "privacy",
+			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt",
+			Enabled: true,
+		})
+		if errStr != "" {
+			return fmt.Errorf("add \"Zen - Privacy\" filter list: %s", errStr)
+		}
+		return nil
+	},
 }
 
 // RunMigrations runs the version-to-version migrations.

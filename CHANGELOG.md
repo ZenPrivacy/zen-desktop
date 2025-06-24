@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.10.1
+
+### What's New
+
+- **Fixed Windows installer**:
+  The Windows installer for the version 0.10.0 has unfortunately included the version of the app with its self-update capabilities disabled. If you're on Windows, not getting the prompt for this update, and missing the "Choose how updates are installed" option in the settings, please manually uninstall the app and download a newer version. We apologize for the inconvenience.
+- **Proxy exclusions**:
+  The list of proxy exclusions now includes more hosts. This fixes error with Apple Pay on macOS, the desktop ChatGPT app, and improves your security overall.
+- **Homebrew**:
+  The macOS app is now available on Homebrew. Go to our homepage, zenprivacy.net, to get the installation instructions.
+
+### New Contributors
+
+- @michaelthatsit made their first contribution in <https://github.com/ZenPrivacy/zen-desktop/pull/352>
+
+Thank you for using Zen!
+
+**Full Changelog**: <https://github.com/ZenPrivacy/zen-desktop/compare/v0.10.0...v0.10.1>
+
 ## v0.10.0
 
 ### What's New

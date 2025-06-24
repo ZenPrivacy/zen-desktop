@@ -7,36 +7,40 @@
  *   npm run build
  *   npm run upload-manifest
  */
-import { Octokit } from "@octokit/rest";
-import { createHash } from "node:crypto";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { marked } from "marked";
-import { convert } from "html-to-text";
-import semver from "semver";
+import { Octokit } from '@octokit/rest';
+import { createHash } from 'node:crypto';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { marked } from 'marked';
+import { convert } from 'html-to-text';
+import semver from 'semver';
 
-const GITHUB_REPO_OWNER = "ZenPrivacy";
-const GITHUB_REPO = "zen-desktop";
+const GITHUB_REPO_OWNER = 'ZenPrivacy';
+const GITHUB_REPO = 'zen-desktop';
 const PLATFORM_ASSETS = {
   darwin: {
-    arm64: "Zen_darwin_arm64.tar.gz",
-    amd64: "Zen_darwin_amd64.tar.gz",
+    arm64: 'Zen_darwin_arm64.tar.gz',
+    amd64: 'Zen_darwin_amd64.tar.gz',
   },
   windows: {
-    arm64: "Zen_windows_arm64.zip",
-    amd64: "Zen_windows_amd64.zip",
+    arm64: 'Zen_windows_arm64.zip',
+    amd64: 'Zen_windows_amd64.zip',
   },
   linux: {
-    amd64: "Zen_linux_amd64.tar.gz",
-    arm64: "Zen_linux_arm64.tar.gz",
+    amd64: 'Zen_linux_amd64.tar.gz',
+    arm64: 'Zen_linux_arm64.tar.gz',
   },
 };
-const MANIFESTS_BASE_URL = "https://zenprivacy.net/update-manifests/stable"; // Hardcoding the release track for now.
-const BUCKET_BASE_KEY = "update-manifests/stable"; // Here too.
+const MANIFESTS_HOST = 'update-manifests.zenprivacy.net';
+const RELEASE_TRACK = 'stable'; // This is the release track we are working with.
+const MANIFESTS_BASE_URL = `https://${MANIFESTS_HOST}/${RELEASE_TRACK}`;
+const BUCKET_BASE_KEY = RELEASE_TRACK;
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
 const S3_API_ENDPOINT = process.env.S3_API_ENDPOINT;
-const S3_API_REGION = process.env.S3_API_REGION || "auto";
+const S3_API_REGION = process.env.S3_API_REGION || 'auto';
 const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID;
 const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY;
+const CF_ZONE_ID = process.env.CF_ZONE_ID;
+const CF_API_KEY = process.env.CF_API_KEY;
 
 const s3Client = new S3Client({
   endpoint: S3_API_ENDPOINT as string,
@@ -55,15 +59,11 @@ type Manifest = {
 };
 
 (async () => {
-  if (process.argv.includes("--help") || process.argv.includes("-h")) {
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
     console.log(`Usage: ${process.argv[1]} [--force] [--dry-run]`);
-    console.log("Options:");
-    console.log(
-      `  --force   Don't check existing manifest versions before uploading.`
-    );
-    console.log(
-      "  --dry-run Print what would have been uploaded to S3 without actually doing it."
-    );
+    console.log('Options:');
+    console.log(`  --force   Don't check existing manifest versions before uploading.`);
+    console.log('  --dry-run Print what would have been uploaded to S3 without actually doing it.');
     process.exit(0);
   }
 
@@ -73,10 +73,7 @@ type Manifest = {
     repo: GITHUB_REPO,
   });
   if (res.status !== 200) {
-    console.error(
-      "API returned non-200 status, dumping response:\n",
-      JSON.stringify(res, null, 2)
-    );
+    console.error('API returned non-200 status, dumping response:\n', JSON.stringify(res, null, 2));
     process.exit(1);
   }
 
@@ -84,24 +81,20 @@ type Manifest = {
   const releaseVersion = release.tag_name;
   const releaseBody = release.body;
   if (releaseBody == undefined) {
-    throw new Error("Release body is empty");
+    throw new Error('Release body is empty');
   }
 
-  if (!process.argv.includes("--force")) {
+  if (!process.argv.includes('--force')) {
     // Check all release assets before starting to update manifest files.
     for (const platform of Object.keys(PLATFORM_ASSETS)) {
-      for (const arch of Object.keys(
-        PLATFORM_ASSETS[platform as keyof typeof PLATFORM_ASSETS]
-      )) {
+      for (const arch of Object.keys(PLATFORM_ASSETS[platform as keyof typeof PLATFORM_ASSETS])) {
         await fetchAndCompareManifest({ platform, arch, releaseVersion });
       }
     }
   }
 
   for (const platform of Object.keys(PLATFORM_ASSETS)) {
-    for (const arch of Object.keys(
-      PLATFORM_ASSETS[platform as keyof typeof PLATFORM_ASSETS]
-    )) {
+    for (const arch of Object.keys(PLATFORM_ASSETS[platform as keyof typeof PLATFORM_ASSETS])) {
       const assetName =
         PLATFORM_ASSETS[platform as keyof typeof PLATFORM_ASSETS][
           arch as keyof (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS]
@@ -116,11 +109,13 @@ type Manifest = {
         releaseVersion,
         asset,
       });
-      const op = process.argv.includes("--dry-run")
-        ? printManifestS3OpDryRun
-        : uploadManifestToBucket;
+      const op = process.argv.includes('--dry-run') ? printManifestS3OpDryRun : uploadManifestToBucket;
       await op({ manifest, platform, arch });
     }
+  }
+
+  if (!process.argv.includes('--dry-run')) {
+    await purgeCloudflareCache();
   }
 })();
 
@@ -140,18 +135,16 @@ async function fetchAndCompareManifest({
   const url = `${MANIFESTS_BASE_URL}/${platform}/${arch}/manifest.json`;
   const res = await fetch(url);
   if (res.status === 404) {
-    console.warn(
-      `Manifest at ${url} returned 404. Considering it as yet uncreated.`
-    );
+    console.warn(`Manifest at ${url} returned 404. Considering it as yet uncreated.`);
     return;
   } else if (!res.ok) {
     throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
   }
 
-  const manifest: Manifest = await res.json();
+  const manifest = (await res.json()) as Manifest;
   if (semver.lte(releaseVersion, manifest.version)) {
     throw new Error(
-      `${platform}/${arch} manifest version is ${manifest.version}, release version is ${releaseVersion}`
+      `${platform}/${arch} manifest version is ${manifest.version}, release version is ${releaseVersion}`,
     );
   }
 }
@@ -181,9 +174,9 @@ async function sha256RemoteAsset(url: string) {
 
   const data = await res.arrayBuffer();
 
-  const hash = createHash("sha256");
+  const hash = createHash('sha256');
   hash.update(Buffer.from(data));
-  return hash.digest("hex");
+  return hash.digest('hex');
 }
 
 async function printManifestS3OpDryRun({
@@ -220,11 +213,33 @@ async function uploadManifestToBucket({
       Bucket: S3_BUCKET_NAME,
       Key: key,
       Body: data,
-      ContentType: "application/json",
-      ACL: "public-read",
-    })
+      ContentType: 'application/json',
+      ACL: 'public-read',
+    }),
   );
   return key;
+}
+
+async function purgeCloudflareCache() {
+  console.log('Purging Cloudflare cache');
+  const url = `https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${CF_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ hosts: [MANIFESTS_HOST] }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to purge Cloudflare cache: ${res.statusText}`);
+  }
+
+  const data = (await res.json()) as { success: boolean; errors: unknown[] };
+  if (!data.success) {
+    throw new Error(`Failed to purge Cloudflare cache: ${JSON.stringify(data.errors)}`);
+  }
+  console.log('Cloudflare cache purged successfully');
 }
 
 async function markdownToPlaintext(input: string): Promise<string> {
