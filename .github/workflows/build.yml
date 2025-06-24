@@ -191,6 +191,10 @@ jobs:
             arch: "${{ matrix.arch }}"
             version: "${{ github.ref }}"
 
+      - name: Debug CI
+        run: |
+          ls -la build/windows/zip_signed_output
+
       - name: Extract signed bundle
         run: |
           Expand-Archive `
