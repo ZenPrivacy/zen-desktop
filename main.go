@@ -8,6 +8,9 @@ import (
 	"os"
 	"runtime"
 
+	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/ZenPrivacy/zen-desktop/internal/app"
 	"github.com/ZenPrivacy/zen-desktop/internal/autostart"
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
@@ -26,6 +29,10 @@ const (
 var assets embed.FS
 
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	startOnDomReady := flag.Bool("start", false, "Start the service when DOM is ready")
 	startHidden := flag.Bool("hidden", false, "Start the application in hidden mode")
 	uninstallCA := flag.Bool("uninstall-ca", false, "Uninstall the CA and exit")
