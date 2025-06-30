@@ -17,8 +17,8 @@ func setSystemProxy(pacURL string) error {
 	}
 
 	commands := [][]string{
-		[]string{"gsettings", "set", "org.gnome.system.proxy", "autoconfig-url", pacURL},
-		[]string{"gsettings", "set", "org.gnome.system.proxy", "mode", "auto"},
+		{"gsettings", "set", "org.gnome.system.proxy", "autoconfig-url", pacURL},
+		{"gsettings", "set", "org.gnome.system.proxy", "mode", "auto"},
 	}
 
 	for _, command := range commands {
