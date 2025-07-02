@@ -101,7 +101,7 @@ Zen exists thanks to the support of many incredible people and organizations, in
 
 - Our sponsors
   <a href="https://opencollective.com/zen-privacy#backers" target="_blank" rel="noreferrer noopener">
-  <img src="https://opencollective.com/zen-privacy/backers.svg?width=890&button=false">
+  <img src="https://opencollective.com/zen-privacy/backers.svg?width=890&button=false" alt="Avatars of all backers of Zen on Open Collective" />
   </a>
 
 - [SignPath](https://signpath.io) and [SignPath Foundation](https://signpath.org/), who generously provide a free Windows certificate and code signing
