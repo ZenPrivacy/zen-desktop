@@ -3,7 +3,7 @@ name: Build & Release
 env:
   SIGNPATH_ORG_ID: 4e46fe22-9387-4cc4-b458-ca6542b30ae7
   SIGNPATH_PROJECT_SLUG: zen-desktop
-  SIGNPATH_SIGNING_POLICY_SLUG: test-signing
+  SIGNPATH_SIGNING_POLICY_SLUG: release-signing
   SIGNPATH_ARTIFACT_CONFIG_SLUG: ci-bundle
 
 on:
@@ -156,13 +156,6 @@ jobs:
           # build without self-update
           task build:prod-noupdate ARCH=${{ matrix.arch }}
           Copy-Item .\build\bin\Zen.exe .\build\bin\Zen-noselfupdate.exe
-
-      # - name: Create ZIP for signing
-      #   run: |
-      #     Compress-Archive `
-      #       -Path .\build\bin\Zen-selfupdate.exe, .\build\bin\Zen-noselfupdate.exe, .\build\bin\Zen-installer.exe `
-      #       -DestinationPath Zen_all_${{ matrix.arch }}.zip
-
       - name: Upload artifact with binaries (for SignPath)
         id: unsigned
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -172,10 +165,8 @@ jobs:
             build/bin/Zen-selfupdate.exe
             build/bin/Zen-noselfupdate.exe
             build/bin/Zen-installer.exe
-
       - name: Prepare folder for signed output
         run: New-Item -Path build/windows/signed -ItemType Directory
-
       - name: Sign with SignPath
         uses: signpath/github-action-submit-signing-request@4f13d373e8f0cd8d3c0465ff4877feff27aed2ae # v1.2
         with:
@@ -190,7 +181,6 @@ jobs:
           parameters: |
             arch: "${{ matrix.arch }}"
             version: "${{ github.ref }}"
-
       - name: Prepare final signed artifacts
         run: |
           Move-Item -Path build/windows/signed/Zen-installer.exe `
@@ -199,7 +189,6 @@ jobs:
                           -DestinationPath Zen_windows_${{ matrix.arch }}.zip
           Compress-Archive -Path build/windows/signed/Zen-noselfupdate.exe `
                           -DestinationPath Zen_windows_${{ matrix.arch }}_noselfupdate.zip
-
       - name: Upload final signed artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
