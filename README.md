@@ -104,7 +104,10 @@ Zen exists thanks to the support of many incredible people and organizations, in
   <img src="https://opencollective.com/zen-privacy/backers.svg?width=890&button=false">
   </a>
 
-- [SignPath](https://signpath.io) and [SignPath Foundation](https://signpath.org/), who generously provide a free Windows certificate and code signing
+- [SignPath](https://signpath.io) and [SignPath Foundation](https://signpath.org/), who generously provide a free Windows certificate and code signing<br />
+  <a href="https://signpath.io" target="_blank" rel="noreferrer noopener">
+  <img src="./assets/signpath-logo.png" width="260" />
+  </a>
 
 ## License
 
