@@ -95,13 +95,11 @@ Zen needs your help! You can report bugs, suggest and implement features, improv
 Zen exists thanks to the support of many incredible people and organizations, including:
 
 - Our contributors
-
   <a href="https://github.com/ZenPrivacy/zen-desktop/graphs/contributors">
   <img src="https://opencollective.com/zen-privacy/contributors.svg?width=890&button=false" alt="Avatars of all GitHub contributors to Zen" />
   </a>
 
 - Our sponsors
-
   <a href="https://opencollective.com/zen-privacy#backers" target="_blank" rel="noreferrer noopener">
   <img src="https://opencollective.com/zen-privacy/backers.svg?width=890&button=false">
   </a>
