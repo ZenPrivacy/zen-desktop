@@ -90,6 +90,26 @@ Follow the [getting started guide](docs/internal/index.md#getting-started) to be
 
 Zen needs your help! You can report bugs, suggest and implement features, improve the codebase, or help translate Zen into your language. Please refer to the [Contributing Guidelines](CONTRIBUTING.md) for more information.
 
+## Special Thanks
+
+Zen exists thanks to the support of many incredible people and organizations, including:
+
+- Our contributors
+  <a href="https://github.com/ZenPrivacy/zen-desktop/graphs/contributors">
+  <img src="https://opencollective.com/zen-privacy/contributors.svg?width=890&button=false" alt="Avatars of all GitHub contributors to Zen" />
+  </a>
+
+- Our sponsors
+  <a href="https://opencollective.com/zen-privacy#backers" target="_blank" rel="noreferrer noopener">
+  <img src="https://opencollective.com/zen-privacy/backers.svg?width=890&button=false" alt="Avatars of all backers of Zen on Open Collective" />
+  </a>
+
+- [SignPath](https://signpath.io) and [SignPath Foundation](https://signpath.org/), who generously provide a free Windows certificate and code signing
+
+  <a href="https://signpath.io" target="_blank" rel="noreferrer noopener">
+  <img src="./assets/signpath-logo.png" width="260" />
+  </a>
+
 ## License
 
 This project is licensed under the [MIT License](https://github.com/ZenPrivacy/zen-desktop/blob/master/LICENSE). Some code and assets included with Zen are licensed under different terms. For more information, see the [COPYING](https://github.com/ZenPrivacy/zen-desktop/blob/master/COPYING.md) file.
