@@ -27,7 +27,7 @@ const (
 var assets embed.FS
 
 func main() {
-	debug.SetGCPercent(25)
+	debug.SetGCPercent(5)
 	startOnDomReady := flag.Bool("start", false, "Start the service when DOM is ready")
 	startHidden := flag.Bool("hidden", false, "Start the application in hidden mode")
 	uninstallCA := flag.Bool("uninstall-ca", false, "Uninstall the CA and exit")
