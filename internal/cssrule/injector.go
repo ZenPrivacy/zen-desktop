@@ -29,7 +29,7 @@ type store interface {
 	Get(hostname string) []string
 }
 
-type Injector struct {
+type Injector struct { 
 	store store
 }
 

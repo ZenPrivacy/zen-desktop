@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	appName = "Zen"
+	appName       = "Zen"
+	appInstanceID = "e4151472-52cc-40b4-a9b6-42596be85ca9"
 )
 
 //go:embed all:frontend/dist
@@ -69,6 +70,10 @@ func main() {
 		},
 		OnStartup:     app.Startup,
 		OnBeforeClose: app.BeforeClose,
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId:               appInstanceID,
+			OnSecondInstanceLaunch: app.OnSecondInstanceLaunch,
+		},
 		Bind: []interface{}{
 			app,
 			config,
