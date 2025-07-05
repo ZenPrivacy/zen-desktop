@@ -7,6 +7,8 @@ export function AddFilterList(arg1:cfg.FilterList):Promise<string>;
 
 export function AddFilterLists(arg1:Array<cfg.FilterList>):Promise<void>;
 
+export function ExportDebugData():Promise<string>;
+
 export function GetCAInstalled():Promise<boolean>;
 
 export function GetFilterLists():Promise<Array<cfg.FilterList>>;

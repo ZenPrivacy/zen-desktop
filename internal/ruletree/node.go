@@ -20,12 +20,12 @@ const (
 )
 
 // nodeKey uniquely identifies a node within the trie.
-// It comprises the node's kind and the token that the node represents.
+// It comprises the node's kind and the ID of the token that the node represents.
 // The token is included only for nodes of the type 'nodeKindExactMatch'.
 // Nodes of other kinds represent the roots of subtrees without including a token.
 type nodeKey struct {
-	kind  nodeKind
-	token string
+	kind    nodeKind
+	tokenID uint32
 }
 
 // arrNode is a node in the trie that is stored in an array.
@@ -109,7 +109,7 @@ var (
 )
 
 // TraverseFindMatchingRulesReq traverses the trie and returns the rules that match the given request.
-func (n *node[T]) TraverseFindMatchingRulesReq(req *http.Request, tokens []string, shouldUseNode func(*node[T], []string) bool) (rules []T) {
+func (n *node[T]) TraverseFindMatchingRulesReq(req *http.Request, tokens []string, shouldUseNode func(*node[T], []string) bool, interner *TokenInterner) (rules []T) {
 	if n == nil {
 		return rules
 	}
@@ -127,20 +127,23 @@ func (n *node[T]) TraverseFindMatchingRulesReq(req *http.Request, tokens []strin
 	if len(tokens) == 0 {
 		// End of an address is a valid separator, see:
 		// https://adguard.com/kb/general/ad-filtering/create-own-filters/#basic-rules-special-characters.
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesReq(req, tokens, shouldUseNode)...)
+		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesReq(req, tokens, shouldUseNode, interner)...)
 		return rules
 	}
 	if reSeparator.MatchString(tokens[0]) {
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode)...)
+		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
 	}
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode)...)
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, token: tokens[0]}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode)...)
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
+
+	id := interner.Intern(tokens[0])
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesReq(req, tokens[1:],
+		shouldUseNode, interner)...)
 
 	return rules
 }
 
 // TraverseFindMatchingRulesRes traverses the trie and returns the rules that match the given response.
-func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []string, shouldUseNode func(*node[T], []string) bool) (rules []T) {
+func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []string, shouldUseNode func(*node[T], []string) bool, interner *TokenInterner) (rules []T) {
 	if n == nil {
 		return rules
 	}
@@ -158,14 +161,17 @@ func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []stri
 	if len(tokens) == 0 {
 		// End of an address is a valid separator, see:
 		// https://adguard.com/kb/general/ad-filtering/create-own-filters/#basic-rules-special-characters.
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesRes(res, tokens, shouldUseNode)...)
+		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesRes(res, tokens, shouldUseNode, interner)...)
 		return rules
 	}
 	if reSeparator.MatchString(tokens[0]) {
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode)...)
+		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
 	}
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode)...)
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, token: tokens[0]}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode)...)
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
+
+	id := interner.Intern(tokens[0])
+	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesRes(res, tokens[1:],
+		shouldUseNode, interner)...)
 
 	return rules
 }

@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var unicodeEscapeRegex = regexp.MustCompile(`\\[0-9A-Fa-f]{1,6}`)
+
 // sanitizeCSSSelector validates and sanitizes a CSS selector.
 func sanitizeCSSSelector(selectorInput string) (string, error) {
 	if strings.Contains(selectorInput, "</style>") {
@@ -28,13 +30,8 @@ func sanitizeCSSSelector(selectorInput string) (string, error) {
 
 // decodeUnicodeEscapes replaces CSS Unicode escapes with their actual characters.
 func decodeUnicodeEscapes(s string) string {
-	re := regexp.MustCompile(`\\([0-9A-Fa-f]{1,6})(\s)?`)
-	return re.ReplaceAllStringFunc(s, func(match string) string {
-		submatches := re.FindStringSubmatch(match)
-		if len(submatches) < 2 {
-			return match
-		}
-		hexDigits := submatches[1]
+	return unicodeEscapeRegex.ReplaceAllStringFunc(s, func(match string) string {
+		hexDigits := match[1:] // Skip the leading backslash
 		r, err := strconv.ParseInt(hexDigits, 16, 32)
 		if err != nil {
 			return match

@@ -10,6 +10,10 @@ export function AddFilterLists(arg1) {
   return window['go']['cfg']['Config']['AddFilterLists'](arg1);
 }
 
+export function ExportDebugData() {
+  return window['go']['cfg']['Config']['ExportDebugData']();
+}
+
 export function GetCAInstalled() {
   return window['go']['cfg']['Config']['GetCAInstalled']();
 }
