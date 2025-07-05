@@ -38,24 +38,25 @@ func unzip(src, dest string) error {
 				log.Printf("close zip file: %v", err)
 			}
 		}()
-
-		path := filepath.Join(dest, f.Name) // #nosec G305
-
-		// check for ZipSlip (Directory traversal).
-		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
-			return fmt.Errorf("illegal file path: %s", path)
+		
+		root, err := os.OpenRoot(dest)
+		if err != nil {
+			return fmt.Errorf("open root directory: %w", err)
 		}
-
+		defer root.Close()
+		
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
+			err := root.Mkdir(f.Name, f.Mode())
+			if err != nil {
+				return fmt.Errorf("create directory: %w", err)
+			}
 		} else {
-			os.MkdirAll(filepath.Dir(path), f.Mode())
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			file, err := root.OpenFile(f.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
 				return fmt.Errorf("open file: %w", err)
 			}
 			defer func() {
-				if err := f.Close(); err != nil {
+				if err := file.Close(); err != nil {
 					log.Printf("close file: %v", err)
 				}
 			}()
@@ -64,7 +65,7 @@ func unzip(src, dest string) error {
 
 			// Limit the size of the file to prevent zip bombs. G110 gosec
 			limitedReader := &io.LimitedReader{R: rc, N: maxDecompressedSize}
-			_, err = io.Copy(f, limitedReader)
+			_, err = io.Copy(file, limitedReader)
 			if err != nil {
 				return fmt.Errorf("copy file: %w", err)
 			}
@@ -95,6 +96,12 @@ func untarGz(src, dest string) error {
 	}
 	defer gzReader.Close()
 
+	root, err := os.OpenRoot(dest)
+	if err != nil{
+		return fmt.Errorf("open root directory: %w", err)
+	}
+	defer root.Close()
+	
 	tarReader := tar.NewReader(gzReader)
 
 	for {
@@ -105,22 +112,15 @@ func untarGz(src, dest string) error {
 		if err != nil {
 			return fmt.Errorf("read tar header: %w", err)
 		}
-
-		path := filepath.Join(dest, header.Name) // #nosec G305
-
-		// check for ZipSlip (Directory traversal).
-		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
-			return fmt.Errorf("illegal file path: %s", path)
-		}
-
+		
 		switch header.Typeflag {
 		case tar.TypeDir:
-			err := os.MkdirAll(path, 0755)
+			err := root.Mkdir(header.Name, 0755)
 			if err != nil {
 				return fmt.Errorf("create directory: %w", err)
 			}
 		case tar.TypeReg:
-			err := writeTarFile(tarReader, path, os.FileMode(header.Mode)) // #nosec G115
+			err := writeTarFile(tarReader, root, header.Name, os.FileMode(header.Mode)) // #nosec G115
 			if err != nil {
 				return fmt.Errorf("write file: %w", err)
 			}
@@ -129,20 +129,24 @@ func untarGz(src, dest string) error {
 	return nil
 }
 
-func writeTarFile(tarReader *tar.Reader, path string, mode os.FileMode) error {
+func writeTarFile(tarReader *tar.Reader, root *os.Root, name string, mode os.FileMode) error {
 	if mode > 0o777 {
 		return fmt.Errorf("invalid file mode: %d", mode)
 	}
 
-	err := os.MkdirAll(filepath.Dir(path), 0755)
+	err := root.Mkdir(filepath.Dir(name), 0755)
 	if err != nil {
 		return fmt.Errorf("create directory: %w", err)
 	}
-	outFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
+	outFile, err := root.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
 	}
-	defer outFile.Close()
+	defer func(){
+		if err := outFile.Close(); err != nil {
+			fmt.Printf("close file: %v\n", err)
+		}
+	}()
 
 	_, err = io.Copy(outFile, tarReader)
 	return err
