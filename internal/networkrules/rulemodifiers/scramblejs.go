@@ -5,8 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"math/rand"
+	"math/rand/v2"
 	"mime"
 	"net/http"
 	"regexp"
@@ -16,29 +15,30 @@ import (
 	"golang.org/x/net/html"
 )
 
-type ReplaceJSString struct {
+type ScrambleJSModifier struct {
 	keys []string
 }
 
-// var _ rulemodifiers.ModifyingModifier = (*Modifier)(nil)
+var _ ModifyingModifier = (*ScrambleJSModifier)(nil)
 
-var replaceJSConstantRegex = regexp.MustCompile(`^replace-js-string=(.*)$`)
+var scrambleJSRegex = regexp.MustCompile(`^scramblejs=(.+)$`)
 
-func (rc *ReplaceJSString) Parse(modifier string) error {
-	match := replaceJSConstantRegex.FindStringSubmatch(modifier)
+func (s *ScrambleJSModifier) Parse(modifier string) error {
+	match := scrambleJSRegex.FindStringSubmatch(modifier)
 	if match == nil {
 		return errors.New("invalid syntax")
 	}
 
-	rc.keys = strings.Split(match[1], "|")
+	s.keys = strings.Split(match[1], "|")
+
 	return nil
 }
 
-func (*ReplaceJSString) ModifyReq(*http.Request) bool {
+func (*ScrambleJSModifier) ModifyReq(*http.Request) bool {
 	return false
 }
 
-func (rc *ReplaceJSString) ModifyRes(res *http.Response) (bool, error) {
+func (s *ScrambleJSModifier) ModifyRes(res *http.Response) (bool, error) {
 	contentType := res.Header.Get("Content-Type")
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -46,12 +46,12 @@ func (rc *ReplaceJSString) ModifyRes(res *http.Response) (bool, error) {
 	}
 	switch mediaType {
 	case "text/html":
-		if err := replaceInInlineHTML(res, rc.keys); err != nil {
+		if err := replaceInInlineHTML(res, s.keys); err != nil {
 			return false, fmt.Errorf("replace in inline HTML: %v", err)
 		}
 		return true, nil
 	case "text/javascript":
-		if err := replaceInJS(res, rc.keys); err != nil {
+		if err := replaceInJS(res, s.keys); err != nil {
 			return false, fmt.Errorf("replace in JS: %v", err)
 		}
 		return true, nil
@@ -59,8 +59,22 @@ func (rc *ReplaceJSString) ModifyRes(res *http.Response) (bool, error) {
 	return false, nil
 }
 
-func (rc *ReplaceJSString) Cancels(modifier Modifier) bool {
-	return false
+func (s *ScrambleJSModifier) Cancels(modifier Modifier) bool {
+	other, ok := modifier.(*ScrambleJSModifier)
+	if !ok {
+		return false
+	}
+
+	if len(s.keys) != len(other.keys) {
+		return false
+	}
+	for i := range s.keys {
+		if s.keys[i] != other.keys[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 // replaceInInlineHTML replaces matched keys with unique random values in HTML responses.
@@ -86,12 +100,7 @@ func replaceInInlineHTML(res *http.Response, keys []string) error {
 					continue parseLoop
 				}
 				script := z.Raw()
-				newScript, err := replaceKeysUniquely(script, keys)
-				if err != nil {
-					log.Printf("error randomizing JS constant for %q: %v", res.Request.URL, err)
-					modified.Write(script)
-					continue parseLoop
-				}
+				newScript := replaceKeys(script, keys)
 				modified.Write(newScript)
 			default:
 				modified.Write(z.Raw())
@@ -103,33 +112,37 @@ func replaceInInlineHTML(res *http.Response, keys []string) error {
 // replaceInJS replaces matched keys with unique random values in JS responses.
 func replaceInJS(res *http.Response, keys []string) error {
 	return httprewrite.BufferRewrite(res, func(src []byte) []byte {
-		newScript, err := replaceKeysUniquely(src, keys)
-		if err != nil {
-			log.Printf("error randomizing JS constant for %q: %v", res.Request.URL, err)
-			return src
-		}
+		newScript := replaceKeys(src, keys)
 		return newScript
 	})
 }
 
-// replaceKeysUniquely replaces each occurrence of keys with unique random strings.
-func replaceKeysUniquely(script []byte, keys []string) ([]byte, error) {
-	modifiedScript := string(script)
+// replaceKeys replaces each occurrence of keys with unique random strings.
+func replaceKeys(script []byte, keys []string) []byte {
 	for _, key := range keys {
 		re := regexp.MustCompile(regexp.QuoteMeta(key))
-		modifiedScript = re.ReplaceAllStringFunc(modifiedScript, func(_ string) string {
-			return generateRandomString(10)
+		script = re.ReplaceAllFunc(script, func(_ []byte) []byte {
+			return genRandomIdent(10)
 		})
 	}
-	return []byte(modifiedScript), nil
+	return script
 }
 
-// generateRandomString returns a random alphanumeric string of given length.
-func generateRandomString(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+// genRandomIdent returns a string that has a random alpha character in position 0
+// and random alphanumerical characters in every other position.
+func genRandomIdent(length int) []byte {
+	const alphaCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const fullCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	if length == 0 {
+		return []byte{}
 	}
-	return string(b)
+
+	b := make([]byte, length)
+
+	b[0] = alphaCharset[rand.IntN(len(alphaCharset))] // #nosec G404 -- Not used for security-related purposes
+	for i := 1; i < length; i++ {
+		b[i] = fullCharset[rand.IntN(len(fullCharset))] // #nosec G404 -- Not used for security-related purposes
+	}
+	return b
 }
