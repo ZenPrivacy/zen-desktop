@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 )
 
@@ -78,6 +79,37 @@ type FilterList struct {
 	URL     string         `json:"url"`
 	Enabled bool           `json:"enabled"`
 	Trusted bool           `json:"trusted"`
+}
+
+type DebugData struct {
+	EnabledFilterListURLs []string `json:"enabledFilterListURLs"`
+	CustomRules           []string `json:"customRules"`
+	Platform              string   `json:"platform"`
+	Architecture          string   `json:"architecture"`
+	Version               string   `json:"version"`
+}
+
+func (c *Config) ExportDebugData() (string, error) {
+	c.RLock()
+	defer c.RUnlock()
+	var enabledFilterListURLs []string
+	for _, filterList := range c.Filter.FilterLists {
+		if filterList.Enabled {
+			enabledFilterListURLs = append(enabledFilterListURLs, filterList.URL)
+		}
+	}
+	debugData := DebugData{
+		EnabledFilterListURLs: enabledFilterListURLs,
+		CustomRules:           c.Filter.MyRules,
+		Platform:              runtime.GOOS,
+		Architecture:          runtime.GOARCH,
+		Version:               Version,
+	}
+	jsonData, err := json.MarshalIndent(debugData, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal debug data: %w", err)
+	}
+	return string(jsonData), nil
 }
 
 func (f *FilterList) UnmarshalJSON(data []byte) error {

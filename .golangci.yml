@@ -43,5 +43,7 @@ linters:
         path: (.+)_windows.go
 
 formatters:
+  enable:
+    - gofmt
   exclusions:
     generated: lax

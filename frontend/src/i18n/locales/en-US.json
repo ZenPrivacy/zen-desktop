@@ -34,6 +34,12 @@
     "openError": "Failed to open logs directory: {{error}}",
     "tooltip": "Open logs directory"
   },
+  "exportDebugDataButton": {
+    "label": "Export debug data",
+    "tooltip": "Copy debug information to clipboard",
+    "success": "Debug data copied to clipboard",
+    "error": "Failed to export debug data: {{error}}"
+  },
   "filterLists": {
     "delete": "Delete",
     "more": "More",

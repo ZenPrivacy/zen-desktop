@@ -14,6 +14,10 @@ export function IsNoSelfUpdate() {
   return window['go']['app']['App']['IsNoSelfUpdate']();
 }
 
+export function OnSecondInstanceLaunch(arg1) {
+  return window['go']['app']['App']['OnSecondInstanceLaunch'](arg1);
+}
+
 export function OpenLogsDirectory() {
   return window['go']['app']['App']['OpenLogsDirectory']();
 }

@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { OpenLogsDirectory } from '../../../wailsjs/go/app/App';
-import './index.css';
 import { AppToaster } from '../../common/toaster';
 
 export function ExportLogsButton() {

@@ -26,6 +26,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/selfupdate"
 	"github.com/ZenPrivacy/zen-desktop/internal/sysproxy"
 	"github.com/ZenPrivacy/zen-desktop/internal/systray"
+	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -373,4 +374,28 @@ func (a *App) ImportCustomFilterLists() error {
 
 func (a *App) IsNoSelfUpdate() bool {
 	return selfupdate.NoSelfUpdate == "true"
+}
+
+func (a *App) OnSecondInstanceLaunch(secondInstanceData options.SecondInstanceData) {
+	start, hidden := parseLaunchArgs(secondInstanceData.Args)
+	if !hidden {
+		runtime.WindowUnmaximise(a.ctx)
+		runtime.Show(a.ctx)
+	}
+	if start {
+		a.StartProxy()
+	}
+
+}
+
+func parseLaunchArgs(args []string) (start, hidden bool) {
+	for _, arg := range args[1:] {
+		if arg == "-start" {
+			start = true
+		}
+		if arg == "-hidden" {
+			hidden = true
+		}
+	}
+	return start, hidden
 }
