@@ -16,6 +16,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
 	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
 )
@@ -264,22 +265,22 @@ func (f *Filter) HandleRequest(req *http.Request) *http.Response {
 // As of April 2024, there are no response-only rules that can block or redirect responses.
 // For that reason, this method does not return a blocking or redirecting response itself.
 func (f *Filter) HandleResponse(req *http.Request, res *http.Response) error {
-	// if isDocumentNavigation(req, res) {
-	// 	if err := f.scriptletsInjector.Inject(req, res); err != nil {
-	// 		// This and the following injection errors are recoverable, so we log them and continue processing the response.
-	// 		log.Printf("error injecting scriptlets for %q: %v", logger.Redacted(req.URL), err)
-	// 	}
+	if isDocumentNavigation(req, res) {
+		if err := f.scriptletsInjector.Inject(req, res); err != nil {
+			// This and the following injection errors are recoverable, so we log them and continue processing the response.
+			log.Printf("error injecting scriptlets for %q: %v", logger.Redacted(req.URL), err)
+		}
 
-	// 	if err := f.cosmeticRulesInjector.Inject(req, res); err != nil {
-	// 		log.Printf("error injecting cosmetic rules for %q: %v", logger.Redacted(req.URL), err)
-	// 	}
-	// 	if err := f.cssRulesInjector.Inject(req, res); err != nil {
-	// 		log.Printf("error injecting css rules for %q: %v", logger.Redacted(req.URL), err)
-	// 	}
-	// 	if err := f.jsRuleInjector.Inject(req, res); err != nil {
-	// 		log.Printf("error injecting js rules for %q: %v", logger.Redacted(req.URL), err)
-	// 	}
-	// }
+		if err := f.cosmeticRulesInjector.Inject(req, res); err != nil {
+			log.Printf("error injecting cosmetic rules for %q: %v", logger.Redacted(req.URL), err)
+		}
+		if err := f.cssRulesInjector.Inject(req, res); err != nil {
+			log.Printf("error injecting css rules for %q: %v", logger.Redacted(req.URL), err)
+		}
+		if err := f.jsRuleInjector.Inject(req, res); err != nil {
+			log.Printf("error injecting js rules for %q: %v", logger.Redacted(req.URL), err)
+		}
+	}
 
 	appliedRules, err := f.networkRules.ModifyRes(req, res)
 	if err != nil {
