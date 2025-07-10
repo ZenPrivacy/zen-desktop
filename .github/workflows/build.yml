@@ -148,26 +148,31 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build EXEs
         run: |
+          # Prepare output directories
+          New-Item -Path .\ci-upload -ItemType Directory -Force
+          New-Item -Path .\ci-upload\unsigned -ItemType Directory -Force
+          New-Item -Path .\ci-upload\signed -ItemType Directory -Force
+          New-Item -Path .\ci-upload\final -ItemType Directory -Force
+
           # build with self-update
           task build:prod ARCH=${{ matrix.arch }}
-          Copy-Item .\build\bin\Zen.exe .\build\bin\Zen-selfupdate.exe
-          Copy-Item .\build\bin\Zen-${{ matrix.arch }}-installer.exe .\build\bin\Zen-installer.exe
+          Copy-Item .\build\bin\Zen.exe .\ci-upload\unsigned\Zen-selfupdate.exe
+          Copy-Item .\build\bin\Zen-${{ matrix.arch }}-installer.exe .\ci-upload\unsigned\Zen-installer.exe
 
           # build without self-update
           task build:prod-noupdate ARCH=${{ matrix.arch }}
-          Copy-Item .\build\bin\Zen.exe .\build\bin\Zen-noselfupdate.exe
-      - name: Upload artifact with binaries (for SignPath)
+          Copy-Item .\build\bin\Zen.exe .\ci-upload\unsigned\Zen-noselfupdate.exe
+      - name: Upload intermediate unsigned artifacts
         id: unsigned
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: windows-all-${{ matrix.arch }}
+          name: windows-unsigned-${{ matrix.arch }}
           path: |
-            build/bin/Zen-selfupdate.exe
-            build/bin/Zen-noselfupdate.exe
-            build/bin/Zen-installer.exe
-      - name: Prepare folder for signed output
-        run: New-Item -Path build/windows/signed -ItemType Directory
+            ci-upload/unsigned/Zen-selfupdate.exe
+            ci-upload/unsigned/Zen-noselfupdate.exe
+            ci-upload/unsigned/Zen-installer.exe
       - name: Sign with SignPath
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: signpath/github-action-submit-signing-request@4f13d373e8f0cd8d3c0465ff4877feff27aed2ae # v1.2
         with:
           api-token:                    ${{ secrets.SIGNPATH_API_TOKEN }}
@@ -177,26 +182,36 @@ jobs:
           artifact-configuration-slug:  ${{ env.SIGNPATH_ARTIFACT_CONFIG_SLUG }}
           github-artifact-id:           ${{ steps.unsigned.outputs.artifact-id }}
           wait-for-completion:          true
-          output-artifact-directory:    build/windows/signed
+          output-artifact-directory:    ci-upload/signed
           parameters: |
             arch: "${{ matrix.arch }}"
             version: "${{ github.ref }}"
-      - name: Prepare final signed artifacts
+      - name: Prepare final artifacts using unsigned artifacts
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         run: |
-          Move-Item -Path build/windows/signed/Zen-installer.exe `
-                          -Destination Zen-${{ matrix.arch }}-installer.exe
-          Compress-Archive -Path build/windows/signed/Zen-selfupdate.exe `
-                          -DestinationPath Zen_windows_${{ matrix.arch }}.zip
-          Compress-Archive -Path build/windows/signed/Zen-noselfupdate.exe `
-                          -DestinationPath Zen_windows_${{ matrix.arch }}_noselfupdate.zip
+          Move-Item -Path .\ci-upload\unsigned\Zen-installer.exe `
+                          -Destination .\ci-upload\final\Zen-${{ matrix.arch }}-installer.exe
+          Compress-Archive -Path .\ci-upload\unsigned\Zen-selfupdate.exe `
+                          -DestinationPath .\ci-upload\final\Zen_windows_${{ matrix.arch }}.zip
+          Compress-Archive -Path .\ci-upload\unsigned\Zen-noselfupdate.exe `
+                          -DestinationPath .\ci-upload\final\Zen_windows_${{ matrix.arch }}_noselfupdate.zip
+      - name: Prepare final artifacts using signed artifacts
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          Move-Item -Path .\ci-upload\signed\Zen-installer.exe `
+                          -Destination .\ci-upload\final\Zen-${{ matrix.arch }}-installer.exe
+          Compress-Archive -Path .\ci-upload\signed\Zen-selfupdate.exe `
+                          -DestinationPath .\ci-upload\final\Zen_windows_${{ matrix.arch }}.zip
+          Compress-Archive -Path .\ci-upload\signed\Zen-noselfupdate.exe `
+                          -DestinationPath .\ci-upload\final\Zen_windows_${{ matrix.arch }}_noselfupdate.zip
       - name: Upload final signed artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: windows-${{ matrix.arch }}
+          name: windows-final-${{ matrix.arch }}
           path: |
-            Zen_windows_${{ matrix.arch }}.zip
-            Zen_windows_${{ matrix.arch }}_noselfupdate.zip
-            Zen-${{ matrix.arch }}-installer.exe
+            ci-upload/final/Zen_windows_${{ matrix.arch }}.zip
+            ci-upload/final/Zen_windows_${{ matrix.arch }}_noselfupdate.zip
+            ci-upload/final/Zen-${{ matrix.arch }}-installer.exe
 
   release:
     permissions:
@@ -211,7 +226,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          path: artifacts
+          pattern: |
+            linux-*
+            macos-*
+            windows-final-*
       - name: Generate artifact attestations
         uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
         with:
