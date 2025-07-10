@@ -16,7 +16,7 @@ import (
 )
 
 type ScrambleJSModifier struct {
-	keys []string
+	keys []*regexp.Regexp
 }
 
 var _ ModifyingModifier = (*ScrambleJSModifier)(nil)
@@ -29,7 +29,19 @@ func (s *ScrambleJSModifier) Parse(modifier string) error {
 		return errors.New("invalid syntax")
 	}
 
-	s.keys = strings.Split(match[1], "|")
+	rawKeys := strings.Split(match[1], "|")
+	s.keys = make([]*regexp.Regexp, len(rawKeys))
+	for i, key := range rawKeys {
+		if len(key) == 0 {
+			return errors.New("empty keys are not allowed")
+		}
+
+		re, err := regexp.Compile(regexp.QuoteMeta(key))
+		if err != nil {
+			return fmt.Errorf("compile key %q: %v", key, err)
+		}
+		s.keys[i] = re
+	}
 
 	return nil
 }
@@ -78,7 +90,7 @@ func (s *ScrambleJSModifier) Cancels(modifier Modifier) bool {
 }
 
 // replaceInInlineHTML replaces matched keys with unique random values in HTML responses.
-func replaceInInlineHTML(res *http.Response, keys []string) error {
+func replaceInInlineHTML(res *http.Response, keys []*regexp.Regexp) error {
 	return httprewrite.StreamRewrite(res, func(original io.ReadCloser, modified *io.PipeWriter) {
 		defer original.Close()
 		z := html.NewTokenizer(original)
@@ -110,20 +122,19 @@ func replaceInInlineHTML(res *http.Response, keys []string) error {
 }
 
 // replaceInJS replaces matched keys with unique random values in JS responses.
-func replaceInJS(res *http.Response, keys []string) error {
+func replaceInJS(res *http.Response, keys []*regexp.Regexp) error {
 	return httprewrite.BufferRewrite(res, func(src []byte) []byte {
 		return replaceKeys(src, keys)
 	})
 }
 
 // replaceKeys replaces each occurrence of keys with unique random strings.
-func replaceKeys(script []byte, keys []string) []byte {
-	// anfragment: This is potentially inefficient when running on large script arrays/multiples keys
+func replaceKeys(script []byte, keys []*regexp.Regexp) []byte {
+	// anfragment: This is potentially inefficient when running on large script arrays/multiple keys
 	// due to multiple passes/script array copies. Preprocess keys into an Aho-Corasick or build a single regexp
 	// if this gets determined as a bottleneck.
 	for _, key := range keys {
-		re := regexp.MustCompile(regexp.QuoteMeta(key))
-		script = re.ReplaceAllFunc(script, func(_ []byte) []byte {
+		script = key.ReplaceAllFunc(script, func(_ []byte) []byte {
 			return genRandomIdent(10)
 		})
 	}
