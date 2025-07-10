@@ -50,7 +50,7 @@ func (s *ScrambleJSModifier) ModifyRes(res *http.Response) (bool, error) {
 			return false, fmt.Errorf("replace in inline HTML: %v", err)
 		}
 		return true, nil
-	case "text/javascript":
+	case "text/javascript", "application/javascript":
 		if err := replaceInJS(res, s.keys); err != nil {
 			return false, fmt.Errorf("replace in JS: %v", err)
 		}
@@ -112,13 +112,15 @@ func replaceInInlineHTML(res *http.Response, keys []string) error {
 // replaceInJS replaces matched keys with unique random values in JS responses.
 func replaceInJS(res *http.Response, keys []string) error {
 	return httprewrite.BufferRewrite(res, func(src []byte) []byte {
-		newScript := replaceKeys(src, keys)
-		return newScript
+		return replaceKeys(src, keys)
 	})
 }
 
 // replaceKeys replaces each occurrence of keys with unique random strings.
 func replaceKeys(script []byte, keys []string) []byte {
+	// anfragment: This is potentially inefficient when running on large script arrays/multiples keys
+	// due to multiple passes/script array copies. Preprocess keys into an Aho-Corasick or build a single regexp
+	// if this gets determined as a bottleneck.
 	for _, key := range keys {
 		re := regexp.MustCompile(regexp.QuoteMeta(key))
 		script = re.ReplaceAllFunc(script, func(_ []byte) []byte {
@@ -140,6 +142,7 @@ func genRandomIdent(length int) []byte {
 
 	b := make([]byte, length)
 
+	// This makes the modifier compatible with replacing identifiers, which in JS should not begin with a numerical character.
 	b[0] = alphaCharset[rand.IntN(len(alphaCharset))] // #nosec G404 -- Not used for security-related purposes
 	for i := 1; i < length; i++ {
 		b[i] = fullCharset[rand.IntN(len(fullCharset))] // #nosec G404 -- Not used for security-related purposes
