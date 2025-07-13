@@ -15,3 +15,15 @@ If you're using arkenfox you can add the above to your `user-overrides.js` like 
 ```js
 user_pref("security.cert_pinning.enforcement_level", 1);
 ```
+
+Another issue that may pop up is `MOZILLA_PKIX_ERROR_MITM_DETECTED`
+
+This can be fixed in a few ways:
+
+Sometimes a simple restart of the browser is all that's needed, if that doesn't work you can go to
+
+`Settings > Privacy & Security` and scroll down to `Certificates`
+
+Once there, tick the checkbox for "Allow Firefox to automatically trust third-party root certificates you install"
+
+And finally you can set `security.enterprise_roots.enabled` to `true` in `about:config` and restart Firefox. This appears to have the same effect as the above fix, according to the Firefox docs. However, it's good to check both just incase.
