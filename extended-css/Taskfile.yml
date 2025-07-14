@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+  lint:
+    desc: Lints the code.
+    dir: extended-css
+    cmds:
+      - npm run lint
+
+  test:
+    desc: Tests the code.
+    dir: extended-css
+    cmds:
+      - npm run test
+
+  install:
+    desc: Installs the complete set of dependencies.
+    dir: extended-css
+    cmds:
+      - npm ci
+
+  install-prod:
+    desc: Installs the dependencies required to build the bundle.
+    dir: extended-css
+    cmds:
+      - npm ci --only=prod
