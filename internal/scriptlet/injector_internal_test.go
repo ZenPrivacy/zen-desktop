@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestInjectorInternal(t *testing.T) {
+func TestAddRule(t *testing.T) {
 	t.Parallel()
 
 	t.Run("parses Adguard-style rule", func(t *testing.T) {
@@ -21,7 +21,7 @@ func TestInjectorInternal(t *testing.T) {
 		}
 
 		if len(spyStore.PrimaryEntries) != 1 {
-			t.Errorf("expected exactly one entry to be collected, got %d", len(spyStore.PrimaryEntries))
+			t.Fatalf("expected exactly one entry to be collected, got %d", len(spyStore.PrimaryEntries))
 		}
 		if spyStore.PrimaryEntries[0].HostnamePatterns != "example.org" {
 			t.Errorf("expected hostname to be collected, got %q", spyStore.PrimaryEntries[0].HostnamePatterns)
@@ -51,7 +51,7 @@ func TestInjectorInternal(t *testing.T) {
 		}
 
 		if len(spyStore.ExceptionEntries) != 1 {
-			t.Errorf("expected exactly one entry to be collected, got %d", len(spyStore.ExceptionEntries))
+			t.Fatalf("expected exactly one entry to be collected, got %d", len(spyStore.ExceptionEntries))
 		}
 		if spyStore.ExceptionEntries[0].HostnamePatterns != "example.org" {
 			t.Errorf("expected hostname to be collected, got %q", spyStore.ExceptionEntries[0].HostnamePatterns)
@@ -81,7 +81,7 @@ func TestInjectorInternal(t *testing.T) {
 		}
 
 		if len(spyStore.PrimaryEntries) != 1 {
-			t.Errorf("expected exactly one entry to be collected, got %d", len(spyStore.PrimaryEntries))
+			t.Fatalf("expected exactly one entry to be collected, got %d", len(spyStore.PrimaryEntries))
 		}
 		if spyStore.PrimaryEntries[0].HostnamePatterns != "example.org" {
 			t.Errorf("expected hostname to be collected, got %q", spyStore.PrimaryEntries[0].HostnamePatterns)
@@ -111,7 +111,7 @@ func TestInjectorInternal(t *testing.T) {
 		}
 
 		if len(spyStore.ExceptionEntries) != 1 {
-			t.Errorf("expected exactly one entry to be collected, got %d", len(spyStore.ExceptionEntries))
+			t.Fatalf("expected exactly one entry to be collected, got %d", len(spyStore.ExceptionEntries))
 		}
 		if spyStore.ExceptionEntries[0].HostnamePatterns != "example.org" {
 			t.Errorf("expected hostname to be collected, got %q", spyStore.ExceptionEntries[0].HostnamePatterns)
@@ -124,6 +124,25 @@ func TestInjectorInternal(t *testing.T) {
 
 		if spyStore.ExceptionEntries[0].ArgList != expectedArgList {
 			t.Errorf("expected first scriptlet to be %v, got %v", expectedArgList, spyStore.ExceptionEntries[0].ArgList)
+		}
+	})
+
+	t.Run("returns an error on an attempt to add a trusted rule if filterListTrusted = false", func(t *testing.T) {
+		t.Parallel()
+
+		injector, err := NewInjectorWithDefaults()
+		if err != nil {
+			t.Fatalf("failed to create injector: %v", err)
+		}
+
+		err = injector.AddRule("example.org#@%#//scriptlet('trusted-test', 'first', 'false')", false)
+		if err == nil {
+			t.Error("expected an error, got nil")
+		}
+
+		err = injector.AddRule("example.org#@#+js(trusted-test)", false)
+		if err == nil {
+			t.Error("expected an error, got nil")
 		}
 	})
 }
