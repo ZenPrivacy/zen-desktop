@@ -16,6 +16,7 @@ import { CreateFilterList } from './CreateFilterList';
 import { ExportFilterList } from './ExportFilterList';
 import { ImportFilterList } from './ImportFilterList';
 import { FilterListType } from './types';
+import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 
 export function FilterLists() {
   const { t } = useTranslation();
@@ -117,6 +118,7 @@ function ListItem({
   const { isProxyRunning } = useProxyState();
   const [switchLoading, setSwitchLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   return (
     <div className="filter-lists__list">
@@ -150,7 +152,46 @@ function ListItem({
       ) : null}
 
       <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
+      <div className="filter-lists__list-buttons">
+        <Tooltip
+          content="Скопировано!"
+          isOpen={copied}
+          hoverOpenDelay={0}
+          hoverCloseDelay={0}
+          position="top"
+          className="filter-lists__list-button"
+        >
+          <Button
+            icon="duplicate"
+            intent="none"
+            className="filter-lists__list-button"
+            disabled={isProxyRunning}
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(filterList.url);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              } catch (err) {
+                console.error('Ошибка при копировании', err);
+              }
+            }}
+          >
+            Копировать
+          </Button>
+        </Tooltip>
 
+        <Button
+          icon="link"
+          intent="none"
+          className="filter-lists__list-button"
+          disabled={isProxyRunning}
+          onClick={() => {
+            BrowserOpenURL(filterList.url);
+          }}
+        >
+          Перейти
+        </Button>
+      </div>
       {showDelete && (
         <Tooltip content={t('common.stopProxyToDeleteFilter') as string} disabled={!isProxyRunning} placement="right">
           <Button
