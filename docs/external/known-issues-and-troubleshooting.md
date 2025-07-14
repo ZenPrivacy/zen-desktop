@@ -1,6 +1,8 @@
 # Known issues and troubleshooting
 
-### Firefox
+## Firefox
+
+### MOZILLA_PKIX_ERROR_KEY_PINNING_FAILURE
 
 It's possible when visiting sites, that the page will fail to render and you will see
 
@@ -15,6 +17,8 @@ If you're using arkenfox you can add the above to your `user-overrides.js` like 
 ```js
 user_pref("security.cert_pinning.enforcement_level", 1);
 ```
+
+### MOZILLA_PKIX_ERROR_MITM_DETECTED
 
 Another issue that may pop up is `MOZILLA_PKIX_ERROR_MITM_DETECTED`
 
