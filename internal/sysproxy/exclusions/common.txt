@@ -46,6 +46,7 @@ m.stripe.network
 square.com
 venmo.com
 sis.redsys.es
+payu.com
 
 # Messengers
 whatsapp.net
