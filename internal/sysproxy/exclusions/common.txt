@@ -91,3 +91,5 @@ oaiusercontent.com
 # Issues
 # https://github.com/ZenPrivacy/zen-desktop/pull/223
 account.booking.com
+# https://github.com/ZenPrivacy/zen-desktop/issues/407
+updates.ghub.logitechg.com
