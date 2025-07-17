@@ -154,7 +154,7 @@ function ListItem({
       <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
       <div className="filter-lists__list-buttons">
         <Tooltip
-          content="Скопировано!"
+          content={t('filterLists.copied') ?? ''}
           isOpen={copied}
           hoverOpenDelay={0}
           hoverCloseDelay={0}
@@ -176,7 +176,7 @@ function ListItem({
               }
             }}
           >
-            Копировать
+            {t('filterLists.copy')}
           </Button>
         </Tooltip>
 
@@ -189,7 +189,7 @@ function ListItem({
             BrowserOpenURL(filterList.url);
           }}
         >
-          Перейти
+          {t('filterLists.goTo')}
         </Button>
       </div>
       {showDelete && (
