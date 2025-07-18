@@ -62,3 +62,13 @@
   display: flex;
   justify-content: space-between;
 }
+
+.filter-lists__list-buttons {
+  display: flex;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.filter-lists__list-button {
+  width: 100%;
+}
