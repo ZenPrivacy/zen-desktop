@@ -3,6 +3,7 @@ import * as CSSTree from 'css-tree';
 import { Child } from './combinators/child';
 import { Descendant } from './combinators/descendant';
 import { Contains, MatchesPath } from './extendedPseudoClasses';
+import { Upward } from './extendedPseudoClasses/upward';
 import { Mixed } from './mixed';
 import { RawQuery } from './raw';
 import { Selector } from './types';
@@ -85,6 +86,13 @@ function parsePseudoClass(node: CSSTree.PseudoClassSelector): { selector: Select
         throw new Error('Bad contains');
       }
       return { selector: new Contains(child.value), skip: true };
+    }
+    case 'upward': {
+      const child = node.children?.first;
+      if (child?.type !== 'Raw') {
+        throw new Error('Bad upward');
+      }
+      return { selector: new Upward(child.value), skip: true };
     }
     default:
       throw new Error('Unsupported pseudoclass');
