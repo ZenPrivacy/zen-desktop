@@ -9,13 +9,14 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // More on the logging setup in README.md.
 
 func SetupLogger() error {
-	logsDir, err := getLogsDir(appName)
+	logsDir, err := getLogsDir(constants.AppName)
 	if err != nil {
 		return fmt.Errorf("get logs directory: %w", err)
 	}

@@ -50,10 +50,6 @@ type release struct {
 	SHA256      string `json:"sha256"`
 }
 
-const (
-	appName = "Zen"
-)
-
 func NewSelfUpdater(httpClient httpClient, policy cfg.UpdatePolicyType) (*SelfUpdater, error) {
 	if httpClient == nil {
 		return nil, errors.New("httpClient is nil")

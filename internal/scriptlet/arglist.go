@@ -36,6 +36,18 @@ func (al argList) Normalize() (argList, error) {
 	return argList(normalized), nil
 }
 
+// IsTrusted returns true if the scriptlet should only be executed when retrieved from a trusted filter list.
+// This must only be called after the argList has been normalized via .Normalize().
+//
+// Semantically, it checks whether the scriptlet name begins with the prefix "trusted-".
+func (al argList) IsTrusted() bool {
+	const trustedPrefix = "trusted-"
+
+	firstArg := strings.Split(string(al), ",")[0]
+	unquoted := firstArg[1 : len(firstArg)-1]
+	return strings.HasPrefix(unquoted, trustedPrefix)
+}
+
 func (al argList) GenerateInjection(w io.Writer) error {
 	_, err := fmt.Fprintf(w, `try{scriptlet(%s)}catch(ex){console.error(ex);}`, al)
 	return err

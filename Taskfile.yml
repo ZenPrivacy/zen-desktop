@@ -47,3 +47,8 @@ tasks:
     desc: Run Go linters.
     cmds:
       - golangci-lint run
+
+  fmt-go:
+    desc: Run go fmt on improperly formatted Go files.
+    cmds:
+      - golangci-lint fmt

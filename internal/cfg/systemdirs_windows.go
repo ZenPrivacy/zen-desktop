@@ -3,10 +3,12 @@ package cfg
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 const (
-	appFolderName = "Zen"
+	appFolderName = constants.AppName
 	configDirName = "Config"
 )
 
