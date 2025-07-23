@@ -2,6 +2,8 @@ import * as CSSTree from 'css-tree';
 
 import { Child } from './combinators/child';
 import { Descendant } from './combinators/descendant';
+import { NextSibling } from './combinators/nextSibling';
+import { SubsequentSibling } from './combinators/subsequentSibling';
 import { Contains, MatchesPath } from './extendedPseudoClasses';
 import { Upward } from './extendedPseudoClasses/upward';
 import { Mixed } from './mixed';
@@ -15,7 +17,6 @@ export function parse(rule: string): Selector[] {
 
   CSSTree.walk(ast, (node) => {
     let selector: Selector;
-    let action;
     switch (node.type) {
       case 'Selector':
         return;
@@ -33,7 +34,7 @@ export function parse(rule: string): Selector[] {
         }
 
         if (node.type === 'AttributeSelector') {
-          action = CSSTree.walk.skip;
+          return CSSTree.walk.skip;
         }
         break;
       }
@@ -44,16 +45,17 @@ export function parse(rule: string): Selector[] {
         let skip;
         ({ selector, skip } = parsePseudoClass(node));
         if (skip) {
-          action = CSSTree.walk.skip;
+          return CSSTree.walk.skip;
         }
-        res.push(selector);
+        if (res.length === 0) {
+          res.push(new RawQuery('*'), selector);
+        } else {
+          res.push(selector);
+        }
         break;
       }
       default:
         throw new Error(`Unsupported node type ${node.type}`);
-    }
-    if (action) {
-      return action;
     }
   });
 
@@ -66,6 +68,10 @@ function parseCombinator(literal: string): Selector {
       return new Child();
     case ' ':
       return new Descendant();
+    case '+':
+      return new NextSibling();
+    case '~':
+      return new SubsequentSibling();
     default:
       throw new Error('Combinator not supported');
   }
