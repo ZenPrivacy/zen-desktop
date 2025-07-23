@@ -9,6 +9,7 @@ import { type cfg } from '../../wailsjs/go/models';
 
 import './index.css';
 
+import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AppToaster } from '../common/toaster';
 import { useProxyState } from '../context/ProxyStateContext';
 
@@ -16,7 +17,6 @@ import { CreateFilterList } from './CreateFilterList';
 import { ExportFilterList } from './ExportFilterList';
 import { ImportFilterList } from './ImportFilterList';
 import { FilterListType } from './types';
-import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 
 export function FilterLists() {
   const { t } = useTranslation();
@@ -154,7 +154,7 @@ function ListItem({
       <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
       <div className="filter-lists__list-buttons">
         <Tooltip
-          content={t('filterLists.copied') ?? ''}
+          content={t('filterLists.copied') as string}
           isOpen={copied}
           hoverOpenDelay={0}
           hoverCloseDelay={0}
@@ -172,7 +172,7 @@ function ListItem({
                 setCopied(true);
                 setTimeout(() => setCopied(false), 1500);
               } catch (err) {
-                console.error('Ошибка при копировании', err);
+                console.error('Copying error', err);
               }
             }}
           >
@@ -181,7 +181,7 @@ function ListItem({
         </Tooltip>
 
         <Button
-          icon="link"
+          icon="globe-network"
           intent="none"
           className="filter-lists__list-button"
           disabled={isProxyRunning}
