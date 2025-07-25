@@ -16,7 +16,6 @@ export function parse(rule: string): Selector[] {
   const res: Selector[] = [];
 
   CSSTree.walk(ast, (node) => {
-    let selector: Selector;
     switch (node.type) {
       case 'Selector':
         return;
@@ -42,15 +41,13 @@ export function parse(rule: string): Selector[] {
         res.push(parseCombinator(node.name));
         break;
       case 'PseudoClassSelector': {
-        let skip;
-        ({ selector, skip } = parsePseudoClass(node));
-        if (skip) {
-          return CSSTree.walk.skip;
+        const { selector, skipChildren, requiresQueryInFront } = parsePseudoClass(node);
+        if (requiresQueryInFront && res.length === 0) {
+          res.push(new RawQuery('*'));
         }
-        if (res.length === 0) {
-          res.push(new RawQuery('*'), selector);
-        } else {
-          res.push(selector);
+        res.push(selector);
+        if (skipChildren) {
+          return CSSTree.walk.skip;
         }
         break;
       }
@@ -77,30 +74,54 @@ function parseCombinator(literal: string): Selector {
   }
 }
 
-function parsePseudoClass(node: CSSTree.PseudoClassSelector): { selector: Selector; skip: boolean } {
+function parsePseudoClass(node: CSSTree.PseudoClassSelector): {
+  selector: Selector;
+  skipChildren: boolean;
+  requiresQueryInFront?: boolean;
+} {
   switch (node.name) {
-    case 'matches-path': {
-      const child = node.children?.first;
-      if (child?.type !== 'Raw') {
-        throw new Error('Bad matches-path');
-      }
-      return { selector: new MatchesPath(child.value), skip: true };
-    }
-    case 'contains': {
-      const child = node.children?.first;
-      if (child?.type !== 'Raw') {
-        throw new Error('Bad contains');
-      }
-      return { selector: new Contains(child.value), skip: true };
-    }
-    case 'upward': {
-      const child = node.children?.first;
-      if (child?.type !== 'Raw') {
-        throw new Error('Bad upward');
-      }
-      return { selector: new Upward(child.value), skip: true };
-    }
+    case 'matches-path':
+      return { selector: createPseudoWithArgument(node, MatchesPath, 'matches-path'), skipChildren: true };
+    case 'contains':
+      return {
+        selector: createPseudoWithArgument(node, Contains, 'contains'),
+        skipChildren: true,
+        requiresQueryInFront: true,
+      };
+    case 'upward':
+      return { selector: createPseudoWithArgument(node, Upward, 'upward'), skipChildren: true };
+    case 'matches-css':
+      return {
+        selector: createPseudoWithArgument(node, Upward, 'matches-css'),
+        skipChildren: true,
+        requiresQueryInFront: true,
+      };
+    case 'has':
+    case 'has-text':
+    case 'matches-attr':
+    case 'matches-css-before':
+    case 'matches-css-after':
+    case 'matches-media':
+    case 'matches-prop':
+    case 'min-text-length':
+    case 'not':
+    case 'others':
+    case 'watch-attr':
+    case 'xpath':
+      throw new Error(`Unsupported pseudoclass ${node.name}`);
     default:
-      throw new Error('Unsupported pseudoclass');
+      throw new Error(`Unknown pseudoclass ${node.name}`);
   }
+}
+
+function createPseudoWithArgument<T extends Selector>(
+  node: CSSTree.PseudoClassSelector,
+  SelectorClass: new (value: string) => T,
+  pseudoName: string,
+) {
+  const child = node.children?.first;
+  if (child?.type !== 'Raw') {
+    throw new Error(`Bad ${pseudoName}: expected first child type to be 'Raw', got ${child?.type}`);
+  }
+  return new SelectorClass(child.value);
 }

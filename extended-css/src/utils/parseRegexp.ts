@@ -32,6 +32,20 @@ export function parseRegexpFromString(input: string, flags?: string): RegExp | n
   }
 }
 
+/**
+ * Parses a wildcard pattern into a RegExp.
+ * @param input The wildcard pattern to parse, e.g., "foo*" or "*.bar".
+ * @returns The RegExp that matches the pattern, or null if the input is invalid.
+ */
+export function parseWildcardPattern(input: string): RegExp | null {
+  try {
+    const patternRe = escapeRegexp(input).replace(/\\\*/g, '.*');
+    return new RegExp(patternRe);
+  } catch {
+    return null;
+  }
+}
+
 function escapeRegexp(input: string): string {
   return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
