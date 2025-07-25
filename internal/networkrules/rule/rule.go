@@ -82,6 +82,8 @@ func (rm *Rule) ParseModifiers(modifiers string) error {
 			modifier = &rulemodifiers.RemoveHeaderModifier{}
 		case isKind("remove-js-constant"):
 			modifier = &removejsconstant.Modifier{}
+		case isKind("scramblejs"):
+			modifier = &rulemodifiers.ScrambleJSModifier{}
 		case isKind("jsonprune"):
 			modifier = &rulemodifiers.JSONPruneModifier{}
 		case isKind("all"):

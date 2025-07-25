@@ -6,10 +6,12 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 func replaceExecutable(tempDir string) error {
-	expectedExecName := appName
+	expectedExecName := constants.AppName
 	if runtime.GOOS == "windows" {
 		expectedExecName += ".exe"
 	}

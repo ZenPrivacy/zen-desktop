@@ -6,14 +6,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-)
 
-const (
-	appName = "Zen"
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 func OpenLogsDirectory() error {
-	logsDir, err := getLogsDir(appName)
+	logsDir, err := getLogsDir(constants.AppName)
 	if err != nil {
 		return fmt.Errorf("get logs directory: %w", err)
 	}
