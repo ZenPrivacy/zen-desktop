@@ -12,11 +12,12 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 	"golang.org/x/sys/windows/registry"
 )
 
 const (
-	regKey  = "Zen"
+	regKey  = constants.AppName
 	regPath = `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 )
 

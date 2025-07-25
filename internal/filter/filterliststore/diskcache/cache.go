@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 type cacheEntry struct {
@@ -142,9 +144,9 @@ func getCacheDir() (string, error) {
 	var appName string
 	switch runtime.GOOS {
 	case "darwin", "windows":
-		appName = "Zen"
+		appName = constants.AppName
 	case "linux":
-		appName = "zen"
+		appName = constants.AppNameLowercase
 	default:
 		panic("unsupported platform")
 	}

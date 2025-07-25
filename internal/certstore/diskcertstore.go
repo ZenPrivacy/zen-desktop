@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 	"github.com/hectane/go-acl"
 )
 
@@ -28,10 +29,8 @@ const (
 	certFilename = "rootCA.pem"
 	// keyFilename is the name of the file containing the root CA key.
 	keyFilename = "rootCA-key.pem"
-	// certOrganization is the organization name for the root CA certificate.
-	certOrganization = "Zen"
 	// certCommonName is the common name for the root CA certificate.
-	certCommonName = "Zen Root CA"
+	certCommonName = "Zen Personal CA"
 )
 
 // config provides access to the relevant configuration settings.
@@ -169,7 +168,7 @@ func (cs *DiskCertStore) newCA() error {
 	tpl := &x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{certOrganization},
+			Organization: []string{constants.OrgName},
 			CommonName:   certCommonName,
 		},
 		SubjectKeyId: skid[:],
