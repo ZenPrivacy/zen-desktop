@@ -7,12 +7,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/hostmatch"
 	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
-	"github.com/google/uuid"
 )
 
 var (
@@ -67,10 +65,10 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	nonce := ""
-	if hasScriptControls(res.Header) {
-		nonce = uuid.NewString()
-		addNonceToCSP(res.Header, nonce)
+	nonce, ok := patchCSPHeaders(res.Header)
+	if !ok {
+		log.Print("skip injection: multiple nonces present")
+		return nil
 	}
 
 	var injection bytes.Buffer
@@ -97,59 +95,4 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	}
 
 	return nil
-}
-
-func addNonceToCSP(h http.Header, nonce string) {
-	const key = "Content-Security-Policy"
-	lines := h[key]
-	if len(lines) == 0 {
-		return
-	}
-
-	// https://w3c.github.io/webappsec-csp/#directive-fallback-list
-	prio := []string{"script-src-elem", "script-src", "default-src"}
-
-	lineIdx, dirMatch := -1, ""
-outer:
-	for _, dir := range prio {
-		for i, l := range lines {
-			if strings.Contains(strings.ToLower(l), dir) {
-				lineIdx, dirMatch = i, dir
-				break outer
-			}
-		}
-	}
-	if lineIdx == -1 {
-		return
-	}
-
-	parts := strings.Split(lines[lineIdx], ";")
-	for i, p := range parts {
-		if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(p)), dirMatch) {
-			continue
-		}
-
-		token := " 'nonce-" + nonce + "'"
-		p = strings.ToLower(p)
-		switch {
-		case strings.Contains(p, "'unsafe-inline'") && !strings.Contains(p, "'strict-dynamic'"):
-			// Intentionally empty. 'unsafe-inline' allows the execution of inline scripts, and is incompatible with 'nonce-' directives.
-		case strings.Contains(p, "'none'"):
-			parts[i] = strings.Replace(p, "'none'", token, 1)
-		default:
-			parts[i] = strings.TrimSpace(p) + token
-		}
-		break
-	}
-	h[key][lineIdx] = strings.Join(parts, "; ")
-}
-
-func hasScriptControls(h http.Header) bool {
-	for _, csp := range h.Values("Content-Security-Policy") {
-		lc := strings.ToLower(csp)
-		if strings.Contains(lc, "script-src-elem") || strings.Contains(lc, "script-src") || strings.Contains(lc, "default-src") {
-			return true
-		}
-	}
-	return false
 }
