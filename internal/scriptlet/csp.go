@@ -10,7 +10,6 @@ import (
 
 var (
 	nonceRe = regexp.MustCompile(`'nonce-([^']+)'`)
-	hashRe  = regexp.MustCompile(`'sha(256|384|512)-([^']+)'`)
 )
 
 // patchCSPHeaders mutates header as needed and tells the caller whether injection is
@@ -43,7 +42,7 @@ func patchCSPHeaders(h http.Header) (nonce string, ok bool) {
 }
 
 // addNonceToCSP appends nonce *only* to directives that don't already contain a
-// nonce/hash and aren't "'none'".
+// nonce and aren't "'none'".
 func addNonceToCSP(h http.Header, nonce string) {
 	const key = "Content-Security-Policy"
 	lines := h.Values(key)
@@ -57,9 +56,9 @@ func addNonceToCSP(h http.Header, nonce string) {
 		for j, d := range dirs {
 			ld := strings.ToLower(strings.TrimSpace(d))
 
-			if !(strings.HasPrefix(ld, "script-src-elem") ||
-				strings.HasPrefix(ld, "script-src") ||
-				strings.HasPrefix(ld, "default-src")) {
+			if !strings.HasPrefix(ld, "script-src-elem") &&
+				!strings.HasPrefix(ld, "script-src") &&
+				!strings.HasPrefix(ld, "default-src") {
 				continue
 			}
 			if strings.Contains(ld, "'none'") ||
@@ -94,7 +93,7 @@ func collectNonces(h http.Header) map[string]struct{} {
 }
 
 // inlineAllowed reports whether a directive explicitly allows inline scripts
-// *without* a nonce/hash and *without* 'strict‑dynamic'.
+// *without* a nonce and *without* 'strict‑dynamic'.
 func inlineAllowed(dir string) bool {
 	lc := strings.ToLower(dir)
 	if !strings.Contains(lc, "'unsafe-inline'") {
