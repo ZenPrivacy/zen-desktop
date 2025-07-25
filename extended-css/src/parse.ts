@@ -110,6 +110,7 @@ function parsePseudoClass(node: CSSTree.PseudoClassSelector): {
     case 'xpath':
       throw new Error(`Unsupported pseudoclass ${node.name}`);
     default:
+      // TODO: create RawQuery
       throw new Error(`Unknown pseudoclass ${node.name}`);
   }
 }

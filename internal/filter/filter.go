@@ -15,6 +15,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/extendedcss"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
@@ -63,6 +64,11 @@ type jsRuleInjector interface {
 	Inject(*http.Request, *http.Response) error
 }
 
+type extendedCSSInjector interface {
+	AddRule(rule string) error
+	Inject(*http.Request, *http.Response) error
+}
+
 type filterListStore interface {
 	Get(url string) (io.ReadCloser, error)
 }
@@ -77,6 +83,7 @@ type Filter struct {
 	cosmeticRulesInjector cosmeticRulesInjector
 	cssRulesInjector      cssRulesInjector
 	jsRuleInjector        jsRuleInjector
+	extendedCSSInjector   extendedCSSInjector
 	eventsEmitter         filterEventsEmitter
 	filterListStore       filterListStore
 }
@@ -87,7 +94,7 @@ var (
 )
 
 // NewFilter creates and initializes a new filter.
-func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore) (*Filter, error) {
+func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, extendedCSSInjector extendedCSSInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore) (*Filter, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -109,6 +116,9 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 	if jsRuleInjector == nil {
 		return nil, errors.New("jsRuleInjector is nil")
 	}
+	if extendedCSSInjector == nil {
+		return nil, errors.New("extendedCSSInjector is nil")
+	}
 	if filterListStore == nil {
 		return nil, errors.New("filterListStore is nil")
 	}
@@ -120,6 +130,7 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 		cosmeticRulesInjector: cosmeticRulesInjector,
 		cssRulesInjector:      cssRulesInjector,
 		jsRuleInjector:        jsRuleInjector,
+		extendedCSSInjector:   extendedCSSInjector,
 		eventsEmitter:         eventsEmitter,
 		filterListStore:       filterListStore,
 	}
@@ -217,6 +228,10 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 		if err := f.cosmeticRulesInjector.AddRule(rule); err != nil {
 			return false, fmt.Errorf("add cosmetic rule: %w", err)
 		}
+	case extendedcss.RuleRegex.MatchString(rule):
+		if err := f.extendedCSSInjector.AddRule(rule); err != nil {
+			return false, fmt.Errorf("add extended-css rule: %w", err)
+		}
 	case filterListTrusted && cssrule.RuleRegex.MatchString(rule):
 		if err := f.cssRulesInjector.AddRule(rule); err != nil {
 			return false, fmt.Errorf("add css rule: %w", err)
@@ -273,6 +288,9 @@ func (f *Filter) HandleResponse(req *http.Request, res *http.Response) error {
 
 		if err := f.cosmeticRulesInjector.Inject(req, res); err != nil {
 			log.Printf("error injecting cosmetic rules for %q: %v", logger.Redacted(req.URL), err)
+		}
+		if err := f.extendedCSSInjector.Inject(req, res); err != nil {
+			log.Printf("error injecting extended-css rules for %q: %v", logger.Redacted(req.URL), err)
 		}
 		if err := f.cssRulesInjector.Inject(req, res); err != nil {
 			log.Printf("error injecting css rules for %q: %v", logger.Redacted(req.URL), err)

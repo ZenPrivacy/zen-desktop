@@ -9,10 +9,14 @@ export default {
   output: {
     file: 'dist/bundle.js',
     format: 'iife',
-    name: 'ecss',
+    name: 'extendedCSS',
   },
   plugins: [
-    resolve(),
+    resolve({
+      // https://github.com/csstree/csstree/issues/278#issuecomment-2336642879
+      browser: true,
+      preferBuiltins: false,
+    }),
     commonjs(),
     typescript({
       exclude: ['**/test/*.ts', '**/*.test.ts'],
