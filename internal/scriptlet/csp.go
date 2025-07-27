@@ -116,27 +116,30 @@ func inlineAllowed(dir string) bool {
 	return true
 }
 
-// needsNonce decides whether a fresh nonce is required for inline JS to run.
-// It returns false when inline execution is already allowed (DuckDuckGo case).
+// needsNonce decides whether a fresh nonce is required for inline script to run.
+// It returns false when inline execution is already allowed.
 func needsNonce(h http.Header) bool {
 	for _, line := range h.Values("Content-Security-Policy") {
-		for _, dirName := range []string{"script-src-elem", "script-src", "default-src"} {
-			lc := strings.ToLower(line)
-			pos := strings.Index(lc, dirName)
-			if pos == -1 {
+		lc := strings.ToLower(line)
+		for _, name := range []string{"script-src-elem", "script-src", "default-src"} {
+			idx := strings.Index(lc, name)
+			if idx == -1 {
 				continue
 			}
-			end := strings.Index(line[pos:], ";")
+
+			end := strings.Index(line[idx:], ";")
 			if end == -1 {
 				end = len(line)
 			} else {
-				end += pos
+				end += idx
 			}
-			dir := line[pos:end]
-			return !inlineAllowed(dir)
+
+			dir := line[idx:end]
+			if !inlineAllowed(dir) {
+				return true // one blocking policy is enough
+			}
+			break // this header's applicable directive was permissive; check next header
 		}
 	}
-
-	// No script controls means inline is implicitly allowed.
 	return false
 }
