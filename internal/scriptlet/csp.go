@@ -79,14 +79,22 @@ func addNonceToCSP(h http.Header, nonce string) {
 	h[key] = lines
 }
 
-// collectNonces returns the set of *distinct* nonce strings found in all CSP
-// header fields. Only literal values (without the surrounding "'nonce-" … "'")
-// are returned.
+// collectNonces returns distinct nonce values from script-related directives only.
 func collectNonces(h http.Header) map[string]struct{} {
-	out := map[string]struct{}{}
+	out := make(map[string]struct{})
 	for _, line := range h.Values("Content-Security-Policy") {
-		for _, m := range nonceRe.FindAllStringSubmatch(line, -1) {
-			out[m[1]] = struct{}{}
+		for raw := range strings.SplitSeq(line, ";") {
+			dir := strings.TrimSpace(raw)
+			if dir == "" {
+				continue
+			}
+			name := strings.ToLower(strings.Fields(dir)[0])
+			if name != "script-src" && name != "script-src-elem" && name != "default-src" {
+				continue
+			}
+			for _, m := range nonceRe.FindAllStringSubmatch(dir, -1) {
+				out[m[1]] = struct{}{}
+			}
 		}
 	}
 	return out
