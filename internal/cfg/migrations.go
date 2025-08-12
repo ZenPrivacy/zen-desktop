@@ -140,7 +140,7 @@ var migrations = map[string]func(c *Config) error{
 		}
 		return nil
 	},
-	"v0.12.0": func(c *Config) error {
+	"v0.12.0": func(_ *Config) error {
 		if runtime.GOOS == "darwin" {
 			autostart := autostart.Manager{}
 			enabled, err := autostart.IsEnabled()
