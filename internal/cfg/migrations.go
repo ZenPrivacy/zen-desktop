@@ -129,6 +129,17 @@ var migrations = map[string]func(c *Config) error{
 		}
 		return nil
 	},
+	"v0.11.3": func(c *Config) error {
+		for i, list := range c.Filter.FilterLists {
+			if list.URL == "https://malware-filter.gitlab.io/malware-filter/phishing-filter.txt" {
+				c.Filter.FilterLists[i].URL = "https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt"
+			}
+		}
+		if err := c.Save(); err != nil {
+			return fmt.Errorf("save config: %v", err)
+		}
+		return nil
+	},
 }
 
 // RunMigrations runs the version-to-version migrations.

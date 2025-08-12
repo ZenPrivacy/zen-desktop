@@ -52,7 +52,7 @@
         "type": "malware"
       },
       {
-        "url": "https://malware-filter.gitlab.io/malware-filter/phishing-filter.txt",
+        "url": "https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt",
         "name": "Phishing URL Blocklist",
         "enabled": true,
         "type": "malware"

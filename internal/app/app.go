@@ -385,15 +385,14 @@ func (a *App) OnSecondInstanceLaunch(secondInstanceData options.SecondInstanceDa
 	if start {
 		a.StartProxy()
 	}
-
 }
 
 func parseLaunchArgs(args []string) (start, hidden bool) {
-	for _, arg := range args[1:] {
-		if arg == "-start" {
+	for _, arg := range args {
+		if arg == "-start" || arg == "--start" {
 			start = true
 		}
-		if arg == "-hidden" {
+		if arg == "-hidden" || arg == "--hidden" {
 			hidden = true
 		}
 	}
