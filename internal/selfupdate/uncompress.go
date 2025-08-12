@@ -38,13 +38,13 @@ func unzip(src, dest string) error {
 				log.Printf("close zip file: %v", err)
 			}
 		}()
-		
+
 		root, err := os.OpenRoot(dest)
 		if err != nil {
 			return fmt.Errorf("open root directory: %w", err)
 		}
 		defer root.Close()
-		
+
 		if f.FileInfo().IsDir() {
 			err := root.Mkdir(f.Name, f.Mode())
 			if err != nil {
@@ -97,11 +97,11 @@ func untarGz(src, dest string) error {
 	defer gzReader.Close()
 
 	root, err := os.OpenRoot(dest)
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("open root directory: %w", err)
 	}
 	defer root.Close()
-	
+
 	tarReader := tar.NewReader(gzReader)
 
 	for {
@@ -112,7 +112,7 @@ func untarGz(src, dest string) error {
 		if err != nil {
 			return fmt.Errorf("read tar header: %w", err)
 		}
-		
+
 		switch header.Typeflag {
 		case tar.TypeDir:
 			err := root.Mkdir(header.Name, 0755)
@@ -142,7 +142,7 @@ func writeTarFile(tarReader *tar.Reader, root *os.Root, name string, mode os.Fil
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
 	}
-	defer func(){
+	defer func() {
 		if err := outFile.Close(); err != nil {
 			fmt.Printf("close file: %v\n", err)
 		}
