@@ -28,6 +28,7 @@ const (
 		<string>{{.Program}}</string>
 		<key>ProgramArguments</key>
 		<array>
+			<string>{{.Program}}</string>
 			<string>--start</string>
 		</array>
 		<key>RunAtLoad</key>
