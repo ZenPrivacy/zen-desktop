@@ -12,6 +12,31 @@ import (
 	"strings"
 )
 
+func mkdirAllRoot(root *os.Root, dir string, mode os.FileMode) error {
+	err := root.Mkdir(dir, mode)
+	if err == nil{
+		return nil
+	}
+	
+	if os.IsExist(err){
+		return nil
+	}
+	
+	if os.IsNotExist(err){
+		parentDir := filepath.Dir(dir)
+		if parentDir != dir{
+			if err := mkdirAllRoot(root, parentDir, 0755); err != nil {
+				return err
+			}
+			err = root.Mkdir(dir, mode)
+			if err == nil || os.IsExist(err){
+				return nil
+			}
+		}
+	}
+	return err
+}
+
 func unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {
@@ -28,7 +53,13 @@ func unzip(src, dest string) error {
 		return fmt.Errorf("create directory: %w", err)
 	}
 
-	extractAndWriteFile := func(f *zip.File) error {
+	root, err := os.OpenRoot(dest)
+	if err != nil {
+		return fmt.Errorf("open root directory: %w", err)
+	}
+	defer root.Close()
+
+	extractAndWriteFile := func(f *zip.File, root *os.Root) error {
 		rc, err := f.Open()
 		if err != nil {
 			return fmt.Errorf("open zip file: %w", err)
@@ -38,12 +69,6 @@ func unzip(src, dest string) error {
 				log.Printf("close zip file: %v", err)
 			}
 		}()
-
-		root, err := os.OpenRoot(dest)
-		if err != nil {
-			return fmt.Errorf("open root directory: %w", err)
-		}
-		defer root.Close()
 
 		if f.FileInfo().IsDir() {
 			err := root.Mkdir(f.Name, f.Mode())
@@ -74,7 +99,7 @@ func unzip(src, dest string) error {
 	}
 
 	for _, f := range r.File {
-		err := extractAndWriteFile(f)
+		err := extractAndWriteFile(f, root)
 		if err != nil {
 			return fmt.Errorf("extract and write file: %w", err)
 		}
@@ -134,10 +159,13 @@ func writeTarFile(tarReader *tar.Reader, root *os.Root, name string, mode os.Fil
 		return fmt.Errorf("invalid file mode: %d", mode)
 	}
 
-	err := root.Mkdir(filepath.Dir(name), 0755)
-	if err != nil {
-		return fmt.Errorf("create directory: %w", err)
+	dir := filepath.Clean(filepath.Dir(name))
+	if dir != "." && dir != "" {
+		if err := mkdirAllRoot(root, dir, 0755); err != nil {
+			return fmt.Errorf("create directory: %w", err)
+		}
 	}
+
 	outFile, err := root.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
 	if err != nil {
 		return fmt.Errorf("open file: %w", err)
