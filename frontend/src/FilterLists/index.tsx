@@ -9,6 +9,7 @@ import { type cfg } from '../../wailsjs/go/models';
 
 import './index.css';
 
+import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AppToaster } from '../common/toaster';
 import { useProxyState } from '../context/ProxyStateContext';
 
@@ -117,6 +118,7 @@ function ListItem({
   const { isProxyRunning } = useProxyState();
   const [switchLoading, setSwitchLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   return (
     <div className="filter-lists__list">
@@ -150,7 +152,44 @@ function ListItem({
       ) : null}
 
       <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
+      <div className="filter-lists__list-buttons">
+        <Tooltip
+          content={t('filterLists.copied') as string}
+          isOpen={copied}
+          hoverOpenDelay={0}
+          hoverCloseDelay={0}
+          position="top"
+          className="filter-lists__list-button"
+        >
+          <Button
+            icon="duplicate"
+            intent="none"
+            className="filter-lists__list-button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(filterList.url);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              } catch (err) {
+                console.error('Copying error', err);
+              }
+            }}
+          >
+            {t('filterLists.copy')}
+          </Button>
+        </Tooltip>
 
+        <Button
+          icon="globe-network"
+          intent="none"
+          className="filter-lists__list-button"
+          onClick={() => {
+            BrowserOpenURL(filterList.url);
+          }}
+        >
+          {t('filterLists.goTo')}
+        </Button>
+      </div>
       {showDelete && (
         <Tooltip content={t('common.stopProxyToDeleteFilter') as string} disabled={!isProxyRunning} placement="right">
           <Button

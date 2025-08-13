@@ -3,10 +3,12 @@ package cfg
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 const (
-	appFolderName = "zen"
+	appFolderName = constants.AppNameLowercase
 )
 
 // On Linux, we use the XDG Base Directory Specification:

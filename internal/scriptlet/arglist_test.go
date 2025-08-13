@@ -5,7 +5,7 @@ import "testing"
 func TestNormalize(t *testing.T) {
 	t.Parallel()
 
-	t.Run("normal cases", func(t *testing.T) {
+	t.Run("proper normalization of arg lists in expected format", func(t *testing.T) {
 		t.Parallel()
 
 		testCases := []struct {
@@ -22,7 +22,7 @@ func TestNormalize(t *testing.T) {
 			argList := argList(test.input)
 			got, err := argList.Normalize()
 			if err != nil {
-				t.Errorf("normalize(%q) returned an error: %v", test.input, err)
+				t.Fatalf("normalize(%q) returned an error: %v", test.input, err)
 			}
 			if string(got) != test.expected {
 				t.Errorf("normalize(%q) = %q, want %q", test.input, got, test.expected)
@@ -30,15 +30,16 @@ func TestNormalize(t *testing.T) {
 		}
 	})
 
-	t.Run("error cases", func(t *testing.T) {
+	t.Run("error on improper formatting", func(t *testing.T) {
 		t.Parallel()
 
 		testCases := []string{
 			`"arg1", "arg2`,
 			`"`,
-			``,
 			`"""`,
-			``,
+			` `,
+			`"arg1\", "arg2"`,
+			`"arg1", ,"arg2"`,
 		}
 
 		for _, test := range testCases {
@@ -92,4 +93,47 @@ func TestValidateJSString(t *testing.T) {
 			t.Errorf("validateJSString(%q) = %t, want %t", test.input, got, test.valid)
 		}
 	}
+}
+
+func TestIsTrusted(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns false for non-'trusted-' name", func(t *testing.T) {
+		t.Parallel()
+
+		argList, err := argList(`"test", "1", "2"`).Normalize()
+		if err != nil {
+			t.Fatalf("unexpected normalization error: %v", err)
+		}
+
+		if argList.IsTrusted() {
+			t.Error("IsTrusted() = true, want false")
+		}
+	})
+
+	t.Run("returns false and does not panic on empty name", func(t *testing.T) {
+		t.Parallel()
+
+		argList, err := argList(`""`).Normalize()
+		if err != nil {
+			t.Fatalf("unexpected normalization error: %v", err)
+		}
+
+		if argList.IsTrusted() {
+			t.Error("IsTrusted() = true, want false")
+		}
+	})
+
+	t.Run("returns true on 'trusted-' name", func(t *testing.T) {
+		t.Parallel()
+
+		argList, err := argList(`"trusted-test"`).Normalize()
+		if err != nil {
+			t.Fatalf("unexpected normalization error: %v", err)
+		}
+
+		if !argList.IsTrusted() {
+			t.Error("IsTrusted() = false, want true")
+		}
+	})
 }

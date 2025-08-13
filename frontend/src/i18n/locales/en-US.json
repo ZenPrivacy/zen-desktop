@@ -45,7 +45,10 @@
     "more": "More",
     "removeError": "Failed to remove filter list: {{error}}",
     "toggleError": "Failed to toggle filter list: {{error}}",
-    "trusted": "Trusted"
+    "trusted": "Trusted",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "goTo": "Open in browser"
   },
   "filterTypes": {
     "ads": "Ads",

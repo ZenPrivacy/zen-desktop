@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"math/big"
 	"time"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 // certTTL is the time-to-live for certificates.
@@ -42,7 +44,7 @@ func (cg *CertGenerator) GetCertificate(host string) (*tls.Certificate, error) {
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{"Zen"},
+			Organization: []string{constants.OrgName},
 		},
 		DNSNames:  []string{host},
 		NotBefore: time.Now(),

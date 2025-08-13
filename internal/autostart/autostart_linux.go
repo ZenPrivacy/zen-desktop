@@ -9,10 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 const (
-	appName         = "Zen"
 	desktopTemplate = `[Desktop Entry]
 Name={{.Name}}
 Comment=Automatically start {{.Name}} at user login
@@ -80,7 +81,7 @@ func (m Manager) Enable() (err error) {
 	t := template.Must(template.New("desktop").Parse(desktopTemplate))
 
 	if err := t.Execute(f, desktopTemplateParameters{
-		Name:     appName,
+		Name:     constants.AppName,
 		ExecPath: execPath,
 	}); err != nil {
 		return fmt.Errorf("execute template: %w", err)
@@ -134,5 +135,5 @@ func getDesktopPath() (string, error) {
 		return "", fmt.Errorf("get desktop folder: %w", err)
 	}
 
-	return filepath.Join(folder, appName+"-autostart.desktop"), nil
+	return filepath.Join(folder, constants.AppName+"-autostart.desktop"), nil
 }

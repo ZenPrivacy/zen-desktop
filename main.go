@@ -12,15 +12,12 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/app"
 	"github.com/ZenPrivacy/zen-desktop/internal/autostart"
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
-)
-
-const (
-	appName = "Zen"
 )
 
 //go:embed all:frontend/dist
@@ -44,7 +41,7 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	app, err := app.NewApp(appName, config, *startOnDomReady)
+	app, err := app.NewApp(constants.AppName, config, *startOnDomReady)
 	if err != nil {
 		log.Fatalf("failed to create app: %v", err)
 	}
@@ -62,7 +59,7 @@ func main() {
 	autostart := &autostart.Manager{}
 
 	err = wails.Run(&options.App{
-		Title:         appName,
+		Title:         constants.AppName,
 		Width:         420,
 		Height:        650,
 		DisableResize: true,
@@ -71,6 +68,10 @@ func main() {
 		},
 		OnStartup:     app.Startup,
 		OnBeforeClose: app.BeforeClose,
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId:               constants.InstanceID,
+			OnSecondInstanceLaunch: app.OnSecondInstanceLaunch,
+		},
 		Bind: []interface{}{
 			app,
 			config,
@@ -81,7 +82,7 @@ func main() {
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
-				Title:   appName,
+				Title:   constants.AppName,
 				Message: fmt.Sprintf("Your Comprehensive Ad-Blocker and Privacy Guard\nVersion: %s\n© 2025 Zen Privacy Project Developers", cfg.Version),
 			},
 		},
