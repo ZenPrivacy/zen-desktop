@@ -14,22 +14,22 @@ import (
 
 func mkdirAllRoot(root *os.Root, dir string, mode os.FileMode) error {
 	err := root.Mkdir(dir, mode)
-	if err == nil{
+	if err == nil {
 		return nil
 	}
-	
-	if os.IsExist(err){
+
+	if os.IsExist(err) {
 		return nil
 	}
-	
-	if os.IsNotExist(err){
+
+	if os.IsNotExist(err) {
 		parentDir := filepath.Dir(dir)
-		if parentDir != dir{
+		if parentDir != dir {
 			if err := mkdirAllRoot(root, parentDir, 0755); err != nil {
 				return err
 			}
 			err = root.Mkdir(dir, mode)
-			if err == nil || os.IsExist(err){
+			if err == nil || os.IsExist(err) {
 				return nil
 			}
 		}
