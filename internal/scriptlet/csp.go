@@ -1,145 +1,171 @@
 package scriptlet
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
 	"net/http"
-	"regexp"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
-var (
-	nonceRe = regexp.MustCompile(`'nonce-([^']+)'`)
+const (
+	cspHeader     = "Content-Security-Policy"
+	cspReportOnly = "Content-Security-Policy-Report-Only"
 )
 
-// patchCSPHeaders mutates header as needed and tells the caller whether injection is
-// possible. It returns the nonce to place on the <script> tag (empty string if
-// no nonce is required) and ok=false when inline injection would be blocked
-// (e.g., multiple conflicting nonces).
-func patchCSPHeaders(h http.Header) (nonce string, ok bool) {
-	nonces := collectNonces(h)
-	switch len(nonces) {
-	case 0:
-		if needsNonce(h) {
-			n := uuid.NewString()
-			addNonceToCSP(h, n)
-			return n, true
-		}
-		// inline allowed, but no nonce needed
-		return "", true
-	case 1:
-		// get the single element
-		for n := range nonces {
-			return n, true
-		}
-	}
-
-	// multiple distinct nonces -> skip
-	// Browsers enforce *all* CSP headers: an inline script can satisfy
-	// only one nonce, so with two different nonces every inline script
-	// is blocked (CSP 2 §3.1, CSP 3 §7.2.3) - https://www.w3.org/TR/CSP2
-	return "", false
+var directivePriority = map[string]int{
+	"default-src":     1, // fallback
+	"script-src":      2,
+	"script-src-elem": 3, // most specific for <script> elements
 }
 
-// addNonceToCSP appends nonce *only* to directives that don't already contain a
-// nonce and aren't "'none'".
-func addNonceToCSP(h http.Header, nonce string) {
-	const key = "Content-Security-Policy"
+// patchCSPHeaders mutates headers so an inline <script nonce=...> can run.
+// Returns the nonce to place on the <script> tag.
+func patchCSPHeaders(h http.Header) (nonce string, err error) {
+	// If there is no CSP at all, nothing to patch; return empty nonce.
+	if len(h.Values(cspHeader)) == 0 && len(h.Values(cspReportOnly)) == 0 {
+		return "", nil
+	}
+	n, err := newCSPNonce()
+	if err != nil {
+		return "", fmt.Errorf("generate nonce: %v", err)
+	}
+
+	enforcedPatched := patchOneHeader(h, cspHeader, n)
+	reportOnlyPatched := patchOneHeader(h, cspReportOnly, n)
+
+	if !enforcedPatched && !reportOnlyPatched {
+		return "", nil
+	}
+
+	return n, nil
+}
+
+func patchOneHeader(h http.Header, key, nonce string) (patched bool) {
 	lines := h.Values(key)
 	if len(lines) == 0 {
 		return
 	}
 
+	nonceToken := "'nonce-" + nonce + "'"
+	var changed bool
+
+	// In case of multiple lines/policies, the browsers will select the most restrictive one.
+	// For this reason, we modify each independently so they all allow the <script>.
+	// See more: https://content-security-policy.com/examples/multiple-csp-headers/.
 	for i, line := range lines {
-		changed := false
-		dirs := strings.Split(line, ";")
-		for j, d := range dirs {
-			ld := strings.ToLower(strings.TrimSpace(d))
+		rawDirs := strings.Split(line, ";")
 
-			if !strings.HasPrefix(ld, "script-src-elem") &&
-				!strings.HasPrefix(ld, "script-src") &&
-				!strings.HasPrefix(ld, "default-src") {
+		// Find most specific directive controlling <script> elements on this line/policy.
+		bestIdx := -1
+		bestName := ""
+		bestPrio := 0
+		bestValue := ""
+
+		for j, raw := range rawDirs {
+			d := strings.TrimSpace(raw)
+			if d == "" {
 				continue
 			}
-			if strings.Contains(ld, "'none'") ||
-				strings.Contains(ld, "'nonce-") {
-				// leave directives that already forbid all or already have a nonce
+			name, value := cutDirective(d)
+			prio, ok := directivePriority[name]
+			if !ok {
 				continue
 			}
-			token := "'nonce-" + nonce + "'"
-			if !strings.Contains(d, token) {
-				dirs[j] = strings.TrimSpace(d) + " " + token
-				changed = true
+			if prio > bestPrio {
+				bestIdx, bestName, bestPrio, bestValue = j, name, prio, value
 			}
 		}
-		if changed {
-			lines[i] = strings.Join(dirs, ";")
+
+		// No relevant directive on this line; leave it as-is.
+		if bestIdx == -1 {
+			continue
+		}
+
+		// If policy already allows inline <script> elements, do nothing.
+		if allowsInline(bestValue) {
+			continue
+		}
+
+		var newValue string
+		if bestValue == "'none'" {
+			newValue = nonceToken
+		} else {
+			newValue = bestValue + " " + nonceToken
+		}
+
+		rawDirs[bestIdx] = bestName + " " + newValue
+		lines[i] = strings.Join(rawDirs, ";")
+		changed = true
+	}
+
+	if changed {
+		h.Del(key)
+		for _, v := range lines {
+			h.Add(key, strings.TrimSpace(strings.Trim(v, " ;")))
 		}
 	}
-	h[key] = lines
+
+	return changed
 }
 
-// collectNonces returns distinct nonce values from script-related directives only.
-func collectNonces(h http.Header) map[string]struct{} {
-	out := make(map[string]struct{})
-	for _, line := range h.Values("Content-Security-Policy") {
-		for raw := range strings.SplitSeq(line, ";") {
-			dir := strings.TrimSpace(raw)
-			if dir == "" {
-				continue
-			}
-			name := strings.ToLower(strings.Fields(dir)[0])
-			if name != "script-src" && name != "script-src-elem" && name != "default-src" {
-				continue
-			}
-			for _, m := range nonceRe.FindAllStringSubmatch(dir, -1) {
-				out[m[1]] = struct{}{}
-			}
-		}
+// cutDirective splits "name [value...]" -> (lowercased name, value without leading and trailing whitespace).
+func cutDirective(s string) (string, string) {
+	name, rest, ok := strings.Cut(s, " ")
+	if !ok {
+		return strings.ToLower(name), ""
 	}
-	return out
+	return strings.ToLower(name), strings.TrimSpace(rest)
 }
 
-// inlineAllowed reports whether a directive explicitly allows inline scripts
-// *without* a nonce and *without* 'strict‑dynamic'.
-func inlineAllowed(dir string) bool {
-	lc := strings.ToLower(dir)
-	if !strings.Contains(lc, "'unsafe-inline'") {
+// newCSPNonce returns a cryptographically random base64 string.
+func newCSPNonce() (string, error) {
+	// From https://www.w3.org/TR/CSP3/#security-nonces:
+	// The generated value SHOULD be at least 128 bits long (before encoding), and
+	// SHOULD be generated via a cryptographically secure random number generator in order to ensure that the value is difficult for an attacker to predict.
+	// The code below satisfies both of these requirements.
+	var b [18]byte // 144 bits
+	_, err := rand.Read(b[:])
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(b[:]), nil
+}
+
+// allowsInline implements CSP3 "Does a source list allow all inline behavior for type?" algorithm.
+// True iff 'unsafe-inline' is present AND there is NO nonce/hash AND NO 'strict-dynamic'.
+//
+// Reference: https://www.w3.org/TR/CSP3/#allow-all-inline
+func allowsInline(sourceList string) bool {
+	sourceList = strings.TrimSpace(sourceList)
+	if sourceList == "" {
 		return false
 	}
-	blockers := []string{"'strict-dynamic'", "'nonce-", "'sha256-", "'sha384-", "'sha512-'"}
-	for _, b := range blockers {
-		if strings.Contains(lc, b) {
+	tokens := strings.Fields(sourceList)
+
+	var unsafeInline bool
+	for _, t := range tokens {
+		switch t {
+		case "'unsafe-inline'":
+			unsafeInline = true
+		case "'strict-dynamic'":
 			return false
+		default:
+			if isNonceOrHashSource(t) {
+				return false
+			}
 		}
 	}
-	return true
+	return unsafeInline
 }
 
-// needsNonce decides whether a fresh nonce is required for inline script to run.
-// It returns false when inline execution is already allowed.
-func needsNonce(h http.Header) bool {
-	for _, line := range h.Values("Content-Security-Policy") {
-		lc := strings.ToLower(line)
-		for _, name := range []string{"script-src-elem", "script-src", "default-src"} {
-			idx := strings.Index(lc, name)
-			if idx == -1 {
-				continue
-			}
-
-			end := strings.Index(line[idx:], ";")
-			if end == -1 {
-				end = len(line)
-			} else {
-				end += idx
-			}
-
-			dir := line[idx:end]
-			if !inlineAllowed(dir) {
-				return true // one blocking policy is enough
-			}
-			break // this header's applicable directive was permissive; check next header
-		}
+func isNonceOrHashSource(t string) bool {
+	if len(t) < 3 || t[0] != '\'' || t[len(t)-1] != '\'' {
+		return false
 	}
-	return false
+	inner := t[1 : len(t)-1]
+	return strings.HasPrefix(inner, "nonce-") ||
+		strings.HasPrefix(inner, "sha256-") ||
+		strings.HasPrefix(inner, "sha384-") ||
+		strings.HasPrefix(inner, "sha512-")
 }
