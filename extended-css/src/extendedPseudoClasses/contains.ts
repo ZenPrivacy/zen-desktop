@@ -16,9 +16,9 @@ export class Contains implements Selector {
 
   select(input: Element[]) {
     if (this.textRe) {
-      return input.filter((e) => this.textRe!.test(e.innerHTML));
+      return input.filter((e) => e.textContent !== null && this.textRe!.test(e.textContent));
     } else if (this.textSearch) {
-      return input.filter((e) => e.innerHTML.includes(this.textSearch!));
+      return input.filter((e) => e.textContent !== null && e.textContent.includes(this.textSearch!));
     }
     return [];
   }
