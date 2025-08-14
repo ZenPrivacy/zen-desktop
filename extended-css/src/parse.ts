@@ -5,6 +5,7 @@ import { Descendant } from './combinators/descendant';
 import { NextSibling } from './combinators/nextSibling';
 import { SubsequentSibling } from './combinators/subsequentSibling';
 import { Contains, MatchesPath } from './extendedPseudoClasses';
+import { MatchesCSS } from './extendedPseudoClasses/matchesCSS';
 import { Upward } from './extendedPseudoClasses/upward';
 import { Mixed } from './mixed';
 import { RawQuery } from './raw';
@@ -92,7 +93,7 @@ function parsePseudoClass(node: CSSTree.PseudoClassSelector): {
       return { selector: createPseudoWithArgument(node, Upward, 'upward'), skipChildren: true };
     case 'matches-css':
       return {
-        selector: createPseudoWithArgument(node, Upward, 'matches-css'),
+        selector: createPseudoWithArgument(node, MatchesCSS, 'matches-css'),
         skipChildren: true,
         requiresQueryInFront: true,
       };
