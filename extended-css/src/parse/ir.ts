@@ -1,21 +1,30 @@
-export class RawSegment {
-  public kind = 'raw';
-  constructor(public text: string) {}
+/**
+ * Raw query token.
+ */
+export class RawToken {
+  public kind: 'raw' = 'raw';
+  constructor(public literal: string) {}
   toString() {
-    return `Raw(${this.text})`;
+    return `Raw(${this.literal})`;
   }
 }
 
-export class Combinator {
-  public kind = 'comb';
-  constructor(public token: string) {}
+/**
+ * Combinator token.
+ */
+export class CombToken {
+  public kind: 'comb' = 'comb';
+  constructor(public literal: string) {}
   toString() {
-    return `Comb(${this.token})`;
+    return `Comb(${this.literal})`;
   }
 }
 
-export class Extended {
-  public kind = 'ext';
+/**
+ * Extended pseudo class token.
+ */
+export class ExtToken {
+  public kind: 'ext' = 'ext';
   constructor(
     public name: string,
     public args: string,
@@ -29,4 +38,4 @@ export class Extended {
 /**
  * Intermediate representation token.
  */
-export type IRToken = RawSegment | Combinator | Extended;
+export type IRToken = RawToken | CombToken | ExtToken;

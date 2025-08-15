@@ -1,6 +1,6 @@
 import * as CSSTree from 'css-tree';
 
-import { Combinator, Extended, IRToken, RawSegment } from './ir';
+import { CombToken, ExtToken, IRToken, RawToken } from './ir';
 
 /**
  * Maps extended selector names to whether they require a context (a raw query) in front.
@@ -24,7 +24,7 @@ export function tokenizeSelector(selector: string): IRToken[] {
   const flushRaw = () => {
     const t = cssBuf.trim();
     if (t.length > 0) {
-      out.push(new RawSegment(t));
+      out.push(new RawToken(t));
     }
     cssBuf = '';
   };
@@ -46,7 +46,7 @@ export function tokenizeSelector(selector: string): IRToken[] {
 
       case 'Combinator':
         flushRaw();
-        out.push(new Combinator(node.name));
+        out.push(new CombToken(node.name));
         return;
 
       case 'PseudoClassSelector': {
@@ -59,7 +59,7 @@ export function tokenizeSelector(selector: string): IRToken[] {
             throw new Error(`:${name}(): expected Raw argument`);
           }
 
-          out.push(new Extended(name, rawArg.value, EXTENDED_CONTEXT[name]));
+          out.push(new ExtToken(name, rawArg.value, EXTENDED_CONTEXT[name]));
         } else {
           cssBuf += getLiteral(node);
         }

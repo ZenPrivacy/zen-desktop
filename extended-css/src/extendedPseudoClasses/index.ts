@@ -1,2 +1,4 @@
-export { Contains } from './contains';
-export { MatchesPath } from './matchesPath';
+export * from './contains';
+export * from './matchesPath';
+export * from './upward';
+export * from './matchesCSS';
