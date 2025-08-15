@@ -3,7 +3,6 @@ package scriptlet
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -21,24 +20,21 @@ var directivePriority = map[string]int{
 
 // patchCSPHeaders mutates headers so an inline <script nonce=...> can run.
 // Returns the nonce to place on the <script> tag.
-func patchCSPHeaders(h http.Header) (nonce string, err error) {
+func patchCSPHeaders(h http.Header) (nonce string) {
 	// If there is no CSP at all, nothing to patch; return empty nonce.
 	if len(h.Values(cspHeader)) == 0 && len(h.Values(cspReportOnly)) == 0 {
-		return "", nil
+		return ""
 	}
-	n, err := newCSPNonce()
-	if err != nil {
-		return "", fmt.Errorf("generate nonce: %v", err)
-	}
+	n := newCSPNonce()
 
 	enforcedPatched := patchOneHeader(h, cspHeader, n)
 	reportOnlyPatched := patchOneHeader(h, cspReportOnly, n)
 
 	if !enforcedPatched && !reportOnlyPatched {
-		return "", nil
+		return ""
 	}
 
-	return n, nil
+	return n
 }
 
 func patchOneHeader(h http.Header, key, nonce string) (patched bool) {
@@ -119,17 +115,14 @@ func cutDirective(s string) (string, string) {
 }
 
 // newCSPNonce returns a cryptographically random base64 string.
-func newCSPNonce() (string, error) {
+func newCSPNonce() string {
 	// From https://www.w3.org/TR/CSP3/#security-nonces:
 	// The generated value SHOULD be at least 128 bits long (before encoding), and
 	// SHOULD be generated via a cryptographically secure random number generator in order to ensure that the value is difficult for an attacker to predict.
 	// The code below satisfies both of these requirements.
 	var b [18]byte // 144 bits
-	_, err := rand.Read(b[:])
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(b[:]), nil
+	rand.Read(b[:])
+	return base64.StdEncoding.EncodeToString(b[:])
 }
 
 // allowsInline implements CSP3 "Does a source list allow all inline behavior for type?" algorithm.

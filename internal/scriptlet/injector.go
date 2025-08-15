@@ -65,10 +65,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	nonce, err := patchCSPHeaders(res.Header)
-	if err != nil {
-		log.Printf("error patching csp headers: %v", err)
-	}
+	nonce := patchCSPHeaders(res.Header)
 
 	var injection bytes.Buffer
 	if nonce == "" {
