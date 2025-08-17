@@ -31,7 +31,17 @@ func setSystemProxy(pacURL string) error {
 	// TODO: add support for other desktop environments
 	switch desktop {
 	case "kde":
-		return setKDEProxy(pacURL)
+		if err := setKDEProxy(pacURL); err != nil {
+			return err
+		}
+
+		// Set gsettings on KDE as firefox based browsers ignores KDE proxy
+		if binaryExists("gsettings") {
+			if err := setGnomeProxy(pacURL); err != nil {
+				return err
+			}
+		}
+		return nil
 
 	case "gnome":
 		return setGnomeProxy(pacURL)
@@ -91,7 +101,16 @@ func unsetSystemProxy() error {
 	desktop := detectDesktopEnvironment()
 	switch desktop {
 	case "kde":
-		return unsetKDEProxy()
+		if err := unsetKDEProxy(); err != nil {
+			return err
+		}
+
+		if binaryExists("gsettings") {
+			if err := unsetGnomeProxy(); err != nil {
+				return err
+			}
+		}
+		return nil
 
 	case "gnome":
 		return unsetGnomeProxy()
