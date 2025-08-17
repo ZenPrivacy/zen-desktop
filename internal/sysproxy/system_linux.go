@@ -113,10 +113,17 @@ func unsetKDEProxy() error {
 		kwriteconfig = "kwriteconfig5"
 	}
 
-	cmd := exec.Command(kwriteconfig, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "0")
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("unset KDE proxy: %v (%q)", err, out)
+	commands := [][]string{
+		{kwriteconfig, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "0"},
+		{kwriteconfig, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "Proxy Config Script", ""},
+	}
+
+	for _, command := range commands {
+		cmd := exec.Command(command[0], command[1:]...)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("unset KDE proxy: %v (%q)", err, out)
+		}
 	}
 
 	return nil
