@@ -52,15 +52,17 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 		// "Items are separated by any number of blanks and/or tab characters."
 		hosts := strings.Fields(hostsField)
 
-		nr.hostsMu.Lock()
 		for _, host := range hosts {
 			if reHostsIgnore.MatchString(host) {
 				continue
 			}
 
-			nr.hosts[host] = filterName
+			r := fmt.Sprintf("||%s^$document", host)
+			nr.regularRuleTree.Add(r, &rule.Rule{
+				RawRule:    r,
+				FilterName: filterName,
+			})
 		}
-		nr.hostsMu.Unlock()
 
 		return false, nil
 	}

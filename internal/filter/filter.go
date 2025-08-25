@@ -17,6 +17,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
+	"github.com/ZenPrivacy/zen-desktop/internal/networkrules"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
 	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
 )
@@ -34,6 +35,7 @@ type networkRules interface {
 	ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error)
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
+	CreateBlockResponseNew(req *http.Request, blockInfo networkrules.BlockInfo) *http.Response
 }
 
 // config provides filter configuration.
@@ -244,6 +246,14 @@ func (f *Filter) HandleRequest(req *http.Request) *http.Response {
 	appliedRules, shouldBlock, redirectURL := f.networkRules.ModifyReq(req)
 	if shouldBlock {
 		f.eventsEmitter.OnFilterBlock(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
+
+		if req.Header.Get("Sec-Fetch-Dest") == "document" && req.Header.Get("Sec-Fetch-User") == "?1" {
+			return f.networkRules.CreateBlockResponseNew(req, networkrules.BlockInfo{
+				URL:        req.URL.Hostname(),
+				Rule:       appliedRules[0].RawRule,
+				FilterList: *appliedRules[0].FilterName,
+			})
+		}
 		return f.networkRules.CreateBlockResponse(req)
 	}
 
