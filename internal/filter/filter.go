@@ -15,6 +15,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/filter/unblockserver"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules"
@@ -176,6 +177,9 @@ func (f *Filter) init() {
 	if len(myRules) > 0 {
 		log.Printf("filter initialization: added %d rules and %d exceptions from %q", ruleCount, exceptionCount, filterName)
 	}
+
+	srv := unblockserver.NewServer(f.networkRules)
+	srv.Start(33669)
 }
 
 // ParseAndAddRules parses the rules from the given reader and adds them to the filter.

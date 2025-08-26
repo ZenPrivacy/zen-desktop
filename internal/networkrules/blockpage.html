@@ -73,15 +73,27 @@
         {{ end }}
 
         <div class="actions">
-          <a
-            class="btn"
-            style="cursor: pointer"
-            onclick="console.log('unblock')"
-            >Proceed</a
-          >
+          <a class="btn" style="cursor: pointer" onclick="proceed()">Proceed</a>
           <span class="btn secondary">Go back</span>
         </div>
       </div>
     </div>
+    <script>
+      function proceed() {
+        const host = location.hostname;
+        fetch(
+          `http://127.0.0.1:33669/unblock?host=${encodeURIComponent(host)}`,
+          {
+            method: 'GET',
+          }
+        )
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((err) => {
+            console.error('Unblock failed:', err);
+          });
+      }
+    </script>
   </body>
 </html>
