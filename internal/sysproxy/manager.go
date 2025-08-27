@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-var ErrUnsupportedDesktopEnvironment = errors.New("system proxy configuration is currently only supported on GNOME")
+var ErrUnsupportedDesktopEnvironment = errors.New("system proxy configuration is currently only supported on GNOME and KDE")
 
 type Manager struct {
 	pacPort int
