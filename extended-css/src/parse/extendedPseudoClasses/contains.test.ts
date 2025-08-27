@@ -25,41 +25,41 @@ describe('Contains', () => {
 
   test('matches elements containing a plain string', () => {
     let selector = new Contains('Hello');
-    expect(selector.select(divs)).toEqual([document.querySelector('#one')]);
+    expect(selector.run(divs)).toEqual([document.querySelector('#one')]);
 
     selector = new Contains('world');
-    const res = selector.select(divs);
+    const res = selector.run(divs);
     expect(res).toContain(document.querySelector('#one'));
     expect(res).toContain(document.querySelector('#six'));
   });
 
   test('matches elements containing a substring', () => {
     const selector = new Contains('bar');
-    expect(selector.select(divs)).toEqual([document.querySelector('#two')]);
+    expect(selector.run(divs)).toEqual([document.querySelector('#two')]);
   });
 
   test('matches elements containing special characters', () => {
     const selector = new Contains('[abc]');
-    expect(selector.select(divs)).toEqual([document.querySelector('#three')]);
+    expect(selector.run(divs)).toEqual([document.querySelector('#three')]);
   });
 
   test('matches elements using a regexp literal', () => {
     const selector = new Contains('/test \\d+/');
-    expect(selector.select(divs)).toEqual([document.querySelector('#four')]);
+    expect(selector.run(divs)).toEqual([document.querySelector('#four')]);
   });
 
   test('matches elements using a regexp with flags', () => {
     const selector = new Contains('/hello/i');
-    expect(selector.select(divs)).toEqual([document.querySelector('#one')]);
+    expect(selector.run(divs)).toEqual([document.querySelector('#one')]);
   });
 
   test('returns empty array if no match', () => {
     const selector = new Contains('notfound');
-    expect(selector.select(divs)).toEqual([]);
+    expect(selector.run(divs)).toEqual([]);
   });
 
   test('returns empty array for empty elements', () => {
     const selector = new Contains('anything');
-    expect(selector.select([document.querySelector('#five')!])).toEqual([]);
+    expect(selector.run([document.querySelector('#five')!])).toEqual([]);
   });
 });

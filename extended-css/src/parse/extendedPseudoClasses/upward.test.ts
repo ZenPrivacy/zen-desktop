@@ -28,24 +28,24 @@ describe('Upward', () => {
   test('matches ancestor by distance', () => {
     let selector = new Upward('1');
     const input = [span];
-    expect(selector.select(input)).toEqual([document.querySelector('#parent')]);
+    expect(selector.run(input)).toEqual([document.querySelector('#parent')]);
 
     selector = new Upward('2');
-    expect(selector.select(input)).toEqual([document.querySelector('#grandparent')]);
+    expect(selector.run(input)).toEqual([document.querySelector('#grandparent')]);
   });
 
   test('skips element if distance is further than the root element', () => {
     const selector = new Upward('42');
     const input = [span];
-    expect(selector.select(input)).toEqual([]);
+    expect(selector.run(input)).toEqual([]);
   });
 
   test('matches ancestor by query', () => {
     let selector = new Upward('[data-e2e-id=ps]');
     const input = [span];
-    expect(selector.select(input)).toEqual([document.querySelector('div[data-e2e-id=ps]')]);
+    expect(selector.run(input)).toEqual([document.querySelector('div[data-e2e-id=ps]')]);
 
     selector = new Upward('#grandparent');
-    expect(selector.select(input)).toEqual([document.querySelector('#grandparent')]);
+    expect(selector.run(input)).toEqual([document.querySelector('#grandparent')]);
   });
 });

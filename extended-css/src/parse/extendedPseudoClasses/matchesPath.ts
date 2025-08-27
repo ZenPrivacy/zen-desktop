@@ -1,7 +1,7 @@
-import { Selector } from '../types';
 import { parseRegexpLiteral } from '../utils/parseRegexp';
+import { Step } from '../types';
 
-export class MatchesPath implements Selector {
+export class MatchesPath implements Step {
   private pathRe?: RegExp;
   private pathSearch?: string;
 
@@ -14,7 +14,7 @@ export class MatchesPath implements Selector {
     this.pathSearch = path;
   }
 
-  select(input: Element[]) {
+  run(input: Element[]) {
     const path = window.location.pathname;
     if (this.pathRe) {
       return this.pathRe.test(path) ? input : [];

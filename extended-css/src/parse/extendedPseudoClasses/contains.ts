@@ -1,7 +1,7 @@
-import { Selector } from '../types';
 import { parseRegexpLiteral } from '../utils/parseRegexp';
+import { Step } from '../types';
 
-export class Contains implements Selector {
+export class Contains implements Step {
   private textRe?: RegExp;
   private textSearch?: string;
 
@@ -14,7 +14,7 @@ export class Contains implements Selector {
     this.textSearch = text;
   }
 
-  select(input: Element[]) {
+  run(input: Element[]) {
     if (this.textRe) {
       return input.filter((e) => e.textContent !== null && this.textRe!.test(e.textContent));
     } else if (this.textSearch) {

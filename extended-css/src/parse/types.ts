@@ -1,4 +1,15 @@
 /**
+ * Part of a final Query. Takes a set of elements as its input and returns another set based on internal semantics.
+ */
+export interface Step {
+  run(input: Element[]): Element[];
+}
+
+export type Query = Step[];
+
+// IR
+
+/**
  * Raw query token.
  */
 export class RawToken {
@@ -8,7 +19,6 @@ export class RawToken {
     return `Raw(${this.literal})`;
   }
 }
-
 /**
  * Combinator token.
  */
@@ -34,7 +44,6 @@ export class ExtToken {
     return `Ext(:${this.name}(${this.args}))`;
   }
 }
-
 /**
  * Intermediate representation token.
  */

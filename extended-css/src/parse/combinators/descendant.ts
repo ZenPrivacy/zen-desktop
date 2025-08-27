@@ -1,7 +1,7 @@
-import { Selector } from '../types';
+import { Step } from '../types';
 
-export class Descendant implements Selector {
-  select(input: Element[]) {
+export class Descendant implements Step {
+  run(input: Element[]) {
     const descendantSet = new Set<Element>();
     for (const el of input) {
       const descendants = el.querySelectorAll('*');

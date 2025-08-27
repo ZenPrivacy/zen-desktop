@@ -1,9 +1,9 @@
-import { Selector } from './types';
+import { Step } from './types';
 
-export class RawQuery implements Selector {
+export class RawQuery implements Step {
   constructor(private query: string) {}
 
-  select(input: Element[]) {
+  run(input: Element[]) {
     const res = [];
     for (const el of input) {
       const selected = el.querySelectorAll(this.query);

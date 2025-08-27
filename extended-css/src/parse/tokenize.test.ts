@@ -1,6 +1,6 @@
 import { describe, test } from '@jest/globals';
 
-import { tokenizeSelector } from './tokenize';
+import { tokenize } from './tokenize';
 
 describe('tokenizeSelector → IR tokens', () => {
   test.each<[string, string]>([
@@ -27,7 +27,7 @@ describe('tokenizeSelector → IR tokens', () => {
 
     ['section:where(.x, .y)', 'Raw(section:where(.x, .y))'],
   ])('tokenize %j', (input, expected) => {
-    const got = tokenizeSelector(input)
+    const got = tokenize(input)
       .map((t) => t.toString())
       .join(' ');
     expect(got).toEqual(expected);

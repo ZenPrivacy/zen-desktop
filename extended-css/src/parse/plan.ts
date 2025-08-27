@@ -1,11 +1,13 @@
-import { Child, Descendant, NextSibling, SubsequentSibling } from '../combinators';
-import { Contains, MatchesCSS, MatchesPath, Upward } from '../extendedPseudoClasses';
-import { RawQuery } from '../raw';
+import { Child, Descendant, NextSibling, SubsequentSibling } from './combinators';
+import { Contains, MatchesCSS, MatchesPath, Upward } from './extendedPseudoClasses';
+import { RawQuery } from './raw';
+import { IRToken, ExtToken, CombToken, Query } from './types';
 
-import { CombToken, ExtToken, IRToken } from './ir';
-
-export function plan(tokens: IRToken[]) {
-  const steps = [];
+/**
+ * Builds a final, optimized query out of intermediate representation tokens.
+ */
+export function plan(tokens: IRToken[]): Query {
+  const steps: Query = [];
   let cssBuilder = '';
   let havePrevStep = false;
 
@@ -92,6 +94,7 @@ function makeExtended(token: ExtToken) {
     case 'matches-css':
       return new MatchesCSS(token.args);
   }
+  throw new Error(`Unknown extended pseudo class ${token.name}`);
 }
 
 /**

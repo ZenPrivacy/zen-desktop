@@ -1,6 +1,6 @@
-import { Selector } from '../types';
+import { Step } from '../types';
 
-export class Upward implements Selector {
+export class Upward implements Step {
   private distance?: number;
   private selector?: string;
 
@@ -16,7 +16,7 @@ export class Upward implements Selector {
     }
   }
 
-  select(input: Element[]): Element[] {
+  run(input: Element[]): Element[] {
     if (this.distance) {
       return this.matchDistance(input);
     } else if (this.selector) {

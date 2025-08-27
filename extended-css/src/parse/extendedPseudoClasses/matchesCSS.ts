@@ -1,7 +1,7 @@
-import { Selector } from '../types';
 import { parseRegexpLiteral, parseWildcardPattern } from '../utils/parseRegexp';
+import { Step } from '../types';
 
-export class MatchesCSS implements Selector {
+export class MatchesCSS implements Step {
   private pseudoElement?: string;
   private property: string;
   private valueRe?: RegExp;
@@ -55,7 +55,7 @@ export class MatchesCSS implements Selector {
     return { pseudoElement, property, value };
   }
 
-  select(input: Element[]): Element[] {
+  run(input: Element[]): Element[] {
     return input.filter((element) => this.matchesElement(element));
   }
 

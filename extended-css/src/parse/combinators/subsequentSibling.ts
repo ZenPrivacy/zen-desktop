@@ -1,7 +1,7 @@
-import { Selector } from '../types';
+import { Step } from '../types';
 
-export class SubsequentSibling implements Selector {
-  select(input: Element[]) {
+export class SubsequentSibling implements Step {
+  run(input: Element[]) {
     const result = new Set<Element>();
 
     for (const element of input) {

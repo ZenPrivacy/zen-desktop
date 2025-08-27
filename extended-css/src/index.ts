@@ -1,41 +1,38 @@
 import { parse } from './parse';
-import { select } from './select';
-import { Selector } from './types';
+import { QueryRunner } from './queryExec';
 
 export default function (rules: string): void {
-  const parsed: Selector[][] = [];
-  for (const rule of rules.split('\n')) {
+  const lines = rules
+    .split('\n')
+    .map((r) => r.trim())
+    .filter((l) => l.length > 0);
+  const runners: QueryRunner[] = [];
+
+  for (const l of lines) {
     try {
-      parsed.push(parse(rule));
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.debug(`Zen (extended-css): failed to parse rule ${rule}: ${err}`);
+      const query = parse(l);
+      const runner = new QueryRunner(query);
+      runners.push(runner);
+    } catch (ex) {
+      console.debug(`Failed to parse line ${l}: ${ex}`);
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const selectedSet = new Set<Element>();
-    for (const selector of parsed) {
-      const elements = select(selector);
-      for (const el of elements) {
-        selectedSet.add(el);
+  const runAll = () => {
+    for (const r of runners) {
+      try {
+        r.run();
+      } catch (ex) {
+        console.debug(`Failed to run ${r}: ${ex}`);
       }
     }
+  };
 
-    console.log(selectedSet);
-    selectedSet.forEach((el) => el.remove());
+  document.addEventListener('DOMContentLoaded', () => {
+    runAll();
   });
 
   window.addEventListener('popstate', () => {
-    const selectedSet = new Set<Element>();
-    for (const selector of parsed) {
-      const elements = select(selector);
-      for (const el of elements) {
-        selectedSet.add(el);
-      }
-    }
-
-    console.log(selectedSet);
-    selectedSet.forEach((el) => el.remove());
+    runAll();
   });
 }

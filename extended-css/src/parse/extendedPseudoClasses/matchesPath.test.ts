@@ -21,29 +21,29 @@ describe('MatchesPath', () => {
   test('returns input if pathname includes the search string', () => {
     const selector = new MatchesPath('foo');
     const input = [{}, {}] as Element[];
-    expect(selector.select(input)).toBe(input);
+    expect(selector.run(input)).toBe(input);
   });
 
   test('returns empty array if pathname does not include the search string', () => {
     const selector = new MatchesPath('notfound');
     const input = [{}, {}] as Element[];
-    expect(selector.select(input)).toEqual([]);
+    expect(selector.run(input)).toEqual([]);
   });
 
   test('returns input if pathname matches the regexp', () => {
     const selector = new MatchesPath('/bar/');
     const input = [{}, {}] as Element[];
-    expect(selector.select(input)).toBe(input);
+    expect(selector.run(input)).toBe(input);
   });
 
   test('returns empty array if pathname does not match the regexp', () => {
     const selector = new MatchesPath('/qux/');
     const input = [{}, {}] as Element[];
-    expect(selector.select(input)).toEqual([]);
+    expect(selector.run(input)).toEqual([]);
   });
 
   test('returns empty array if input is empty', () => {
     const selector = new MatchesPath('foo');
-    expect(selector.select([])).toEqual([]);
+    expect(selector.run([])).toEqual([]);
   });
 });

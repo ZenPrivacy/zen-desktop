@@ -1,6 +1,6 @@
 import * as CSSTree from 'css-tree';
 
-import { CombToken, ExtToken, IRToken, RawToken } from './ir';
+import { IRToken, ExtToken, CombToken, RawToken } from './types';
 
 /**
  * Maps extended selector names to whether they require a context (a raw query) in front.
@@ -15,7 +15,7 @@ const EXTENDED_CONTEXT: Record<string, boolean> = {
 /**
  * Parses the selector into an intermediate token representation.
  */
-export function tokenizeSelector(selector: string): IRToken[] {
+export function tokenize(selector: string): IRToken[] {
   const ast = CSSTree.parse(selector, { context: 'selector', positions: true });
 
   const out: IRToken[] = [];
