@@ -2,30 +2,30 @@ import { describe, test } from '@jest/globals';
 
 import { tokenize } from './tokenize';
 
-describe('tokenizeSelector → IR tokens', () => {
+describe('tokenize', () => {
   test.each<[string, string]>([
-    ['div', 'Raw(div)'],
-    ['a[href^="http"]', 'Raw(a[href^="http"])'],
-    ['div:not(.ad)', 'Raw(div:not(.ad))'],
+    ['div', 'RawTok(div)'],
+    ['a[href^="http"]', 'RawTok(a[href^="http"])'],
+    ['div:not(.ad)', 'RawTok(div:not(.ad))'],
 
-    ['div>.x+span~a', 'Raw(div) Comb(>) Raw(.x) Comb(+) Raw(span) Comb(~) Raw(a)'],
+    ['div>.x+span~a', 'RawTok(div) CombTok(>) RawTok(.x) CombTok(+) RawTok(span) CombTok(~) RawTok(a)'],
 
-    ['div :not(.ad)', 'Raw(div) Comb( ) Raw(:not(.ad))'],
+    ['div :not(.ad)', 'RawTok(div) CombTok( ) RawTok(:not(.ad))'],
 
-    ['div:contains(ad)', 'Raw(div) Ext(:contains(ad))'],
-    ['div.banner:matches-css(color: red)', 'Raw(div.banner) Ext(:matches-css(color: red))'],
-    [':matches-path(/^\\/shop/) .card', 'Ext(:matches-path(/^\\/shop/)) Comb( ) Raw(.card)'],
-    ['div:upward(3)', 'Raw(div) Ext(:upward(3))'],
+    ['div:contains(ad)', 'RawTok(div) ExtTok(:contains(ad))'],
+    ['div.banner:matches-css(color: red)', 'RawTok(div.banner) ExtTok(:matches-css(color: red))'],
+    [':matches-path(/^\\/shop/) .card', 'ExtTok(:matches-path(/^\\/shop/)) CombTok( ) RawTok(.card)'],
+    ['div:upward(3)', 'RawTok(div) ExtTok(:upward(3))'],
 
-    ['div:upward(3)~:contains(ad)', 'Raw(div) Ext(:upward(3)) Comb(~) Ext(:contains(ad))'],
+    ['div:upward(3)~:contains(ad)', 'RawTok(div) ExtTok(:upward(3)) CombTok(~) ExtTok(:contains(ad))'],
 
-    ['> .x:contains(y)', 'Comb(>) Raw(.x) Ext(:contains(y))'],
+    ['> .x:contains(y)', 'CombTok(>) RawTok(.x) ExtTok(:contains(y))'],
 
-    ['div >', 'Raw(div) Comb(>)'],
+    ['div >', 'RawTok(div) CombTok(>)'],
 
-    [':upward(1)+:upward(2)', 'Ext(:upward(1)) Comb(+) Ext(:upward(2))'],
+    [':upward(1)+:upward(2)', 'ExtTok(:upward(1)) CombTok(+) ExtTok(:upward(2))'],
 
-    ['section:where(.x, .y)', 'Raw(section:where(.x, .y))'],
+    ['section:where(.x, .y)', 'RawTok(section:where(.x, .y))'],
   ])('tokenize %j', (input, expected) => {
     const got = tokenize(input)
       .map((t) => t.toString())

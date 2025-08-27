@@ -1,5 +1,5 @@
-import { parseRegexpLiteral, parseWildcardPattern } from '../utils/parseRegexp';
 import { Step } from '../types';
+import { parseRegexpLiteral, parseWildcardPattern } from '../utils/parseRegexp';
 
 export class MatchesCSS implements Step {
   private pseudoElement?: string;
@@ -74,5 +74,20 @@ export class MatchesCSS implements Step {
     } catch {
       return false;
     }
+  }
+
+  toString() {
+    let body = '';
+    if (this.pseudoElement) {
+      body = this.pseudoElement + ', ';
+    }
+    body += this.property + ': ';
+    if (this.valueRe) {
+      body += this.valueRe.toString();
+    } else if (this.valueSearch) {
+      body += this.valueSearch.toString();
+    }
+
+    return `:MatchesCSS(${body})`;
   }
 }

@@ -25,4 +25,8 @@ export class SubsequentSibling implements Step {
 
     return Array.from(result);
   }
+
+  toString() {
+    return 'SubsSiblComb';
+  }
 }

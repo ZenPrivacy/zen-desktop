@@ -1,7 +1,8 @@
 import { Child, Descendant, NextSibling, SubsequentSibling } from './combinators';
 import { Contains, MatchesCSS, MatchesPath, Upward } from './extendedPseudoClasses';
 import { RawQuery } from './raw';
-import { IRToken, ExtToken, CombToken, Query } from './types';
+import { CombToken, ExtToken, IRToken } from './tokenize';
+import { Query } from './types';
 
 /**
  * Builds a final, optimized query out of intermediate representation tokens.

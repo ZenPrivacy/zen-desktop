@@ -13,4 +13,8 @@ export class RawQuery implements Step {
     }
     return res;
   }
+
+  toString() {
+    return `Raw(${this.query})`;
+  }
 }

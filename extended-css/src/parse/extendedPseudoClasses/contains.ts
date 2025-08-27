@@ -1,5 +1,5 @@
-import { parseRegexpLiteral } from '../utils/parseRegexp';
 import { Step } from '../types';
+import { parseRegexpLiteral } from '../utils/parseRegexp';
 
 export class Contains implements Step {
   private textRe?: RegExp;
@@ -21,5 +21,9 @@ export class Contains implements Step {
       return input.filter((e) => e.textContent !== null && e.textContent.includes(this.textSearch!));
     }
     return [];
+  }
+
+  toString() {
+    return `:Contains(${(this.textRe || this.textSearch)!.toString()})`;
   }
 }

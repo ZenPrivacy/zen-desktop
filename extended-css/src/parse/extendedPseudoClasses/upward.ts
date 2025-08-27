@@ -56,4 +56,8 @@ export class Upward implements Step {
     }
     return res;
   }
+
+  toString() {
+    return `:Upward(${(this.distance || this.selector)!.toString()})`;
+  }
 }

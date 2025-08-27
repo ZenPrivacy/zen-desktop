@@ -11,4 +11,8 @@ export class NextSibling implements Step {
     }
     return result;
   }
+
+  toString() {
+    return 'NextSiblComb';
+  }
 }

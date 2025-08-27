@@ -1,5 +1,5 @@
-import { parseRegexpLiteral } from '../utils/parseRegexp';
 import { Step } from '../types';
+import { parseRegexpLiteral } from '../utils/parseRegexp';
 
 export class MatchesPath implements Step {
   private pathRe?: RegExp;
@@ -22,5 +22,9 @@ export class MatchesPath implements Step {
       return path.includes(this.pathSearch) ? input : [];
     }
     return [];
+  }
+
+  toString() {
+    return `:MatchesPath(${(this.pathRe || this.pathSearch)!.toString()})`;
   }
 }

@@ -8,4 +8,8 @@ export class Child implements Step {
     }
     return res;
   }
+
+  toString() {
+    return 'ChildComb';
+  }
 }

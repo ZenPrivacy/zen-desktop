@@ -1,7 +1,5 @@
 import * as CSSTree from 'css-tree';
 
-import { IRToken, ExtToken, CombToken, RawToken } from './types';
-
 /**
  * Maps extended selector names to whether they require a context (a raw query) in front.
  */
@@ -11,6 +9,11 @@ const EXTENDED_CONTEXT: Record<string, boolean> = {
   'matches-path': false,
   upward: true,
 };
+
+/**
+ * Intermediate representation token.
+ */
+export type IRToken = RawToken | CombToken | ExtToken;
 
 /**
  * Parses the selector into an intermediate token representation.
@@ -74,4 +77,41 @@ export function tokenize(selector: string): IRToken[] {
   flushRaw();
 
   return out;
+}
+
+/**
+ * Raw query token.
+ */
+export class RawToken {
+  public kind: 'raw' = 'raw';
+  constructor(public literal: string) {}
+  toString() {
+    return `RawTok(${this.literal})`;
+  }
+}
+
+/**
+ * Combinator token.
+ */
+export class CombToken {
+  public kind: 'comb' = 'comb';
+  constructor(public literal: string) {}
+  toString() {
+    return `CombTok(${this.literal})`;
+  }
+}
+
+/**
+ * Extended pseudo class token.
+ */
+export class ExtToken {
+  public kind: 'ext' = 'ext';
+  constructor(
+    public name: string,
+    public args: string,
+    public requiresContext: boolean,
+  ) {}
+  toString() {
+    return `ExtTok(:${this.name}(${this.args}))`;
+  }
 }

@@ -11,4 +11,8 @@ export class Descendant implements Step {
     }
     return Array.from(descendantSet);
   }
+
+  toString() {
+    return 'DescComb';
+  }
 }
