@@ -21,12 +21,7 @@ export function MyRules() {
   });
 
   const setFilters = useDebouncedCallback(async (rules: string) => {
-    await SetMyRules(
-      rules
-        .split('\n')
-        .map((f) => f.trim())
-        .filter((f) => f.length > 0),
-    );
+    await SetMyRules(rules.replace(/\r\n/g, '\n').split('\n'));
   }, 500);
 
   useEffect(() => {
