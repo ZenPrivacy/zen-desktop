@@ -16,13 +16,18 @@
 }
 
 .my-rules__editor {
-  position: relative; /* для зеркала */
+  position: relative;
   display: flex;
   height: 100%;
   max-height: 100%;
   overflow: hidden;
   align-items: stretch;
   min-height: 0;
+  border-radius: 1px;
+}
+
+.my-rules__editor:focus-within {
+  outline: 1px solid #3374c0;
 }
 
 .my-rules__line-numbers {
