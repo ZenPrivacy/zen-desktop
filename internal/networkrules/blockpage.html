@@ -54,6 +54,7 @@
         color: #fff;
         text-decoration: none;
         display: inline-block;
+        cursor: pointer;
       }
       .btn.secondary {
         background: #e5e7eb;
@@ -67,25 +68,31 @@
         <h1>Blocked by Zen</h1>
         <p><strong>URL:</strong> <code>{{ .URL }}</code></p>
         {{ if .Rule }}
-        <input type="hidden" id="rule" value="{{ .Rule }}" />
         <p><strong>Rule:</strong> <code>{{ .Rule }}</code></p>
         {{ end }} {{ if .FilterList }}
         <p><strong>Found in:</strong> {{ .FilterList }}</p>
         {{ end }}
 
         <div class="actions">
-          <a class="btn" style="cursor: pointer" onclick="proceed()">Proceed</a>
-          <span class="btn secondary">Go back</span>
+          <a class="btn" onclick="allow()">Allow</a>
+          <button
+            class="btn secondary"
+            type="button"
+            onclick="window.history.back()"
+          >
+            Go back
+          </button>
         </div>
       </div>
     </div>
     <script>
-      async function proceed() {
-        const rule = document.querySelector('#rule').value;
-        await fetch('http://127.0.0.1:33669/allow-rule', {
+      async function allow() {
+        const url = `http://127.0.0.1:{{ .WhitelistPort }}/allow-rule`;
+
+        await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'rule=' + encodeURIComponent(rule),
+          body: 'rule=' + encodeURIComponent(`{{ .Rule }}`),
         });
         window.location.reload();
       }

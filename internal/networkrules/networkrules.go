@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/exceptionrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
@@ -23,9 +22,6 @@ var (
 type NetworkRules struct {
 	regularRuleTree   *ruletree.RuleTree[*rule.Rule]
 	exceptionRuleTree *ruletree.RuleTree[*exceptionrule.ExceptionRule]
-
-	hosts   map[string]*string
-	hostsMu sync.RWMutex
 }
 
 func NewNetworkRules() *NetworkRules {
@@ -35,7 +31,6 @@ func NewNetworkRules() *NetworkRules {
 	return &NetworkRules{
 		regularRuleTree:   regularTree,
 		exceptionRuleTree: exceptionTree,
-		hosts:             make(map[string]*string),
 	}
 }
 
@@ -110,20 +105,6 @@ outer:
 }
 
 func (nr *NetworkRules) ModifyReq(req *http.Request) (appliedRules []rule.Rule, shouldBlock bool, redirectURL string) {
-	host := req.URL.Hostname()
-	nr.hostsMu.RLock()
-
-	if filterName, ok := nr.hosts[host]; ok {
-		nr.hostsMu.RUnlock()
-		return []rule.Rule{
-			{
-				RawRule:    host,
-				FilterName: filterName,
-			},
-		}, true, ""
-	}
-	nr.hostsMu.RUnlock()
-
 	regularRules := nr.regularRuleTree.FindMatchingRulesReq(req)
 	if len(regularRules) == 0 {
 		return nil, false, ""

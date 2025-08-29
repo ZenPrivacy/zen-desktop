@@ -20,9 +20,10 @@ func (nr *NetworkRules) CreateBlockResponse(req *http.Request) *http.Response {
 }
 
 type BlockInfo struct {
-	URL        string
-	Rule       string
-	FilterList string
+	URL           string
+	Rule          string
+	FilterList    string
+	WhitelistPort int
 }
 
 //go:embed blockpage.html
@@ -30,9 +31,9 @@ var blockPageTpl string
 
 var blockTmpl = template.Must(template.New("block").Parse(blockPageTpl))
 
-func (nr *NetworkRules) CreateBlockResponseNew(req *http.Request, data BlockInfo) *http.Response {
+func (nr *NetworkRules) CreateBlockPageResponse(req *http.Request, data BlockInfo) *http.Response {
 	var buf bytes.Buffer
-	_ = blockTmpl.Execute(&buf, data)
+	blockTmpl.Execute(&buf, data)
 
 	h := make(http.Header)
 	h.Set("Content-Type", "text/html; charset=utf-8")
@@ -50,7 +51,7 @@ func (nr *NetworkRules) CreateBlockResponseNew(req *http.Request, data BlockInfo
 
 	return &http.Response{
 		StatusCode: http.StatusOK,
-		Status:     "200 OK",
+		Status:     http.StatusText(http.StatusOK),
 		Proto:      req.Proto,
 		ProtoMajor: req.ProtoMajor,
 		ProtoMinor: req.ProtoMinor,
