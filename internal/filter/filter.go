@@ -15,8 +15,10 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/filter/whitelistserver"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
+	"github.com/ZenPrivacy/zen-desktop/internal/networkrules"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
 	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
 )
@@ -34,6 +36,7 @@ type networkRules interface {
 	ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error)
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
+	CreateBlockPageResponse(req *http.Request, blockInfo networkrules.BlockInfo) *http.Response
 }
 
 // config provides filter configuration.
@@ -79,6 +82,7 @@ type Filter struct {
 	jsRuleInjector        jsRuleInjector
 	eventsEmitter         filterEventsEmitter
 	filterListStore       filterListStore
+	whiteListerServer     whitelistserver.Server
 }
 
 var (
@@ -174,6 +178,14 @@ func (f *Filter) init() {
 	if len(myRules) > 0 {
 		log.Printf("filter initialization: added %d rules and %d exceptions from %q", ruleCount, exceptionCount, filterName)
 	}
+
+	srv := whitelistserver.New(f.networkRules)
+	port, err := srv.Start()
+	if err != nil {
+		log.Printf("failed to start whitelist server: %v", err)
+	}
+
+	f.whiteListerServer.Port = port
 }
 
 // ParseAndAddRules parses the rules from the given reader and adds them to the filter.
@@ -244,6 +256,22 @@ func (f *Filter) HandleRequest(req *http.Request) *http.Response {
 	appliedRules, shouldBlock, redirectURL := f.networkRules.ModifyReq(req)
 	if shouldBlock {
 		f.eventsEmitter.OnFilterBlock(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
+		if req.Header.Get("Sec-Fetch-Dest") == "document" && req.Header.Get("Sec-Fetch-User") == "?1" {
+			var rule string
+			var filterList string
+			if len(appliedRules) > 0 {
+				rule = appliedRules[0].RawRule
+				filterList = *appliedRules[0].FilterName
+			}
+
+			fullURL := req.URL.Scheme + "://" + req.URL.Hostname() + req.URL.RequestURI()
+			return f.networkRules.CreateBlockPageResponse(req, networkrules.BlockInfo{
+				URL:           fullURL,
+				Rule:          rule,
+				FilterList:    filterList,
+				WhitelistPort: f.whiteListerServer.Port,
+			})
+		}
 		return f.networkRules.CreateBlockResponse(req)
 	}
 
