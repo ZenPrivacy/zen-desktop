@@ -1,5 +1,6 @@
 import { Child, Descendant, NextSibling, SubsequentSibling } from './combinators';
 import { Contains, MatchesCSS, MatchesPath, Upward } from './extendedPseudoClasses';
+import { Has } from './extendedPseudoClasses/has';
 import { RawQuery } from './raw';
 import { CombToken, ExtToken, IRToken } from './tokenize';
 import { Query } from './types';
@@ -94,6 +95,8 @@ function makeExtended(token: ExtToken) {
       return new Upward(token.args);
     case 'matches-css':
       return new MatchesCSS(token.args);
+    case 'has':
+      return new Has(token.args);
   }
   throw new Error(`Unknown extended pseudo class ${token.name}`);
 }

@@ -93,12 +93,12 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		fmt.Fprintf(&injection, `<script nonce="%s">`, nonce)
 	}
 	injection.Write(inj.bundle)
-	injection.WriteString("window.extendedCSS(")
+	injection.WriteString("(()=>{window.extendedCSS(")
 
 	rulesString := strings.Join(rules, "\n")
 	fmt.Fprintf(&injection, `%q`, rulesString)
 
-	injection.WriteString(");")
+	injection.WriteString(")})();")
 	injection.Write(scriptClosingTag)
 
 	if err := httprewrite.AppendHTMLHeadContents(res, injection.Bytes()); err != nil {

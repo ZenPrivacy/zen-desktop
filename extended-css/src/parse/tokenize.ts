@@ -1,16 +1,6 @@
 import * as CSSTree from 'css-tree';
 
 /**
- * Maps extended selector names to whether they require a context (a raw query) in front.
- */
-const EXTENDED_CONTEXT: Record<string, boolean> = {
-  contains: true,
-  'matches-css': true,
-  'matches-path': false,
-  upward: true,
-};
-
-/**
  * Intermediate representation token.
  */
 export type IRToken = RawToken | CombToken | ExtToken;
@@ -54,15 +44,17 @@ export function tokenize(selector: string): IRToken[] {
 
       case 'PseudoClassSelector': {
         const name = node.name.toLowerCase();
-        if (name in EXTENDED_CONTEXT) {
+        if (ExtToken.classes.has(name)) {
           flushRaw();
 
-          const rawArg = node.children?.first;
-          if (rawArg?.type !== 'Raw') {
-            throw new Error(`:${name}(): expected Raw argument`);
+          const arg = node.children?.first;
+          if (arg == undefined) {
+            throw new Error(`:${name}: expected an argument, got null/undefined`);
           }
 
-          out.push(new ExtToken(name, rawArg.value, EXTENDED_CONTEXT[name]));
+          const argValue = getLiteral(arg);
+
+          out.push(new ExtToken(name, argValue));
         } else {
           cssBuf += getLiteral(node);
         }
@@ -105,12 +97,34 @@ export class CombToken {
  * Extended pseudo class token.
  */
 export class ExtToken {
+  /**
+   * Names of supported extended pseudo classes.
+   */
+  static readonly classes = new Set(['contains', 'matches-css', 'matches-path', 'upward', 'has']);
+
   public kind: 'ext' = 'ext';
   constructor(
     public name: string,
     public args: string,
-    public requiresContext: boolean,
   ) {}
+
+  get requiresContext() {
+    switch (this.name) {
+      case 'contains':
+        return true;
+      case 'matches-css':
+        return true;
+      case 'matches-path':
+        return false;
+      case 'upward':
+        return true;
+      case 'has':
+        return true;
+      default:
+        return false;
+    }
+  }
+
   toString() {
     return `ExtTok(:${this.name}(${this.args}))`;
   }
