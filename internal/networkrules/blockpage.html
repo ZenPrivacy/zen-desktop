@@ -67,6 +67,7 @@
         <h1>Blocked by Zen</h1>
         <p><strong>URL:</strong> <code>{{ .URL }}</code></p>
         {{ if .Rule }}
+        <input type="hidden" id="rule" value="{{ .Rule }}" />
         <p><strong>Rule:</strong> <code>{{ .Rule }}</code></p>
         {{ end }} {{ if .FilterList }}
         <p><strong>Found in:</strong> {{ .FilterList }}</p>
@@ -79,20 +80,14 @@
       </div>
     </div>
     <script>
-      function proceed() {
-        const host = location.hostname;
-        fetch(
-          `http://127.0.0.1:33669/unblock?host=${encodeURIComponent(host)}`,
-          {
-            method: 'GET',
-          }
-        )
-          .then(() => {
-            window.location.reload();
-          })
-          .catch((err) => {
-            console.error('Unblock failed:', err);
-          });
+      async function proceed() {
+        const rule = document.querySelector('#rule').value;
+        await fetch('http://127.0.0.1:33669/allow-rule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'rule=' + encodeURIComponent(rule),
+        });
+        window.location.reload();
       }
     </script>
   </body>

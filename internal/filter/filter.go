@@ -179,7 +179,7 @@ func (f *Filter) init() {
 	}
 
 	srv := unblockserver.NewServer(f.networkRules)
-	srv.Start(33669)
+	srv.Start()
 }
 
 // ParseAndAddRules parses the rules from the given reader and adds them to the filter.

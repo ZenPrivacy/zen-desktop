@@ -27,30 +27,38 @@ func (s *Server) handleUnblock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-	host := strings.ToLower(r.URL.Query().Get("host"))
-	if host == "" {
-		http.Error(w, "missing host", http.StatusBadRequest)
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	rule := fmt.Sprintf("@@||%s^", host)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "invalid form", http.StatusBadRequest)
+		return
+	}
+
+	rule := strings.ToLower(r.FormValue("rule"))
+	if rule == "" {
+		http.Error(w, "missing rule", http.StatusBadRequest)
+		return
+	}
 
 	filterList := "allowed-list"
-	if _, err := s.networkRules.ParseRule(rule, &filterList); err != nil {
+	if _, err := s.networkRules.ParseRule(fmt.Sprintf("@@%s", rule), &filterList); err != nil {
 		http.Error(w, "networkrules: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("unblocked " + host))
+	w.Write([]byte("allowed rule: " + rule))
 }
 
-func (s *Server) Start(port int) (int, error) {
+func (s *Server) Start() (int, error) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/unblock", s.handleUnblock)
+	mux.HandleFunc("/allow-rule", s.handleUnblock)
 
 	s.httpSrv = &http.Server{
 		Handler:      mux,
@@ -58,7 +66,7 @@ func (s *Server) Start(port int) (int, error) {
 		WriteTimeout: time.Minute,
 	}
 
-	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	addr := fmt.Sprintf("127.0.0.1:%d", 0) // random port
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return -1, fmt.Errorf("listen: %w", err)
