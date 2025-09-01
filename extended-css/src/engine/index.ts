@@ -1,17 +1,22 @@
 import { parse } from '../parse';
 import { Query } from '../parse/types';
+import { createLogger } from '../utils/logger';
+import { throttle } from '../utils/throttle';
+
+const logger = createLogger('engine');
 
 export class Engine {
-  private queries: Query[] = [];
-
+  private readonly queries: Query[];
   private readonly target = document.documentElement;
 
   constructor(rules: string) {
-    console.log('here');
-    this.parseRules(rules);
+    logger.debug('Initializing engine');
+    this.queries = this.parseRules(rules);
   }
 
-  start() {
+  start(): void {
+    logger.debug(`Starting with ${this.queries.length} queries`);
+
     this.applyQueries();
 
     if (document.readyState !== 'complete') {
@@ -23,37 +28,38 @@ export class Engine {
     this.registerObserver();
   }
 
-  private parseRules(rules: string): void {
-    const lines = rules.split('\n');
-
-    for (let line of lines) {
-      line = line.trim();
-      if (line.length === 0) {
-        continue;
-      }
-
-      const query = parse(line);
-      this.queries.push(query);
-    }
+  private parseRules(rules: string): Query[] {
+    return rules
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        try {
+          return parse(line);
+        } catch (ex) {
+          logger.error(`Failed to parse rule: "${line}"`, ex);
+          return undefined;
+        }
+      })
+      .filter((q): q is Query => q !== undefined);
   }
 
   private applyQueries(): void {
+    const start = performance.now();
+    let removedCnt = 0;
+
     for (const query of this.queries) {
       let els: Element[] = [this.target];
       for (const step of query) {
         els = step.run(els);
-        if (els.length === 0) {
-          break;
-        }
+        if (els.length === 0) break;
       }
-
-      if (els.length > 0) {
-        console.log('REMOVING ELEMENTS', els);
-      }
-      for (const el of els) {
-        el.remove();
-      }
+      for (const el of els) el.remove();
+      removedCnt += els.length;
     }
+
+    const end = performance.now();
+    logger.debug(`Removed ${removedCnt} elements in ${(end - start).toFixed(2)}ms`);
   }
 
   private registerObserver(): void {
@@ -64,20 +70,17 @@ export class Engine {
       attributeFilter: ['id', 'class'],
     };
 
-    const observer = new MutationObserver((mutations, observer) => {
-      if (mutations.length === 0) {
-        return;
-      }
-      if (mutations.every((m) => m.type === 'attributes')) {
-        return;
-      }
-
-      // Avoid infinite looping
+    const cb = throttle((observer: MutationObserver) => {
       observer.disconnect();
-
       this.applyQueries();
-
       observer.observe(this.target, options);
+    }, 100);
+
+    const observer = new MutationObserver((mutations, observer) => {
+      if (mutations.length === 0) return;
+      if (mutations.every((m) => m.type === 'attributes')) return;
+
+      cb(observer);
     });
 
     observer.observe(this.target, options);
