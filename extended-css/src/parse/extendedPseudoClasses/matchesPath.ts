@@ -2,6 +2,8 @@ import { Step } from '../types';
 import { parseRegexpLiteral } from '../utils/parseRegexp';
 
 export class MatchesPath implements Step {
+  static requiresContext = false;
+
   private pathRe?: RegExp;
   private pathSearch?: string;
 

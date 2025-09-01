@@ -3,6 +3,8 @@ import { QueryRunner } from '../../engine/queryRunner';
 import { Step } from '../types';
 
 export class Has implements Step {
+  static requiresContext = true;
+
   private runners: QueryRunner[] = [];
 
   constructor(arg: string) {

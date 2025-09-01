@@ -1,5 +1,7 @@
 import * as CSSTree from 'css-tree';
 
+import { extPseudoClasses } from './extendedPseudoClasses';
+
 /**
  * Intermediate representation token.
  */
@@ -44,7 +46,7 @@ export function tokenize(selector: string): IRToken[] {
 
       case 'PseudoClassSelector': {
         const name = node.name.toLowerCase();
-        if (ExtToken.classes.has(name)) {
+        if (name in extPseudoClasses) {
           flushRaw();
 
           const arg = node.children?.first;
@@ -54,7 +56,7 @@ export function tokenize(selector: string): IRToken[] {
 
           const argValue = getLiteral(arg);
 
-          out.push(new ExtToken(name, argValue));
+          out.push(new ExtToken(name as keyof typeof extPseudoClasses, argValue));
         } else {
           cssBuf += getLiteral(node);
         }
@@ -97,33 +99,11 @@ export class CombToken {
  * Extended pseudo class token.
  */
 export class ExtToken {
-  /**
-   * Names of supported extended pseudo classes.
-   */
-  static readonly classes = new Set(['contains', 'matches-css', 'matches-path', 'upward', 'has']);
-
   public kind: 'ext' = 'ext';
   constructor(
-    public name: string,
+    public name: keyof typeof extPseudoClasses,
     public args: string,
   ) {}
-
-  get requiresContext() {
-    switch (this.name) {
-      case 'contains':
-        return true;
-      case 'matches-css':
-        return true;
-      case 'matches-path':
-        return false;
-      case 'upward':
-        return true;
-      case 'has':
-        return true;
-      default:
-        return false;
-    }
-  }
 
   toString() {
     return `ExtTok(:${this.name}(${this.args}))`;

@@ -1,6 +1,8 @@
 import { Step } from '../types';
 
 export class Upward implements Step {
+  static requiresContext = true;
+
   private distance?: number;
   private selector?: string;
 

@@ -2,6 +2,8 @@ import { Step } from '../types';
 import { parseRegexpLiteral, parseWildcardPattern } from '../utils/parseRegexp';
 
 export class MatchesCSS implements Step {
+  static requiresContext = true;
+
   private pseudoElement?: string;
   private property: string;
   private valueRe?: RegExp;

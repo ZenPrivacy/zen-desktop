@@ -1,8 +1,7 @@
 import { Child, Descendant, NextSibling, SubsequentSibling } from './combinators';
-import { Contains, MatchesCSS, MatchesPath, Upward } from './extendedPseudoClasses';
-import { Has } from './extendedPseudoClasses/has';
+import { extPseudoClasses } from './extendedPseudoClasses';
 import { RawQuery } from './raw';
-import { CombToken, ExtToken, IRToken } from './tokenize';
+import { CombToken, IRToken } from './tokenize';
 import { Query } from './types';
 
 /**
@@ -69,41 +68,22 @@ export function plan(tokens: IRToken[]): Query {
         }
         break;
       }
-      case 'ext':
+      case 'ext': {
         flushRaw();
-        if (t.requiresContext && !havePrevStep) {
+
+        const extClass = extPseudoClasses[t.name];
+
+        if (extClass.requiresContext && !havePrevStep) {
           steps.push(new RawQuery('*'));
           havePrevStep = true;
         }
-        steps.push(makeExtended(t));
+        steps.push(new extClass(t.args));
         havePrevStep = true;
         break;
+      }
     }
   }
 
   flushRaw();
   return steps;
 }
-
-function makeExtended(token: ExtToken) {
-  switch (token.name) {
-    case 'matches-path':
-      return new MatchesPath(token.args);
-    case 'contains':
-      return new Contains(token.args);
-    case 'upward':
-      return new Upward(token.args);
-    case 'matches-css':
-      return new MatchesCSS(token.args);
-    case 'has':
-      return new Has(token.args);
-  }
-  throw new Error(`Unknown extended pseudo class ${token.name}`);
-}
-
-/**
- * Determines whether a selector needs a scope, based on whether it has a leading combinator.
- */
-// function needsScope(sel: string) {
-//   return /^[ ~+>]/.test(sel);
-// }

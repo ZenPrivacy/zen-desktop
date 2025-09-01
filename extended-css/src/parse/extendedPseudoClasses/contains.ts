@@ -2,6 +2,8 @@ import { Step } from '../types';
 import { parseRegexpLiteral } from '../utils/parseRegexp';
 
 export class Contains implements Step {
+  static requiresContext = true;
+
   private textRe?: RegExp;
   private textSearch?: string;
 
