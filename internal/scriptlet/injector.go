@@ -65,7 +65,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	nonce := patchCSPHeaders(res.Header)
+	nonce := PatchCSPHeaders(res.Header, InlineScript)
 
 	var injection bytes.Buffer
 	if nonce == "" {

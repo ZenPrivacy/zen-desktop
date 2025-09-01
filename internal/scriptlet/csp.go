@@ -12,23 +12,24 @@ const (
 	cspReportOnly = "Content-Security-Policy-Report-Only"
 )
 
-var directivePriority = map[string]int{
-	"default-src":     1, // fallback
-	"script-src":      2,
-	"script-src-elem": 3, // most specific for <script> elements
-}
+type InlineKind int
 
-// patchCSPHeaders mutates headers so an inline <script nonce=...> can run.
-// Returns the nonce to place on the <script> tag.
-func patchCSPHeaders(h http.Header) (nonce string) {
+const (
+	InlineScript InlineKind = iota
+	InlineStyle
+)
+
+// patchCSPHeaders mutates headers so an inline code can run.
+// Returns the nonce to place on the inline tag.
+func PatchCSPHeaders(h http.Header, kind InlineKind) (nonce string) {
 	// If there is no CSP at all, nothing to patch; return empty nonce.
 	if len(h.Values(cspHeader)) == 0 && len(h.Values(cspReportOnly)) == 0 {
 		return ""
 	}
 	n := newCSPNonce()
 
-	enforcedPatched := patchOneHeader(h, cspHeader, n)
-	reportOnlyPatched := patchOneHeader(h, cspReportOnly, n)
+	enforcedPatched := patchOneHeader(h, cspHeader, n, kind)
+	reportOnlyPatched := patchOneHeader(h, cspReportOnly, n, kind)
 
 	if !enforcedPatched && !reportOnlyPatched {
 		return ""
@@ -37,7 +38,7 @@ func patchCSPHeaders(h http.Header) (nonce string) {
 	return n
 }
 
-func patchOneHeader(h http.Header, key, nonce string) (patched bool) {
+func patchOneHeader(h http.Header, key, nonce string, kind InlineKind) (patched bool) {
 	lines := h.Values(key)
 	if len(lines) == 0 {
 		return
@@ -47,28 +48,20 @@ func patchOneHeader(h http.Header, key, nonce string) (patched bool) {
 	var changed bool
 
 	// In case of multiple lines/policies, the browsers will select the most restrictive one.
-	// For this reason, we modify each independently so they all allow the <script>.
+	// For this reason, we modify each independently so they all allow the inline.
 	// See more: https://content-security-policy.com/examples/multiple-csp-headers/.
 	for i, line := range lines {
 		rawDirs := strings.Split(line, ";")
 
-		// Find most specific directive controlling <script> elements on this line/policy.
-		bestIdx := -1
-		bestName := ""
-		bestPrio := 0
-		bestValue := ""
-
+		// Find the most specific directive governing this kind on this line/policy.
+		bestIdx, bestName, bestPrio, bestValue := -1, "", 0, ""
 		for j, raw := range rawDirs {
 			d := strings.TrimSpace(raw)
 			if d == "" {
 				continue
 			}
 			name, value := cutDirective(d)
-			prio, ok := directivePriority[name]
-			if !ok {
-				continue
-			}
-			if prio > bestPrio {
+			if prio := directivePriority(kind, name); prio > bestPrio {
 				bestIdx, bestName, bestPrio, bestValue = j, name, prio, value
 			}
 		}
@@ -78,8 +71,8 @@ func patchOneHeader(h http.Header, key, nonce string) (patched bool) {
 			continue
 		}
 
-		// If policy already allows inline <script> elements, do nothing.
-		if allowsInline(bestValue) {
+		// If this directive already allows inline for this kind, do nothing.
+		if allowsInline(kind, bestValue) {
 			continue
 		}
 
@@ -129,7 +122,7 @@ func newCSPNonce() string {
 // True iff 'unsafe-inline' is present AND there is NO nonce/hash AND NO 'strict-dynamic'.
 //
 // Reference: https://www.w3.org/TR/CSP3/#allow-all-inline
-func allowsInline(sourceList string) bool {
+func allowsInline(kind InlineKind, sourceList string) bool {
 	sourceList = strings.TrimSpace(sourceList)
 	if sourceList == "" {
 		return false
@@ -142,7 +135,9 @@ func allowsInline(sourceList string) bool {
 		case "'unsafe-inline'":
 			unsafeInline = true
 		case "'strict-dynamic'":
-			return false
+			if kind == InlineScript {
+				return false
+			}
 		default:
 			if isNonceOrHashSource(t) {
 				return false
@@ -161,4 +156,28 @@ func isNonceOrHashSource(t string) bool {
 		strings.HasPrefix(inner, "sha256-") ||
 		strings.HasPrefix(inner, "sha384-") ||
 		strings.HasPrefix(inner, "sha512-")
+}
+
+func directivePriority(kind InlineKind, name string) int {
+	switch kind {
+	case InlineScript:
+		switch name {
+		case "script-src-elem":
+			return 3
+		case "script-src":
+			return 2
+		case "default-src":
+			return 1
+		}
+	case InlineStyle:
+		switch name {
+		case "style-src-elem":
+			return 3
+		case "style-src":
+			return 2
+		case "default-src":
+			return 1
+		}
+	}
+	return 0
 }
