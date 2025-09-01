@@ -28,6 +28,9 @@ describe('parse', () => {
 
     // Non-extended pseudo remains in raw
     ['section:where(.x, .y)', 'Raw(section:where(.x, .y))'],
+
+    // Imperative bridging between raw and extended
+    ['.x > :contains(y)', 'Raw(.x) ChildComb :Contains(y)'],
   ])('parse %j', (input, expected) => {
     const got = parse(input)
       .map((s) => s.toString())
