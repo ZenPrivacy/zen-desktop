@@ -4,33 +4,33 @@ import { parse } from './index';
 
 describe('parse', () => {
   test.each<[string, string]>([
-    ['div', 'Raw(div)'],
-    ['a[href^="http"]', 'Raw(a[href^="http"])'],
-    ['div:not(.ad)', 'Raw(div:not(.ad))'],
+    ['div', 'RawQuery(div)'],
+    ['a[href^="http"]', 'RawQuery(a[href^="http"])'],
+    ['div:not(.ad)', 'RawQuery(div:not(.ad))'],
 
     // Pure CSS with combinators is bridged into a single Raw
-    ['div>.x+span~a', 'Raw(div > .x + span ~ a)'],
+    ['div>.x+span~a', 'RawQuery(div > .x + span ~ a)'],
 
     // Extended pseudo classes split into steps
-    ['div:contains(ad)', 'Raw(div) :Contains(ad)'],
-    ['div.banner:matches-css(color: red)', 'Raw(div.banner) :MatchesCSS(color: red)'],
-    [':matches-path(/^\\/shop/) .card', ':MatchesPath(/^\\/shop/) Raw(:scope .card)'],
-    ['div:upward(3)', 'Raw(div) :Upward(3)'],
+    ['div:contains(ad)', 'RawQuery(div) :Contains(ad)'],
+    ['div.banner:matches-css(color: red)', 'RawQuery(div.banner) :MatchesCSS(color: red)'],
+    [':matches-path(/^\\/shop/) .card', ':MatchesPath(/^\\/shop/) RawQuery(.card)'],
+    ['div:upward(3)', 'RawQuery(div) :Upward(3)'],
 
     // Imperative bridging when a combinator is adjacent to an extended step
-    ['div:upward(3)~:contains(ad)', 'Raw(div) :Upward(3) SubsSiblComb :Contains(ad)'],
+    ['div:upward(3)~:contains(ad)', 'RawQuery(div) :Upward(3) SubsSiblComb :Contains(ad)'],
 
     // Leading combinator in raw followed by extended
-    ['.x:contains(y)', 'Raw(.x) :Contains(y)'],
+    ['.x:contains(y)', 'RawQuery(.x) :Contains(y)'],
 
     // Context bootstrap for leading extended step and imperative bridge
-    [':upward(1)+:upward(2)', 'Raw(*) :Upward(1) NextSiblComb :Upward(2)'],
+    [':upward(1)+:upward(2)', 'RawQuery(*) :Upward(1) NextSiblComb :Upward(2)'],
 
     // Non-extended pseudo remains in raw
-    ['section:where(.x, .y)', 'Raw(section:where(.x, .y))'],
+    ['section:where(.x, .y)', 'RawQuery(section:where(.x, .y))'],
 
-    // Imperative bridging between raw and extended
-    ['.x > :contains(y)', 'Raw(.x) ChildComb :Contains(y)'],
+    // Relative selector
+    ['> .x + p', 'ChildComb RawMatches(.x) NextSiblComb RawMatches(p)'],
   ])('parse %j', (input, expected) => {
     const got = parse(input)
       .map((s) => s.toString())

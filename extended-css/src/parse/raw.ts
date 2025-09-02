@@ -15,6 +15,18 @@ export class RawQuery implements Step {
   }
 
   toString() {
-    return `Raw(${this.query})`;
+    return `RawQuery(${this.query})`;
+  }
+}
+
+export class RawMatches implements Step {
+  constructor(private query: string) {}
+
+  run(input: Element[]) {
+    return input.filter((el) => el.matches(this.query));
+  }
+
+  toString() {
+    return `RawMatches(${this.query})`;
   }
 }
