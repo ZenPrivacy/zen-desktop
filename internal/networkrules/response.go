@@ -3,10 +3,10 @@ package networkrules
 import (
 	"bytes"
 	_ "embed"
+	"html/template"
 	"io"
 	"net/http"
 	"strconv"
-	"text/template"
 )
 
 // CreateBlockResponse creates a response for a blocked request.

@@ -182,9 +182,8 @@ func (f *Filter) init() {
 	srv := whitelistserver.New(f.networkRules)
 	port, err := srv.Start()
 	if err != nil {
-		log.Printf("failed to start whitelist server: %v", err)
+		log.Fatalf("failed to start whitelist server: %v", err)
 	}
-
 	f.whiteListerServer.Port = port
 }
 
@@ -256,21 +255,10 @@ func (f *Filter) HandleRequest(req *http.Request) *http.Response {
 	appliedRules, shouldBlock, redirectURL := f.networkRules.ModifyReq(req)
 	if shouldBlock {
 		f.eventsEmitter.OnFilterBlock(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
-		if req.Header.Get("Sec-Fetch-Dest") == "document" && req.Header.Get("Sec-Fetch-User") == "?1" {
-			var rule string
-			var filterList string
-			if len(appliedRules) > 0 {
-				rule = appliedRules[0].RawRule
-				filterList = *appliedRules[0].FilterName
-			}
 
-			fullURL := req.URL.Scheme + "://" + req.URL.Hostname() + req.URL.RequestURI()
-			return f.networkRules.CreateBlockPageResponse(req, networkrules.BlockInfo{
-				URL:           fullURL,
-				Rule:          rule,
-				FilterList:    filterList,
-				WhitelistPort: f.whiteListerServer.Port,
-			})
+		if req.Header.Get("Sec-Fetch-Dest") == "document" && req.Header.Get("Sec-Fetch-User") == "?1" {
+			info := buildBlockInfo(req, appliedRules, f.whiteListerServer.Port)
+			return f.networkRules.CreateBlockPageResponse(req, info)
 		}
 		return f.networkRules.CreateBlockResponse(req)
 	}
@@ -340,4 +328,25 @@ func isDocumentNavigation(req *http.Request, res *http.Response) bool {
 	}
 
 	return true
+}
+
+func buildBlockInfo(req *http.Request, appliedRules []rule.Rule, whitelistPort int) networkrules.BlockInfo {
+	var rawRule, filterList string
+	if len(appliedRules) > 0 {
+		// networkRules.ModifyReq currently returns at most one rule when shouldBlock is true.
+		// If this changes in the future, this logic may need to be updated.
+		r := appliedRules[0]
+		rawRule = r.RawRule
+		if r.FilterName != nil {
+			filterList = *r.FilterName
+		}
+	}
+
+	fullURL := req.URL.Scheme + "://" + req.URL.Hostname() + req.URL.RequestURI()
+	return networkrules.BlockInfo{
+		URL:           fullURL,
+		Rule:          rawRule,
+		FilterList:    filterList,
+		WhitelistPort: whitelistPort,
+	}
 }

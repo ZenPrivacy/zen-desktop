@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -42,7 +41,7 @@ func (s *Server) handleAllow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rule := strings.ToLower(r.FormValue("rule"))
+	rule := r.FormValue("rule")
 	if rule == "" {
 		http.Error(w, "missing rule", http.StatusBadRequest)
 		return
