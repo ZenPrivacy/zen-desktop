@@ -10,9 +10,6 @@ export class Has implements Step {
   constructor(arg: string) {
     // arg may include multiple selectors in a selector list.
     this.runners = arg.split(',').map((selector) => {
-      if (!selector.startsWith(':scope')) {
-        selector = ':scope ' + selector;
-      }
       return new QueryRunner(parse(selector));
     });
   }
