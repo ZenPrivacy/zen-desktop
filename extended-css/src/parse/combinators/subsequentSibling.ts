@@ -7,28 +7,23 @@ import { Step } from '../types';
  */
 export class SubsequentSibling implements Step {
   run(input: Element[]) {
-    const result = new Set<Element>();
+    const result = [];
 
     for (const element of input) {
       const parent = element.parentElement;
 
       if (!parent) continue;
 
-      let foundCurrent = false;
-
-      for (const child of Array.from(parent.children)) {
-        if (child === element) {
-          foundCurrent = true;
-          continue;
-        }
-
-        if (foundCurrent) {
-          result.add(child);
+      const children = Array.from(parent.children);
+      for (let i = 0; i < children.length - 1; i++) {
+        if (children[i] === element) {
+          result.push(children[i + 1]);
+          break;
         }
       }
     }
 
-    return Array.from(result);
+    return result;
   }
 
   toString() {
