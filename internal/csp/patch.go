@@ -1,4 +1,4 @@
-package scriptlet
+package csp
 
 import (
 	"crypto/rand"
@@ -12,16 +12,16 @@ const (
 	cspReportOnly = "Content-Security-Policy-Report-Only"
 )
 
-type InlineKind int
+type inlineKind int
 
 const (
-	InlineScript InlineKind = iota
+	InlineScript inlineKind = iota
 	InlineStyle
 )
 
-// patchCSPHeaders mutates headers so an inline code can run.
+// PatchHeaders mutates headers so an inline code can run.
 // Returns the nonce to place on the inline tag.
-func PatchCSPHeaders(h http.Header, kind InlineKind) (nonce string) {
+func PatchHeaders(h http.Header, kind inlineKind) (nonce string) {
 	// If there is no CSP at all, nothing to patch; return empty nonce.
 	if len(h.Values(cspHeader)) == 0 && len(h.Values(cspReportOnly)) == 0 {
 		return ""
@@ -38,7 +38,7 @@ func PatchCSPHeaders(h http.Header, kind InlineKind) (nonce string) {
 	return n
 }
 
-func patchOneHeader(h http.Header, key, nonce string, kind InlineKind) (patched bool) {
+func patchOneHeader(h http.Header, key, nonce string, kind inlineKind) (patched bool) {
 	lines := h.Values(key)
 	if len(lines) == 0 {
 		return
@@ -122,7 +122,7 @@ func newCSPNonce() string {
 // True iff 'unsafe-inline' is present AND there is NO nonce/hash AND NO 'strict-dynamic'.
 //
 // Reference: https://www.w3.org/TR/CSP3/#allow-all-inline
-func allowsInline(kind InlineKind, sourceList string) bool {
+func allowsInline(kind inlineKind, sourceList string) bool {
 	sourceList = strings.TrimSpace(sourceList)
 	if sourceList == "" {
 		return false
@@ -158,7 +158,7 @@ func isNonceOrHashSource(t string) bool {
 		strings.HasPrefix(inner, "sha512-")
 }
 
-func directivePriority(kind InlineKind, name string) int {
+func directivePriority(kind inlineKind, name string) int {
 	switch kind {
 	case InlineScript:
 		switch name {

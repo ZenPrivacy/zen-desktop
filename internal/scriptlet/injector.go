@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/ZenPrivacy/zen-desktop/internal/csp"
 	"github.com/ZenPrivacy/zen-desktop/internal/hostmatch"
 	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
@@ -65,7 +66,7 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	nonce := PatchCSPHeaders(res.Header, InlineScript)
+	nonce := csp.PatchHeaders(res.Header, csp.InlineScript)
 
 	var injection bytes.Buffer
 	if nonce == "" {
