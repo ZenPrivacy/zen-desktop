@@ -2,15 +2,15 @@ import { Child, Descendant, NextSibling, SubsequentSibling } from './combinators
 import { extPseudoClasses } from './extendedPseudoClasses';
 import { RawMatches, RawQuery } from './raw';
 import { CombToken, IRToken } from './tokenize';
-import { Query } from './types';
+import { Selector } from './types';
 
 /**
  * Builds a final, optimized query out of intermediate representation tokens.
  */
-export function plan(tokens: IRToken[]): Query {
+export function plan(tokens: IRToken[]): Selector {
   if (tokens.length === 0) return [];
 
-  const steps: Query = [];
+  const steps: Selector = [];
   let haveContextualStep = false; // true after we've emitted anything that can serve as context for requiresContext
 
   const emitBridge = (comb: CombToken) => {
@@ -116,7 +116,7 @@ export function plan(tokens: IRToken[]): Query {
 
         if (next.kind === 'raw') {
           // If the next token is raw, prefer declarative bridging for performance.
-          cssBuilder += ` ${t.literal} `;
+          cssBuilder += t.literal;
         } else {
           // Next is ext: end the merged raw run and bridge imperatively.
           flushRaw();

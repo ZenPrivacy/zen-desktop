@@ -26,10 +26,12 @@ describe('tokenize', () => {
     [':upward(1)+:upward(2)', 'ExtTok(:upward(1)) CombTok(+) ExtTok(:upward(2))'],
 
     ['section:where(.x, .y)', 'RawTok(section:where(.x, .y))'],
-  ])('tokenize %j', (input, expected) => {
+
+    ['div, .banner', 'RawTok(div), RawTok(.banner)'],
+  ])('tokenize selector %j', (input, expected) => {
     const got = tokenize(input)
-      .map((t) => t.toString())
-      .join(' ');
+      .map((t) => t.map((t) => t.toString()).join(' '))
+      .join(', ');
     expect(got).toEqual(expected);
   });
 });

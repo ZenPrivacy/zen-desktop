@@ -8,11 +8,28 @@ import { extPseudoClasses } from './extendedPseudoClasses';
 export type IRToken = RawToken | CombToken | ExtToken;
 
 /**
- * Parses the selector into an intermediate token representation.
+ * Token representation of a selector.
  */
-export function tokenize(selector: string): IRToken[] {
-  const ast = CSSTree.parse(selector, { context: 'selector', positions: true });
+export type SelectorTokens = IRToken[];
 
+/**
+ * Parses a selector/selector list into an intermediate token representation.
+ */
+export function tokenize(selectorList: string): SelectorTokens[] {
+  const ast = CSSTree.parse(selectorList, { context: 'selectorList', positions: true });
+
+  const result: IRToken[][] = [];
+
+  (ast as CSSTree.SelectorList).children.forEach((selectorNode) => {
+    if (selectorNode.type === 'Selector') {
+      result.push(parseTokens(selectorNode, selectorList));
+    }
+  });
+
+  return result;
+}
+
+function parseTokens(ast: CSSTree.CssNode, selector: string): IRToken[] {
   const out: IRToken[] = [];
   let cssBuf = '';
 

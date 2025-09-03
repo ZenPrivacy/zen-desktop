@@ -1,9 +1,8 @@
 import { plan } from './plan';
 import { tokenize } from './tokenize';
-import { Query } from './types';
+import { SelectorList } from './types';
 
-export function parse(rule: string): Query {
+export function parse(rule: string): SelectorList {
   const tokens = tokenize(rule);
-  const query = plan(tokens);
-  return query;
+  return tokens.map(plan);
 }

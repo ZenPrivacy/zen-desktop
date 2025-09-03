@@ -5,11 +5,12 @@ import { parse } from './index';
 describe('parse', () => {
   test.each<[string, string]>([
     ['div', 'RawQuery(div)'],
+    ['div span', 'RawQuery(div span)'],
     ['a[href^="http"]', 'RawQuery(a[href^="http"])'],
     ['div:not(.ad)', 'RawQuery(div:not(.ad))'],
 
     // Pure CSS with combinators is bridged into a single Raw
-    ['div>.x+span~a', 'RawQuery(div > .x + span ~ a)'],
+    ['div>.x+span~a', 'RawQuery(div>.x+span~a)'],
 
     // Extended pseudo classes split into steps
     ['div:contains(ad)', 'RawQuery(div) :Contains(ad)'],
@@ -37,10 +38,17 @@ describe('parse', () => {
       'span:has-text(Promoted):-abp-contains(AD):-abp-has(.banner)',
       'RawQuery(span) :Contains(Promoted) :Contains(AD) :Has(...selectors)',
     ],
+
+    // Selector lists
+    ['.banner, .ad', 'RawQuery(.banner), RawQuery(.ad)'],
+    [
+      'div:contains(ad) span:has(.banner), > .x + p, code',
+      'RawQuery(div) :Contains(ad) RawQuery(span) :Has(...selectors), ChildComb RawMatches(.x) NextSiblComb RawMatches(p), RawQuery(code)',
+    ],
   ])('parse %j', (input, expected) => {
     const got = parse(input)
-      .map((s) => s.toString())
-      .join(' ');
+      .map((t) => t.map((t) => t.toString()).join(' '))
+      .join(', ');
     expect(got).toEqual(expected);
   });
 
