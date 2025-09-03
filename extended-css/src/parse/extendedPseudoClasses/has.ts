@@ -18,4 +18,11 @@ export class Has implements Step {
     // For every element in "input", check if any runner returns at least a single result.
     return input.filter((element) => this.runners.some((runner) => runner.run([element]).length > 0));
   }
+
+  toString() {
+    // A complete implementation would store the "arg" passed to the
+    // constructor. However, since it's unused in production methods, we avoid
+    // the memory overhead at the cost of slightly less thorough testing.
+    return ':Has(...selectors)';
+  }
 }

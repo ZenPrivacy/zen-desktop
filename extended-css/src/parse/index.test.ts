@@ -31,6 +31,12 @@ describe('parse', () => {
 
     // Relative selector
     ['> .x + p', 'ChildComb RawMatches(.x) NextSiblComb RawMatches(p)'],
+
+    // Pseudo-class aliases (uBO and ABP compat)
+    [
+      'span:has-text(Promoted):-abp-contains(AD):-abp-has(.banner)',
+      'RawQuery(span) :Contains(Promoted) :Contains(AD) :Has(...selectors)',
+    ],
   ])('parse %j', (input, expected) => {
     const got = parse(input)
       .map((s) => s.toString())
