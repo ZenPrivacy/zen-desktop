@@ -34,11 +34,6 @@
         border-radius: 6px;
         padding: 2px 6px;
       }
-      .meta {
-        margin-top: 16px;
-        font-size: 14px;
-        color: #555;
-      }
       .actions {
         margin-top: 24px;
         display: flex;
@@ -66,35 +61,34 @@
     <div class="wrap">
       <div class="card">
         <h1>Blocked by Zen</h1>
-        <p><strong>URL:</strong> <code>{{ .URL }}</code></p>
+        <p><strong>URL:</strong> <code id="url"></code></p>
         {{ if .Rule }}
         <p><strong>Rule:</strong> <code>{{ .Rule }}</code></p>
         {{ end }} {{ if .FilterList }}
-        <p><strong>Found in:</strong> {{ .FilterList }}</p>
+        <p><strong>Filter list:</strong> {{ .FilterList }}</p>
         {{ end }}
 
         <div class="actions">
           <a class="btn" onclick="allow()">Allow</a>
-          <button
-            class="btn secondary"
-            type="button"
-            onclick="window.history.back()"
-          >
-            Go back
-          </button>
+          <a class="btn secondary" onclick="window.history.back()">Go back</a>
         </div>
       </div>
     </div>
     <script>
-      async function allow() {
-        const url = `http://127.0.0.1:{{ .WhitelistPort }}/allow-rule`;
+      document.getElementById('url').textContent = window.location.toString();
 
-        await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'rule=' + encodeURIComponent(`{{ .Rule }}`),
-        });
-        window.location.reload();
+      async function allow() {
+        try {
+          await fetch(`http://127.0.0.1:{{ .WhitelistPort }}/allow-rule`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'rule=' + encodeURIComponent(`{{ .Rule }}`),
+          });
+          window.location.reload();
+        } catch (err) {
+          console.log('Error allowing rule:', err);
+          alert('Error allowing rule');
+        }
       }
     </script>
   </body>

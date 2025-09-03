@@ -18,6 +18,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/filter"
 	"github.com/ZenPrivacy/zen-desktop/internal/filter/filterliststore"
+	"github.com/ZenPrivacy/zen-desktop/internal/filter/whitelistserver"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules"
@@ -49,6 +50,7 @@ type App struct {
 	certStore       *certstore.DiskCertStore
 	systrayMgr      *systray.Manager
 	filterListStore *filterliststore.FilterListStore
+	whitelistSrv    *whitelistserver.Server
 }
 
 // NewApp initializes the app.
@@ -186,11 +188,17 @@ func (a *App) StartProxy() (err error) {
 	cosmeticRulesInjector := cosmetic.NewInjector()
 	cssRulesInjector := cssrule.NewInjector()
 	jsRuleInjector := jsrule.NewInjector()
+	whitelistSrv := whitelistserver.New(networkRules)
 
-	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, a.eventsHandler, a.filterListStore)
+	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, a.eventsHandler, a.filterListStore, whitelistSrv)
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}
+
+	if err := whitelistSrv.Start(); err != nil {
+		return fmt.Errorf("start whitelist server: %v", err)
+	}
+	a.whitelistSrv = whitelistSrv
 
 	certGenerator, err := certgen.NewCertGenerator(a.certStore)
 	if err != nil {
@@ -265,6 +273,12 @@ func (a *App) StopProxy() (err error) {
 	if err := a.proxy.Stop(); err != nil {
 		return fmt.Errorf("stop proxy: %w", err)
 	}
+
+	if err := a.whitelistSrv.Stop(); err != nil {
+		return fmt.Errorf("stop whitelist server: %w", err)
+	}
+
+	a.whitelistSrv = nil
 	a.proxy = nil
 	a.proxyOn = false
 

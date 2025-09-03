@@ -12,7 +12,7 @@ import (
 type Server struct {
 	networkRules networkRules
 	httpSrv      *http.Server
-	Port         int
+	port         int
 }
 
 type networkRules interface {
@@ -47,7 +47,7 @@ func (s *Server) handleAllow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filterList := "allowed-list"
+	filterList := "Allowlist"
 	if _, err := s.networkRules.ParseRule(fmt.Sprintf("@@%s", rule), &filterList); err != nil {
 		http.Error(w, "networkrules: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -57,7 +57,7 @@ func (s *Server) handleAllow(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("allowed rule: " + html.EscapeString(rule)))
 }
 
-func (s *Server) Start() (int, error) {
+func (s *Server) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/allow-rule", s.handleAllow)
 
@@ -70,10 +70,12 @@ func (s *Server) Start() (int, error) {
 	addr := fmt.Sprintf("127.0.0.1:%d", 0) // random port
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return -1, fmt.Errorf("listen: %w", err)
+		return fmt.Errorf("listen: %w", err)
 	}
 	actualPort := listener.Addr().(*net.TCPAddr).Port
-	log.Printf("Whitelist server listening on port %d", actualPort)
+	s.port = actualPort
+
+	log.Printf("whitelist server listening on port %d", actualPort)
 
 	go func() {
 		if err := s.httpSrv.Serve(listener); err != nil && err != http.ErrServerClosed {
@@ -81,12 +83,18 @@ func (s *Server) Start() (int, error) {
 		}
 	}()
 
-	return actualPort, nil
+	return nil
 }
 
 func (s *Server) Stop() error {
 	if s.httpSrv != nil {
-		return s.httpSrv.Close()
+		if err := s.httpSrv.Close(); err != nil {
+			return fmt.Errorf("close: %v", err)
+		}
 	}
 	return nil
+}
+
+func (s *Server) GetPort() int {
+	return s.port
 }

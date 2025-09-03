@@ -15,10 +15,8 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
-	"github.com/ZenPrivacy/zen-desktop/internal/filter/whitelistserver"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
-	"github.com/ZenPrivacy/zen-desktop/internal/networkrules"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
 	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
 )
@@ -36,7 +34,7 @@ type networkRules interface {
 	ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error)
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
-	CreateBlockPageResponse(req *http.Request, blockInfo networkrules.BlockInfo) *http.Response
+	CreateBlockPageResponse(req *http.Request, appliedRules []rule.Rule, whitelistPort int) (*http.Response, error)
 }
 
 // config provides filter configuration.
@@ -70,6 +68,10 @@ type filterListStore interface {
 	Get(url string) (io.ReadCloser, error)
 }
 
+type whitelistSrv interface {
+	GetPort() int
+}
+
 // Filter is capable of parsing Adblock-style filter lists and hosts rules and matching URLs against them.
 //
 // Safe for concurrent use.
@@ -82,7 +84,7 @@ type Filter struct {
 	jsRuleInjector        jsRuleInjector
 	eventsEmitter         filterEventsEmitter
 	filterListStore       filterListStore
-	whiteListerServer     whitelistserver.Server
+	whitelistSrv          whitelistSrv
 }
 
 var (
@@ -91,7 +93,7 @@ var (
 )
 
 // NewFilter creates and initializes a new filter.
-func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore) (*Filter, error) {
+func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore, whitelistSrv whitelistSrv) (*Filter, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -116,6 +118,9 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 	if filterListStore == nil {
 		return nil, errors.New("filterListStore is nil")
 	}
+	if whitelistSrv == nil {
+		return nil, errors.New("whitelistSrv is nil")
+	}
 
 	f := &Filter{
 		config:                config,
@@ -126,6 +131,7 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 		jsRuleInjector:        jsRuleInjector,
 		eventsEmitter:         eventsEmitter,
 		filterListStore:       filterListStore,
+		whitelistSrv:          whitelistSrv,
 	}
 	f.init()
 
@@ -178,13 +184,6 @@ func (f *Filter) init() {
 	if len(myRules) > 0 {
 		log.Printf("filter initialization: added %d rules and %d exceptions from %q", ruleCount, exceptionCount, filterName)
 	}
-
-	srv := whitelistserver.New(f.networkRules)
-	port, err := srv.Start()
-	if err != nil {
-		log.Fatalf("failed to start whitelist server: %v", err)
-	}
-	f.whiteListerServer.Port = port
 }
 
 // ParseAndAddRules parses the rules from the given reader and adds them to the filter.
@@ -249,30 +248,33 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 
 // HandleRequest handles the given request by matching it against the filter rules.
 // If the request should be blocked, it returns a response that blocks the request. If the request should be modified, it modifies it in-place.
-func (f *Filter) HandleRequest(req *http.Request) *http.Response {
+func (f *Filter) HandleRequest(req *http.Request) (*http.Response, error) {
 	initialURL := req.URL.String()
 
 	appliedRules, shouldBlock, redirectURL := f.networkRules.ModifyReq(req)
 	if shouldBlock {
 		f.eventsEmitter.OnFilterBlock(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
 
-		if req.Header.Get("Sec-Fetch-Dest") == "document" && req.Header.Get("Sec-Fetch-User") == "?1" {
-			info := buildBlockInfo(req, appliedRules, f.whiteListerServer.Port)
-			return f.networkRules.CreateBlockPageResponse(req, info)
+		if isUserNavigation(req) {
+			res, err := f.networkRules.CreateBlockPageResponse(req, appliedRules, f.whitelistSrv.GetPort())
+			if err != nil {
+				return nil, fmt.Errorf("create block page response: %v", err)
+			}
+			return res, nil
 		}
-		return f.networkRules.CreateBlockResponse(req)
+		return f.networkRules.CreateBlockResponse(req), nil
 	}
 
 	if redirectURL != "" {
 		f.eventsEmitter.OnFilterRedirect(req.Method, initialURL, redirectURL, req.Header.Get("Referer"), appliedRules)
-		return f.networkRules.CreateRedirectResponse(req, redirectURL)
+		return f.networkRules.CreateRedirectResponse(req, redirectURL), nil
 	}
 
 	if len(appliedRules) > 0 {
 		f.eventsEmitter.OnFilterModify(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // HandleResponse handles the given response by matching it against the filter rules.
@@ -330,23 +332,13 @@ func isDocumentNavigation(req *http.Request, res *http.Response) bool {
 	return true
 }
 
-func buildBlockInfo(req *http.Request, appliedRules []rule.Rule, whitelistPort int) networkrules.BlockInfo {
-	var rawRule, filterList string
-	if len(appliedRules) > 0 {
-		// networkRules.ModifyReq currently returns at most one rule when shouldBlock is true.
-		// If this changes in the future, this logic may need to be updated.
-		r := appliedRules[0]
-		rawRule = r.RawRule
-		if r.FilterName != nil {
-			filterList = *r.FilterName
-		}
-	}
+func isUserNavigation(req *http.Request) bool {
+	dest := req.Header.Get("Sec-Fetch-Dest")
+	mode := req.Header.Get("Sec-Fetch-Mode")
+	user := req.Header.Get("Sec-Fetch-User")
 
-	fullURL := req.URL.Scheme + "://" + req.URL.Hostname() + req.URL.RequestURI()
-	return networkrules.BlockInfo{
-		URL:           fullURL,
-		Rule:          rawRule,
-		FilterList:    filterList,
-		WhitelistPort: whitelistPort,
+	if dest == "document" && (mode == "navigate" || user == "?1") {
+		return true
 	}
+	return false
 }
