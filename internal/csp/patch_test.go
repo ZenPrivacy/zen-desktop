@@ -1,11 +1,10 @@
-package csp_test
+package csp
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
-
-	"github.com/ZenPrivacy/zen-desktop/internal/csp"
 )
 
 func TestPatchHeaders(t *testing.T) {
@@ -15,7 +14,7 @@ func TestPatchHeaders(t *testing.T) {
 		t.Parallel()
 
 		h := http.Header{}
-		nonce := csp.PatchHeaders(h, csp.InlineScript)
+		nonce := PatchHeaders(h, InlineScript)
 
 		if nonce != "" {
 			t.Fatalf("expected empty nonce when no CSP present, got %q", nonce)
@@ -31,18 +30,16 @@ func TestPatchHeaders(t *testing.T) {
 		h := http.Header{}
 		h.Add("Content-Security-Policy", "script-src-elem 'none'")
 
-		nonce := csp.PatchHeaders(h, csp.InlineScript)
+		nonce := PatchHeaders(h, InlineScript)
 		if nonce == "" {
 			t.Fatalf("expected nonce to be returned")
 		}
 		token := "'nonce-" + nonce + "'"
 
 		got := strings.Join(h.Values("Content-Security-Policy"), ", ")
-		if !strings.Contains(got, token) {
-			t.Fatalf("nonce %q not found in header: %s", token, got)
-		}
-		if strings.Contains(strings.ToLower(got), "'none'") {
-			t.Fatalf("expected 'none' to be replaced, still found in: %s", got)
+		expected := fmt.Sprintf("script-src-elem %s", token)
+		if got != expected {
+			t.Fatalf("expected header value %q, got %q", expected, got)
 		}
 	})
 }
@@ -88,7 +85,7 @@ func TestPatchHeaders_NoncePriority_Script(t *testing.T) {
 			h := http.Header{}
 			h.Add("Content-Security-Policy", tc.cspLine)
 
-			nonce := csp.PatchHeaders(h, csp.InlineScript)
+			nonce := PatchHeaders(h, InlineScript)
 			if tc.wantNonce && nonce == "" {
 				t.Fatalf("expected nonce, got empty")
 			}
@@ -102,21 +99,6 @@ func TestPatchHeaders_NoncePriority_Script(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestPatchHeaders_Style_NoneGetsNonce(t *testing.T) {
-	t.Parallel()
-
-	h := http.Header{}
-	h.Add("Content-Security-Policy", "style-src 'none'")
-
-	nonce := csp.PatchHeaders(h, csp.InlineStyle)
-	if nonce == "" {
-		t.Fatalf("expected nonce for style-src 'none'")
-	}
-	if !dirHasNonce(h, "style-src", nonce) {
-		t.Fatalf("style-src should contain nonce, got: %s", h.Get("Content-Security-Policy"))
 	}
 }
 
@@ -158,7 +140,7 @@ func TestPatchHeaders_NoncePriority_Style(t *testing.T) {
 		h := http.Header{}
 		h.Add("Content-Security-Policy", tc.cspLine)
 
-		nonce := csp.PatchHeaders(h, csp.InlineStyle)
+		nonce := PatchHeaders(h, InlineStyle)
 
 		if tc.wantNonce && nonce == "" {
 			t.Errorf("%s: expected nonce, got empty", tc.name)
@@ -188,10 +170,20 @@ func TestPatchHeaders_NoncePriority_Style(t *testing.T) {
 
 func dirHasNonce(h http.Header, dir, nonce string) bool {
 	token := "'nonce-" + nonce + "'"
-	for _, l := range h.Values("Content-Security-Policy") {
-		lc := strings.ToLower(l)
-		if strings.Contains(lc, dir) && strings.Contains(l, token) {
-			return true
+	lines := h.Values("Content-Security-Policy")
+
+	for _, line := range lines {
+		rawDirs := strings.SplitSeq(line, ";")
+
+		for raw := range rawDirs {
+			d := strings.TrimSpace(raw)
+			if d == "" {
+				continue
+			}
+			name, value := cutDirective(d)
+			if name == dir && strings.Contains(value, token) {
+				return true
+			}
 		}
 	}
 	return false

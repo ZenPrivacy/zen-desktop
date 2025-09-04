@@ -19,8 +19,9 @@ const (
 	InlineStyle
 )
 
-// PatchHeaders mutates headers so an inline code can run.
-// Returns the nonce to place on the inline tag.
+// PatchHeaders mutates headers so an inline <script> or <style> element can run.
+// Returns the nonce to place on the inline tag. Returns "" if no patch was needed
+// (e.g., CSP already allowed inline) or no CSP headers were present.
 func PatchHeaders(h http.Header, kind inlineKind) (nonce string) {
 	// If there is no CSP at all, nothing to patch; return empty nonce.
 	if len(h.Values(cspHeader)) == 0 && len(h.Values(cspReportOnly)) == 0 {
@@ -48,7 +49,7 @@ func patchOneHeader(h http.Header, key, nonce string, kind inlineKind) (patched 
 	var changed bool
 
 	// In case of multiple lines/policies, the browsers will select the most restrictive one.
-	// For this reason, we modify each independently so they all allow the inline.
+	// For this reason, we modify each independently so they all allow the inline tag.
 	// See more: https://content-security-policy.com/examples/multiple-csp-headers/.
 	for i, line := range lines {
 		rawDirs := strings.Split(line, ";")
