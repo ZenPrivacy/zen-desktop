@@ -31,22 +31,22 @@
 }
 
 .my-rules__line-numbers {
-  flex: 0 0 2em;
-  width: 2em;
+  flex: 0 0 28px;
+  width: 28px;
   color: #858585;
   text-align: right;
-  font-size: 0.9em;
+  font-size: 14px;
   background-color: white;
-  padding: 0.9em 0;
+  padding: 14px 0;
   user-select: none;
-  line-height: 1.4em;
+  line-height: 19.6px;
   overflow: hidden;
   min-height: 0;
 }
 
 .line-number {
-  height: 1.4em;
-  line-height: 1.4em;
+  height: 20px;
+  line-height: 20px;
 }
 
 .my-rules__textarea {
@@ -57,10 +57,10 @@
   scrollbar-gutter: stable;
 
   font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
-  font-size: 0.9em !important;
-  line-height: 1.4em !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
   resize: none;
-  padding: 4px 6px;
+  padding: 14px !important;
 }
 
 .my-rules__textarea.bp4-input,
