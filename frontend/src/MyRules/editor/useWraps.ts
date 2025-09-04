@@ -30,7 +30,7 @@ export function useWraps({ value, lines, textAreaRef, mirrorRef }: Args) {
     const cs = window.getComputedStyle(ta);
     const innerWidth = ta.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
 
-    // Важно: повторяем те же параметры, что у textarea
+    // Important: repeat the same parameters as the textarea
     mirror.style.width = `${Math.max(0, innerWidth)}px`;
     mirror.style.fontFamily = cs.fontFamily;
     mirror.style.fontSize = cs.fontSize;
@@ -63,12 +63,12 @@ export function useWraps({ value, lines, textAreaRef, mirrorRef }: Args) {
     setWraps(newWraps);
   }, [computeLineHeightPx, lines, textAreaRef, mirrorRef]);
 
-  // Пересчёт при изменении текста
+  // Recalculate when text changes
   useLayoutEffect(() => {
     recalcWraps();
   }, [value, recalcWraps]);
 
-  // Пересчёт при ресайзе textarea
+  // Recalculate when textarea is resized
   useEffect(() => {
     const ta = textAreaRef.current;
     if (!ta) return;
