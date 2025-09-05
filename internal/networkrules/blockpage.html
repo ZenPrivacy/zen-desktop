@@ -72,9 +72,11 @@
           <a class="btn" onclick="allow()">Allow</a>
           <a class="btn secondary" onclick="window.history.back()">Go back</a>
         </div>
+        <div id="rule" data-rule="{{ .Rule }}"></div>
       </div>
     </div>
     <script>
+      const rule = document.getElementById('rule').dataset.rule;
       document.getElementById('url').textContent = window.location.toString();
 
       async function allow() {
@@ -82,7 +84,7 @@
           await fetch(`http://127.0.0.1:{{ .WhitelistPort }}/allow-rule`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'rule=' + encodeURIComponent(`{{ .Rule }}`),
+            body: 'rule=' + encodeURIComponent(rule),
           });
           window.location.reload();
         } catch (err) {
