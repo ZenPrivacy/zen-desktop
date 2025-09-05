@@ -16,6 +16,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/extendedcss"
 	"github.com/ZenPrivacy/zen-desktop/internal/filter"
 	"github.com/ZenPrivacy/zen-desktop/internal/filter/filterliststore"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
@@ -183,11 +184,16 @@ func (a *App) StartProxy() (err error) {
 		return fmt.Errorf("create scriptlets injector: %v", err)
 	}
 
+	extendedCssInjector, err := extendedcss.NewInjectorWithDefaults()
+	if err != nil {
+		return fmt.Errorf("create extended css injector: %v", err)
+	}
+
 	cosmeticRulesInjector := cosmetic.NewInjector()
 	cssRulesInjector := cssrule.NewInjector()
 	jsRuleInjector := jsrule.NewInjector()
 
-	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, a.eventsHandler, a.filterListStore)
+	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCssInjector, a.eventsHandler, a.filterListStore)
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}
