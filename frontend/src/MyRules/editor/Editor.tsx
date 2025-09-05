@@ -1,5 +1,5 @@
 import { TextArea } from '@blueprintjs/core';
-import React, { useMemo, useRef, useCallback } from 'react';
+import React, { useMemo, useRef, useCallback, useLayoutEffect } from 'react';
 import { useWraps } from './useWraps';
 
 type Props = {
@@ -16,6 +16,29 @@ export function MyRulesEditor({ value, placeholder, disabled, onChange, lines }:
   const mirrorRef = useRef<HTMLDivElement>(null);
 
   const { wraps } = useWraps({ value, lines, textAreaRef, mirrorRef });
+
+  const applyLineNumberMetrics = useCallback(() => {
+    const ta = textAreaRef.current;
+    const ln = lineNumbersRef.current;
+    if (!ta || !ln) return;
+    const cs = window.getComputedStyle(ta);
+
+    ln.style.paddingTop = cs.paddingTop;
+    ln.style.paddingBottom = cs.paddingBottom;
+    ln.style.setProperty('--lnh', cs.lineHeight);
+  }, []);
+
+  useLayoutEffect(() => {
+    applyLineNumberMetrics();
+  }, [applyLineNumberMetrics, value, lines, wraps]);
+
+  useLayoutEffect(() => {
+    const ta = textAreaRef.current;
+    if (!ta) return;
+    const ro = new ResizeObserver(() => applyLineNumberMetrics());
+    ro.observe(ta);
+    return () => ro.disconnect();
+  }, [applyLineNumberMetrics]);
 
   const syncScroll = useCallback(() => {
     if (lineNumbersRef.current && textAreaRef.current) {

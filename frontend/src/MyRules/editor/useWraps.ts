@@ -17,9 +17,9 @@ export function useWraps({ value, lines, textAreaRef, mirrorRef }: Args) {
     const lh = cs.lineHeight;
     if (!lh || lh === 'normal') {
       const fs = parseFloat(cs.fontSize || '16');
-      return Math.round(fs * 1.2);
+      return fs * 1.2;
     }
-    return Math.round(parseFloat(lh));
+    return parseFloat(lh);
   }, [textAreaRef]);
 
   const recalcWraps = useCallback(() => {
@@ -30,11 +30,14 @@ export function useWraps({ value, lines, textAreaRef, mirrorRef }: Args) {
     const cs = window.getComputedStyle(ta);
     const innerWidth = ta.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
 
-    // Important: repeat the same parameters as the textarea
     mirror.style.width = `${Math.max(0, innerWidth)}px`;
     mirror.style.fontFamily = cs.fontFamily;
     mirror.style.fontSize = cs.fontSize;
     mirror.style.lineHeight = cs.lineHeight;
+    mirror.style.letterSpacing = cs.letterSpacing;
+    mirror.style.wordSpacing = cs.wordSpacing;
+    mirror.style.fontWeight = cs.fontWeight;
+    mirror.style.boxSizing = cs.boxSizing;
     mirror.style.paddingTop = cs.paddingTop;
     mirror.style.paddingBottom = cs.paddingBottom;
 
@@ -55,20 +58,21 @@ export function useWraps({ value, lines, textAreaRef, mirrorRef }: Args) {
     const children = mirrorLines.children;
     for (let i = 0; i < children.length; i++) {
       const el = children[i] as HTMLElement;
-      const h = el.scrollHeight;
-      const wrapsForLine = Math.max(1, Math.round(h / lineHeightPx));
+      const h = el.getBoundingClientRect().height;
+      const ratio = h / lineHeightPx;
+
+      const wrapsForLine = Math.max(1, Math.floor(ratio + 0.001));
+
       newWraps.push(wrapsForLine);
     }
 
     setWraps(newWraps);
   }, [computeLineHeightPx, lines, textAreaRef, mirrorRef]);
 
-  // Recalculate when text changes
   useLayoutEffect(() => {
     recalcWraps();
-  }, [value, recalcWraps]);
+  }, [value, lines, recalcWraps]);
 
-  // Recalculate when textarea is resized
   useEffect(() => {
     const ta = textAreaRef.current;
     if (!ta) return;

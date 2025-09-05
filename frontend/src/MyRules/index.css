@@ -37,16 +37,15 @@
   text-align: right;
   font-size: 14px;
   background-color: white;
-  padding: 14px 0;
   user-select: none;
-  line-height: 19.6px;
   overflow: hidden;
   min-height: 0;
+  --lnh: 20px;
 }
 
 .line-number {
-  height: 20px;
-  line-height: 20px;
+  height: var(--lnh);
+  line-height: var(--lnh);
 }
 
 .my-rules__textarea {
