@@ -85,6 +85,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'rule=' + encodeURIComponent(rule),
+            mode: 'no-cors',
           });
           window.location.reload();
         } catch (err) {

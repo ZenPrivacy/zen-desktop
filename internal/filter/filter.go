@@ -256,6 +256,12 @@ func (f *Filter) HandleRequest(req *http.Request) (*http.Response, error) {
 		f.eventsEmitter.OnFilterBlock(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
 
 		if isUserNavigation(req) {
+			port := f.whitelistSrv.GetPort()
+			if port <= 0 {
+				log.Printf("whitelist server not ready, falling back to simple block response for %q", logger.Redacted(req.URL))
+				return f.networkRules.CreateBlockResponse(req), nil
+			}
+
 			res, err := f.networkRules.CreateBlockPageResponse(req, appliedRules, f.whitelistSrv.GetPort())
 			if err != nil {
 				return nil, fmt.Errorf("create block page response: %v", err)

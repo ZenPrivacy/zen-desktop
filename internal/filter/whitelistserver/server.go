@@ -27,15 +27,20 @@ func (s *Server) handleAllow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
+	r.Body = http.MaxBytesReader(w, r.Body, 4096)
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "invalid form", http.StatusBadRequest)
 		return
@@ -53,6 +58,7 @@ func (s *Server) handleAllow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("allowed rule: " + html.EscapeString(rule)))
 }

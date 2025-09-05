@@ -53,10 +53,12 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 			}
 
 			r := fmt.Sprintf("||%s^$document", host)
-			nr.regularRuleTree.Add(r, &rule.Rule{
+			if err := nr.regularRuleTree.Add(r, &rule.Rule{
 				RawRule:    r,
 				FilterName: filterName,
-			})
+			}); err != nil {
+				return false, fmt.Errorf("add host rule: %w", err)
+			}
 		}
 
 		return false, nil
