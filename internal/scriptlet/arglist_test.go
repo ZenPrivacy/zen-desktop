@@ -36,9 +36,10 @@ func TestNormalize(t *testing.T) {
 		testCases := []string{
 			`"arg1", "arg2`,
 			`"`,
-			``,
 			`"""`,
-			``,
+			` `,
+			`"arg1\", "arg2"`,
+			`"arg1", ,"arg2"`,
 		}
 
 		for _, test := range testCases {

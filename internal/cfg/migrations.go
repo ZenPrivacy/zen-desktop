@@ -129,6 +129,37 @@ var migrations = map[string]func(c *Config) error{
 		}
 		return nil
 	},
+	"v0.11.3": func(c *Config) error {
+		for i, list := range c.Filter.FilterLists {
+			if list.URL == "https://malware-filter.gitlab.io/malware-filter/phishing-filter.txt" {
+				c.Filter.FilterLists[i].URL = "https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt"
+			}
+		}
+		if err := c.Save(); err != nil {
+			return fmt.Errorf("save config: %v", err)
+		}
+		return nil
+	},
+	"v0.12.0": func(_ *Config) error {
+		if runtime.GOOS == "darwin" {
+			autostart := autostart.Manager{}
+			enabled, err := autostart.IsEnabled()
+			if err != nil {
+				return fmt.Errorf("check enabled: %v", err)
+			}
+			if enabled {
+				// Re-enable to update ProgramArguments
+				if err := autostart.Disable(); err != nil {
+					return fmt.Errorf("disable autostart: %v", err)
+				}
+				if err := autostart.Enable(); err != nil {
+					return fmt.Errorf("enable autostart: %v", err)
+				}
+			}
+		}
+
+		return nil
+	},
 }
 
 // RunMigrations runs the version-to-version migrations.

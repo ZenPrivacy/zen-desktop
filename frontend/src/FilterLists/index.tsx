@@ -165,7 +165,6 @@ function ListItem({
             icon="duplicate"
             intent="none"
             className="filter-lists__list-button"
-            disabled={isProxyRunning}
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(filterList.url);
@@ -184,7 +183,6 @@ function ListItem({
           icon="globe-network"
           intent="none"
           className="filter-lists__list-button"
-          disabled={isProxyRunning}
           onClick={() => {
             BrowserOpenURL(filterList.url);
           }}
