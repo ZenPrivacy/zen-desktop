@@ -4,7 +4,7 @@ import { Engine } from '.';
 
 describe('Engine', () => {
   let originalBody: string;
-  const startedEngines: Engine[] = [];
+  let startedEngines: Engine[] = [];
 
   beforeEach(() => {
     originalBody = document.body.innerHTML;
@@ -15,6 +15,8 @@ describe('Engine', () => {
     for (const engine of startedEngines) {
       engine.stop();
     }
+    startedEngines = [];
+    jest.useRealTimers();
     document.body.innerHTML = originalBody;
   });
 
