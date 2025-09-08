@@ -10,6 +10,12 @@ export class Engine {
   private readonly executors: SelectorExecutor[];
   private readonly target = document.documentElement;
 
+  /**
+   * Tracks original inline display values for elements we hide.
+   */
+  private readonly hiddenOriginalDisplay = new Map<Element, { value: string; important: boolean }>();
+  private observer: MutationObserver | null = null;
+
   constructor(rules: string) {
     logger.debug('Initializing engine');
     this.executors = this.parseRules(rules);
@@ -33,6 +39,23 @@ export class Engine {
     this.registerObserver();
   }
 
+  /**
+   * Tears down the mutation observer and restores styles of all affected elements to their original state.
+   */
+  stop(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+      this.observer = null;
+    }
+
+    for (const el of this.hiddenOriginalDisplay.keys()) {
+      this.restoreElement(el);
+    }
+    this.hiddenOriginalDisplay.clear();
+
+    logger.debug('Engine stopped');
+  }
+
   private parseRules(rules: string): SelectorExecutor[] {
     const lines = rules.split('\n');
 
@@ -54,23 +77,52 @@ export class Engine {
 
   private applyQueries(): void {
     const start = performance.now();
-    let hiddenCnt = 0;
 
+    // Compute the union of all current matches.
+    const currentMatches = new Set<Element>();
     for (const ex of this.executors) {
       try {
         const els = ex.match(this.target);
-        for (const el of els) {
-          if (!(el instanceof HTMLElement)) continue;
-          el.style.setProperty('display', 'none', 'important');
-        }
-        hiddenCnt += els.length;
+        for (const el of els) currentMatches.add(el);
       } catch (ex) {
         logger.error(`Failed to apply rule`, ex);
       }
     }
 
+    // Restore elements that are no longer matched by any rule.
+    const toRestore: Element[] = [];
+    for (const el of this.hiddenOriginalDisplay.keys()) {
+      if (!currentMatches.has(el)) toRestore.push(el);
+    }
+    for (const el of toRestore) this.restoreElement(el);
+
+    // Hide all currently matched elements, recording original inline display once.
+    let newlyHidden = 0;
+    for (const el of currentMatches) {
+      if (!(el instanceof HTMLElement)) continue;
+      if (this.hiddenOriginalDisplay.has(el)) continue;
+
+      this.hiddenOriginalDisplay.set(el, {
+        value: el.style.getPropertyValue('display'),
+        important: el.style.getPropertyPriority('display') === 'important',
+      });
+
+      el.style.setProperty('display', 'none', 'important');
+
+      newlyHidden++;
+    }
+
     const end = performance.now();
-    logger.debug(`Hidden ${hiddenCnt} elements in ${(end - start).toFixed(2)}ms`);
+    logger.debug(`Hidden ${newlyHidden} elements, restored ${toRestore.length} in ${(end - start).toFixed(2)}ms`);
+  }
+
+  private restoreElement(el: Element): void {
+    if (!(el instanceof HTMLElement)) return;
+    const original = this.hiddenOriginalDisplay.get(el);
+    if (original === undefined) return;
+
+    el.style.setProperty('display', original.value, original.important ? 'important' : undefined);
+    this.hiddenOriginalDisplay.delete(el);
   }
 
   private registerObserver(): void {
@@ -87,13 +139,13 @@ export class Engine {
       observer.observe(this.target, options);
     }, 100);
 
-    const observer = new MutationObserver((mutations, observer) => {
+    this.observer = new MutationObserver((mutations, observer) => {
       if (mutations.length === 0) return;
       if (mutations.every((m) => m.type === 'attributes')) return;
 
       cb(observer);
     });
 
-    observer.observe(this.target, options);
+    this.observer.observe(this.target, options);
   }
 }
