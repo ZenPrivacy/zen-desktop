@@ -26,7 +26,9 @@ describe('tokenize', () => {
 
     [':upward(1)+:upward(2)', 'ExtTok(:upward(1)) CombTok(+) ExtTok(:upward(2))'],
 
+    // Selector lists in classes/pseudo-classes
     ['section:where(.x, .y)', 'RawTok(section:where(.x, .y))'],
+    ['div:has(span, strong)', 'RawTok(div) ExtTok(:has(span, strong))'],
 
     ['div, .banner', 'RawTok(div), RawTok(.banner)'],
   ])('tokenize selector %j', (input, expected) => {
