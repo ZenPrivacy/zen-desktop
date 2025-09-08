@@ -51,7 +51,6 @@ export class Engine {
     for (const el of this.hiddenOriginalDisplay.keys()) {
       this.restoreElement(el);
     }
-    this.hiddenOriginalDisplay.clear();
 
     logger.debug('Engine stopped');
   }
@@ -89,12 +88,13 @@ export class Engine {
       }
     }
 
-    // Restore elements that are no longer matched by any rule.
-    const toRestore: Element[] = [];
+    let restored = 0;
     for (const el of this.hiddenOriginalDisplay.keys()) {
-      if (!currentMatches.has(el)) toRestore.push(el);
+      if (!currentMatches.has(el)) {
+        this.restoreElement(el);
+        restored++;
+      }
     }
-    for (const el of toRestore) this.restoreElement(el);
 
     // Hide all currently matched elements, recording original inline display once.
     let newlyHidden = 0;
@@ -113,7 +113,7 @@ export class Engine {
     }
 
     const end = performance.now();
-    logger.debug(`Hidden ${newlyHidden} elements, restored ${toRestore.length} in ${(end - start).toFixed(2)}ms`);
+    logger.debug(`Hidden ${newlyHidden} elements, restored ${restored} in ${(end - start).toFixed(2)}ms`);
   }
 
   private restoreElement(el: Element): void {
@@ -121,7 +121,12 @@ export class Engine {
     const original = this.hiddenOriginalDisplay.get(el);
     if (original === undefined) return;
 
-    el.style.setProperty('display', original.value, original.important ? 'important' : undefined);
+    if (original.value) {
+      el.style.setProperty('display', original.value, original.important ? 'important' : undefined);
+    } else {
+      el.style.removeProperty('display');
+    }
+
     this.hiddenOriginalDisplay.delete(el);
   }
 
