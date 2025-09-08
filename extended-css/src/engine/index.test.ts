@@ -247,6 +247,29 @@ describe('Engine', () => {
       expect(getVisibleElements('#complex2')).toHaveLength(1);
     });
 
+    test('"unhides" elements after they no longer match the selector', async () => {
+      jest.useFakeTimers();
+
+      createTestDOM(`
+        <div class="dynamic"><div class="ad"></div></div>
+        <div class="static">Should remain visible</div>
+      `);
+
+      startEngine('div:has(.ad)');
+
+      expect(getVisibleElements('.dynamic')).toHaveLength(0);
+      expect(getVisibleElements('.static')).toHaveLength(1);
+
+      const ad = document.querySelector('.ad')!;
+      ad.remove();
+
+      await jest.runAllTimersAsync();
+
+      expect(getVisibleElements('.dynamic')).toHaveLength(1);
+      expect(getVisibleElements('.static')).toHaveLength(1);
+      jest.useRealTimers();
+    });
+
     test('handles dynamic content updates', () => {
       jest.useFakeTimers();
       createTestDOM(`
