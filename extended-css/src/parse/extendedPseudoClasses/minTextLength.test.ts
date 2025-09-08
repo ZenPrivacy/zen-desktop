@@ -39,7 +39,7 @@ describe(':MinTextLength()', () => {
     expect(selector.run(input)).toEqual([document.querySelector('#t1'), document.querySelector('#t2')]);
   });
 
-  test.only('includes nested text content when computing length', () => {
+  test('includes nested text content when computing length', () => {
     document.body.innerHTML = `
       <div id="t4">a<span>bc</span>d</div>
       <div id="t5"><span>123</span></div>
