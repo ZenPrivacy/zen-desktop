@@ -21,9 +21,13 @@ export class Engine {
     this.applyQueries();
 
     if (document.readyState !== 'complete') {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.applyQueries();
-      });
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          this.applyQueries();
+        },
+        { once: true },
+      );
     }
 
     this.registerObserver();
