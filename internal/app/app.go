@@ -184,7 +184,7 @@ func (a *App) StartProxy() (err error) {
 		return fmt.Errorf("create scriptlets injector: %v", err)
 	}
 
-	extendedCssInjector, err := extendedcss.NewInjectorWithDefaults()
+	extendedCSSInjector, err := extendedcss.NewInjectorWithDefaults()
 	if err != nil {
 		return fmt.Errorf("create extended css injector: %v", err)
 	}
@@ -193,7 +193,7 @@ func (a *App) StartProxy() (err error) {
 	cssRulesInjector := cssrule.NewInjector()
 	jsRuleInjector := jsrule.NewInjector()
 
-	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCssInjector, a.eventsHandler, a.filterListStore)
+	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, a.filterListStore)
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}

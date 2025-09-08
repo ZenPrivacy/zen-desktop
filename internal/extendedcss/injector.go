@@ -58,7 +58,7 @@ func newInjector(bundleData []byte, store store) (*Injector, error) {
 	}
 
 	return &Injector{
-		bundle: template.JS(bundleData),
+		bundle: template.JS(bundleData), // #nosec G203 -- bundleData comes from a trusted source
 		store:  store,
 	}, nil
 }
@@ -79,9 +79,8 @@ func (inj *Injector) AddRule(rule string) error {
 			return fmt.Errorf("add exception rule: %v", err)
 		}
 		return nil
-	} else {
-		return errors.New("unknown rule format")
 	}
+	return errors.New("unknown rule format")
 }
 
 // Inject injects extended-css rules into a given HTTP HTML response.
