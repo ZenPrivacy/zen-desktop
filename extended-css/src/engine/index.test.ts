@@ -244,7 +244,7 @@ describe('Engine', () => {
       for (let i = 0; i < 100; i++) {
         const div = document.createElement('div');
         div.textContent = 'Ad ' + i;
-        document.documentElement.appendChild(div);
+        document.body.appendChild(div);
       }
 
       jest.runAllTimers();
