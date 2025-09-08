@@ -29,7 +29,6 @@ module.exports = {
     'import/no-relative-packages': 0,
     'no-undef': 0,
     'no-console': 1,
-    'no-global-assign': 0,
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
   },
