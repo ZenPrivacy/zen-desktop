@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/csp"
@@ -16,6 +17,12 @@ import (
 )
 
 var (
+	// RuleRegex matches extended CSS rules.
+	RuleRegex = regexp.MustCompile(`.+?#@?\?#.+$`)
+
+	primaryRuleRegex   = regexp.MustCompile(`(.+?)#\?#(.+)`)
+	exceptionRuleRegex = regexp.MustCompile(`(.+?)#@\?#(.+)`)
+
 	//go:embed bundle.js
 	defaultExtendedCSSBundle []byte
 	scriptOpeningTag         = []byte("<script>")
@@ -24,6 +31,7 @@ var (
 
 type store interface {
 	AddPrimaryRule(hostnamePatterns string, body string) error
+	AddExceptionRule(hostnamePatterns string, body string) error
 	Get(hostname string) []string
 }
 
@@ -55,18 +63,25 @@ func newInjector(bundleData []byte, store store) (*Injector, error) {
 	}, nil
 }
 
-// AddRule adds an extended-css rule to the injector.
+// AddRule adds an extended CSS rule to the injector.
 func (inj *Injector) AddRule(rule string) error {
-	parsed, err := parseRule(rule)
-	if err != nil {
-		return fmt.Errorf("parse extended-css rule: %v", err)
+	if match := primaryRuleRegex.FindStringSubmatch(rule); match != nil {
+		hostnamePatters := match[1]
+		selector := match[2]
+		if err := inj.store.AddPrimaryRule(hostnamePatters, selector); err != nil {
+			return fmt.Errorf("add primary rule: %v", err)
+		}
+		return nil
+	} else if match := exceptionRuleRegex.FindStringSubmatch(rule); match != nil {
+		hostnamePatterns := match[1]
+		selector := match[2]
+		if err := inj.store.AddExceptionRule(hostnamePatterns, selector); err != nil {
+			return fmt.Errorf("add exception rule: %v", err)
+		}
+		return nil
+	} else {
+		return errors.New("unknown rule format")
 	}
-
-	if err := inj.store.AddPrimaryRule(parsed.hostnamePatterns, parsed.selector); err != nil {
-		return fmt.Errorf("add extended-css rule to store: %v", err)
-	}
-
-	return nil
 }
 
 // Inject injects extended-css rules into a given HTTP HTML response.

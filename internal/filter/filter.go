@@ -230,7 +230,7 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 		}
 	case extendedcss.RuleRegex.MatchString(rule):
 		if err := f.extendedCSSInjector.AddRule(rule); err != nil {
-			return false, fmt.Errorf("add extended-css rule: %w", err)
+			return false, fmt.Errorf("add extended css rule: %w", err)
 		}
 	case filterListTrusted && cssrule.RuleRegex.MatchString(rule):
 		if err := f.cssRulesInjector.AddRule(rule); err != nil {
