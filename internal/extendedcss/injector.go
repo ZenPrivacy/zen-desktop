@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"regexp"
@@ -25,8 +26,8 @@ var (
 
 	//go:embed bundle.js
 	defaultExtendedCSSBundle []byte
-	scriptOpeningTag         = []byte("<script>")
-	scriptClosingTag         = []byte("</script>")
+
+	injectionTmp = template.Must(template.New("injection").Parse(`<script{{if .Nonce}} nonce="{{.Nonce}}"{{end}}>{{.Bundle}}(()=>{window.extendedCSS("{{.Rules}}")})();</script>`))
 )
 
 type store interface {
@@ -35,11 +36,11 @@ type store interface {
 	Get(hostname string) []string
 }
 
-// Injector injects extended-css rules into HTML HTTP responses.
+// Injector injects extended CSS rules into HTML HTTP responses.
 type Injector struct {
-	// bundle contains the extended-css JS bundle.
-	bundle []byte
-	// store stores and retrieves extended-css rules by hostname.
+	// bundle contains the extended CSS JS bundle.
+	bundle template.JS
+	// store stores and retrieves extended CSS rules by hostname.
 	store store
 }
 
@@ -48,7 +49,6 @@ func NewInjectorWithDefaults() (*Injector, error) {
 	return newInjector(defaultExtendedCSSBundle, store)
 }
 
-// newInjector creates a new Injector with the embedded extended-css bundle.
 func newInjector(bundleData []byte, store store) (*Injector, error) {
 	if bundleData == nil {
 		return nil, errors.New("bundleData is nil")
@@ -58,7 +58,7 @@ func newInjector(bundleData []byte, store store) (*Injector, error) {
 	}
 
 	return &Injector{
-		bundle: bundleData,
+		bundle: template.JS(bundleData),
 		store:  store,
 	}, nil
 }
@@ -98,22 +98,21 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 	nonce := csp.PatchHeaders(res.Header, csp.InlineScript)
 
 	var injection bytes.Buffer
-	if nonce == "" {
-		injection.Write(scriptOpeningTag)
-	} else {
-		fmt.Fprintf(&injection, `<script nonce="%s">`, nonce)
+	err := injectionTmp.Execute(&injection, struct {
+		Nonce  string
+		Bundle template.JS
+		Rules  string
+	}{
+		Nonce:  nonce,
+		Bundle: inj.bundle,
+		Rules:  strings.Join(rules, "\n"),
+	})
+	if err != nil {
+		return fmt.Errorf("execute template: %v", err)
 	}
-	injection.Write(inj.bundle)
-	injection.WriteString("(()=>{window.extendedCSS(")
-
-	rulesString := strings.Join(rules, "\n")
-	fmt.Fprintf(&injection, `%q`, rulesString)
-
-	injection.WriteString(")})();")
-	injection.Write(scriptClosingTag)
 
 	if err := httprewrite.AppendHTMLHeadContents(res, injection.Bytes()); err != nil {
-		return fmt.Errorf("append head contents: %w", err)
+		return fmt.Errorf("append head contents: %v", err)
 	}
 
 	return nil
