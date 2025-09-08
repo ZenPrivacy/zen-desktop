@@ -308,7 +308,7 @@ describe('Engine', () => {
         <div class="test">Should remain visible</div>
       `);
 
-      expect(() => new Engine('~~~~invalid css syntax~~~~~')).not.toThrow();
+      expect(() => startEngine('~~~~invalid css syntax~~~~~')).not.toThrow();
       expect(getVisibleElements('.test')).toHaveLength(1);
     });
 
@@ -323,7 +323,7 @@ describe('Engine', () => {
         :invalid-pseudo
       `;
 
-      expect(() => new Engine(rules).start()).not.toThrow();
+      expect(() => startEngine(rules)).not.toThrow();
       expect(getVisibleElements('.valid')).toHaveLength(0);
       expect(getVisibleElements('.other')).toHaveLength(1);
     });
