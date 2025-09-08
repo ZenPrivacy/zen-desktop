@@ -4,12 +4,17 @@ import { Engine } from '.';
 
 describe('Engine', () => {
   let originalBody: string;
+  const startedEngines: Engine[] = [];
 
   beforeEach(() => {
     originalBody = document.body.innerHTML;
   });
 
   afterEach(() => {
+    // Stop all engines to disconnect MutationObservers and event handlers
+    for (const engine of startedEngines) {
+      engine.stop();
+    }
     document.body.innerHTML = originalBody;
   });
 
@@ -29,6 +34,13 @@ describe('Engine', () => {
     return Array.from(document.documentElement.querySelectorAll(selector)).filter((el) => !isElementHidden(el));
   };
 
+  const startEngine = (rules: string): Engine => {
+    const engine = new Engine(rules);
+    engine.start();
+    startedEngines.push(engine);
+    return engine;
+  };
+
   describe('basic selector parsing and execution', () => {
     test('hides elements matching simple class selector', () => {
       createTestDOM(`
@@ -37,8 +49,7 @@ describe('Engine', () => {
         <span class="hide-me">Should also be hidden</span>
       `);
 
-      const engine = new Engine('.hide-me');
-      engine.start();
+      startEngine('.hide-me');
 
       expect(getVisibleElements('.hide-me')).toHaveLength(0);
       expect(getVisibleElements('.keep-me')).toHaveLength(1);
@@ -50,8 +61,7 @@ describe('Engine', () => {
         <div id="other">Should remain visible</div>
       `);
 
-      const engine = new Engine('#target');
-      engine.start();
+      startEngine('#target');
 
       expect(getVisibleElements('#target')).toHaveLength(0);
       expect(getVisibleElements('#other')).toHaveLength(1);
@@ -64,8 +74,7 @@ describe('Engine', () => {
         <span>Should also be hidden</span>
       `);
 
-      const engine = new Engine('span');
-      engine.start();
+      startEngine('span');
 
       expect(getVisibleElements('span')).toHaveLength(0);
       expect(getVisibleElements('div')).toHaveLength(1);
@@ -78,8 +87,7 @@ describe('Engine', () => {
         <span data-ad="banner">Should also be hidden</span>
       `);
 
-      const engine = new Engine('[data-ad]');
-      engine.start();
+      startEngine('[data-ad]');
 
       expect(getVisibleElements('[data-ad]')).toHaveLength(0);
       expect(getVisibleElements('[data-content]')).toHaveLength(1);
@@ -96,8 +104,7 @@ describe('Engine', () => {
         </p>
       `);
 
-      const engine = new Engine('*');
-      engine.start();
+      startEngine('*');
 
       expect(getVisibleElements('*')).toHaveLength(0);
     });
@@ -118,8 +125,7 @@ describe('Engine', () => {
         </div>
       `);
 
-      const engine = new Engine('div:has(.ad-marker)');
-      engine.start();
+      startEngine('div:has(.ad-marker)');
 
       expect(getVisibleElements('#container1')).toHaveLength(0);
       expect(getVisibleElements('#container2')).toHaveLength(1);
@@ -138,8 +144,7 @@ describe('Engine', () => {
         </div>
       `);
 
-      const engine = new Engine('div:has(> .marker)');
-      engine.start();
+      startEngine('div:has(> .marker)');
 
       expect(getVisibleElements('#direct')).toHaveLength(0);
       expect(getVisibleElements('#nested')).toHaveLength(1);
@@ -156,8 +161,7 @@ describe('Engine', () => {
         <div id="hasNeither">Has neither</div>
       `);
 
-      const engine = new Engine('div:has(span, .marker)');
-      engine.start();
+      startEngine('div:has(span, .marker)');
 
       expect(getVisibleElements('#hasSpan')).toHaveLength(0);
       expect(getVisibleElements('#hasP')).toHaveLength(0);
@@ -175,8 +179,7 @@ describe('Engine', () => {
         <div id="other">Should remain visible</div>
       `);
 
-      const engine = new Engine(':is(.target, #special)');
-      engine.start();
+      startEngine(':is(.target, #special)');
 
       expect(getVisibleElements('.target')).toHaveLength(0);
       expect(getVisibleElements('#special')).toHaveLength(0);
@@ -193,8 +196,7 @@ describe('Engine', () => {
         </div>
       `);
 
-      const engine = new Engine('.container :is(.first, .last)');
-      engine.start();
+      startEngine('.container :is(.first, .last)');
 
       expect(getVisibleElements('.first')).toHaveLength(0);
       expect(getVisibleElements('.last')).toHaveLength(0);
@@ -217,8 +219,7 @@ describe('Engine', () => {
         .popup
       `;
 
-      const engine = new Engine(rules);
-      engine.start();
+      startEngine(rules);
 
       expect(getVisibleElements('.ad')).toHaveLength(0);
       expect(getVisibleElements('.tracker')).toHaveLength(0);
@@ -240,8 +241,7 @@ describe('Engine', () => {
         </div>
       `);
 
-      const engine = new Engine(':is(.container:has(.ad))');
-      engine.start();
+      startEngine(':is(.container:has(.ad))');
 
       expect(getVisibleElements('#complex1')).toHaveLength(0);
       expect(getVisibleElements('#complex2')).toHaveLength(1);
@@ -253,8 +253,7 @@ describe('Engine', () => {
         <div class="dangerous">Ad</div>
       `);
 
-      const engine = new Engine('div:has-text(Ad)');
-      engine.start();
+      startEngine('div:has-text(Ad)');
 
       expect(getVisibleElements('div')).toHaveLength(0);
 
@@ -277,8 +276,7 @@ describe('Engine', () => {
         <div class="test">Should remain visible</div>
       `);
 
-      const engine = new Engine('');
-      expect(() => engine.start()).not.toThrow();
+      expect(() => startEngine('')).not.toThrow();
       expect(getVisibleElements('.test')).toHaveLength(1);
     });
 
@@ -287,8 +285,7 @@ describe('Engine', () => {
         <div class="test">Should remain visible</div>
       `);
 
-      const engine = new Engine('~~~~invalid css syntax~~~~~');
-      expect(() => engine.start()).not.toThrow();
+      expect(() => new Engine('~~~~invalid css syntax~~~~~')).not.toThrow();
       expect(getVisibleElements('.test')).toHaveLength(1);
     });
 
@@ -303,8 +300,7 @@ describe('Engine', () => {
         :invalid-pseudo
       `;
 
-      const engine = new Engine(rules);
-      expect(() => engine.start()).not.toThrow();
+      expect(() => new Engine(rules).start()).not.toThrow();
       expect(getVisibleElements('.valid')).toHaveLength(0);
       expect(getVisibleElements('.other')).toHaveLength(1);
     });
@@ -317,8 +313,7 @@ describe('Engine', () => {
 
       createTestDOM(createNestedStructure(100));
 
-      const engine = new Engine('div:has(.deep-target)');
-      engine.start();
+      startEngine('div:has(.deep-target)');
 
       expect(getVisibleElements('.level-1')).toHaveLength(0);
       expect(document.querySelectorAll('.deep-target')).toHaveLength(1);
@@ -334,8 +329,7 @@ describe('Engine', () => {
 
       createTestDOM(elements);
 
-      const engine = new Engine('.even:has-text(Item)');
-      engine.start();
+      startEngine('.even:has-text(Item)');
 
       expect(getVisibleElements('.even')).toHaveLength(0);
       expect(getVisibleElements('.odd')).toHaveLength(5000);
@@ -348,14 +342,13 @@ describe('Engine', () => {
         <div class="safe">Safe content</div>
       `);
 
-      const engine1 = new Engine('.target1');
-      const engine2 = new Engine('.target2');
+      startEngine('.target1');
 
-      engine1.start();
       expect(getVisibleElements('.target1')).toHaveLength(0);
       expect(getVisibleElements('.target2')).toHaveLength(1);
 
-      engine2.start();
+      startEngine('.target2');
+
       expect(getVisibleElements('.target1')).toHaveLength(0);
       expect(getVisibleElements('.target2')).toHaveLength(0);
       expect(getVisibleElements('.safe')).toHaveLength(1);
@@ -382,8 +375,7 @@ describe('Engine', () => {
         div:has(.ad-label)
       `;
 
-      const engine = new Engine(rules);
-      engine.start();
+      startEngine(rules);
 
       expect(getVisibleElements('.advertisement')).toHaveLength(0);
       expect(getVisibleElements('[data-ad-type]')).toHaveLength(0);
@@ -404,8 +396,7 @@ describe('Engine', () => {
         </div>
       `);
 
-      const engine = new Engine('.social-widget:has(iframe[src])');
-      engine.start();
+      startEngine('.social-widget:has(iframe[src])');
 
       expect(getVisibleElements('.social-widget')).toHaveLength(0);
       expect(getVisibleElements('.content')).toHaveLength(1);
