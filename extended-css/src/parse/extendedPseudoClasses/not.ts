@@ -12,17 +12,19 @@ export class Not implements Step {
   }
 
   run(input: Element[]): Element[] {
-    return input
-      .map((element) => {
-        const matched = new Set();
-        this.executor.match(element).forEach((el) => matched.add(el));
+    const matched: Set<Element> = new Set();
 
-        const notInMatched: Element[] = [];
-        element.querySelectorAll('*').forEach((el) => {
-          if (!matched.has(el)) notInMatched.push(el);
-        });
-        return notInMatched;
-      })
-      .flat();
+    const matchedEls = this.executor.match(document.documentElement);
+    for (const element of matchedEls) {
+      matched.add(element);
+    }
+
+    const filtered = [];
+    for (const element of input) {
+      if (!matched.has(element)) {
+        filtered.push(element);
+      }
+    }
+    return filtered;
   }
 }
