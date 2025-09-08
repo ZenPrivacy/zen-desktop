@@ -26,7 +26,7 @@ describe('Engine', () => {
 
   // Helper function to get visible elements by selector
   const getVisibleElements = (selector: string): Element[] => {
-    return Array.from(document.querySelectorAll(selector)).filter((el) => !isElementHidden(el));
+    return Array.from(document.documentElement.querySelectorAll(selector)).filter((el) => !isElementHidden(el));
   };
 
   describe('basic selector parsing and execution', () => {
@@ -83,6 +83,23 @@ describe('Engine', () => {
 
       expect(getVisibleElements('[data-ad]')).toHaveLength(0);
       expect(getVisibleElements('[data-content]')).toHaveLength(1);
+    });
+
+    test('hides all elements with a universal selector', () => {
+      createTestDOM(`
+        <div>Should be hidden</div>
+        <span>Should also be hidden</span>
+        <h3>Should also be hidden></h3>
+        <p>
+          <span>Should also be hidden</span>
+          Should also be hidden
+        </p>
+      `);
+
+      const engine = new Engine('*');
+      engine.start();
+
+      expect(getVisibleElements('*')).toHaveLength(0);
     });
   });
 

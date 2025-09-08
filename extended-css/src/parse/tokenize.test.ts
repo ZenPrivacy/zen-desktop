@@ -5,6 +5,7 @@ import { tokenize } from './tokenize';
 describe('tokenize', () => {
   test.each<[string, string]>([
     ['div', 'RawTok(div)'],
+    ['*', 'RawTok(*)'],
     ['a[href^="http"]', 'RawTok(a[href^="http"])'],
     ['div:not(.ad)', 'RawTok(div:not(.ad))'],
 
