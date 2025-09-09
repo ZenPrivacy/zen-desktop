@@ -28,36 +28,6 @@ func (s *Server) handleAllow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
 
-	if r.Method == http.MethodGet {
-		rule := r.URL.Query().Get("rule")
-		returnTo := r.URL.Query().Get("returnTo")
-
-		if rule == "" {
-			http.Error(w, "missing rule", http.StatusBadRequest)
-			return
-		}
-		if returnTo == "" {
-			http.Error(w, "missing returnTo", http.StatusBadRequest)
-			return
-		}
-
-		filterList := "Allowlist"
-		if _, err := s.networkRules.ParseRule(fmt.Sprintf("@@%s", rule), &filterList); err != nil {
-			http.Error(w, "networkrules: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if u, err := url.Parse(returnTo); err == nil && (u.Scheme == "http" || u.Scheme == "https") {
-			http.Redirect(w, r, returnTo, http.StatusSeeOther)
-			return
-		}
-	}
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
 	switch r.Method {
 	case http.MethodGet:
 		rule := r.URL.Query().Get("rule")
