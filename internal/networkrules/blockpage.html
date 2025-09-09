@@ -69,30 +69,22 @@
         {{ end }}
 
         <div class="actions">
-          <a class="btn" onclick="allow()">Allow</a>
+          <a id="allowLink" class="btn" onclick="allow()">Allow</a>
           <a class="btn secondary" onclick="window.history.back()">Go back</a>
         </div>
-        <div id="rule" data-rule="{{ .Rule }}"></div>
       </div>
     </div>
     <script>
-      const rule = document.getElementById('rule').dataset.rule;
       document.getElementById('url').textContent = window.location.toString();
 
-      async function allow() {
-        try {
-          await fetch(`http://127.0.0.1:{{ .WhitelistPort }}/allow-rule`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'rule=' + encodeURIComponent(rule),
-            mode: 'no-cors',
-          });
-          window.location.reload();
-        } catch (err) {
-          console.log('Error allowing rule:', err);
-          alert('Error allowing rule');
-        }
-      }
+      const rule = '{{ .Rule }}';
+      const returnTo = encodeURIComponent(location.href);
+
+      document.getElementById(
+        'allowLink'
+      ).href = `http://127.0.0.1:{{ .WhitelistPort }}/allow-rule?rule=${encodeURIComponent(
+        rule
+      )}&returnTo=${returnTo}`;
     </script>
   </body>
 </html>

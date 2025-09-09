@@ -2,10 +2,10 @@ package whitelistserver
 
 import (
 	"fmt"
-	"html"
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -28,39 +28,83 @@ func (s *Server) handleAllow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
 
+	if r.Method == http.MethodGet {
+		rule := r.URL.Query().Get("rule")
+		returnTo := r.URL.Query().Get("returnTo")
+
+		if rule == "" {
+			http.Error(w, "missing rule", http.StatusBadRequest)
+			return
+		}
+		if returnTo == "" {
+			http.Error(w, "missing returnTo", http.StatusBadRequest)
+			return
+		}
+
+		filterList := "Allowlist"
+		if _, err := s.networkRules.ParseRule(fmt.Sprintf("@@%s", rule), &filterList); err != nil {
+			http.Error(w, "networkrules: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if u, err := url.Parse(returnTo); err == nil && (u.Scheme == "http" || u.Scheme == "https") {
+			http.Redirect(w, r, returnTo, http.StatusSeeOther)
+			return
+		}
+	}
+
 	if r.Method == http.MethodOptions {
-		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
-	if r.Method != http.MethodPost {
+	switch r.Method {
+	case http.MethodGet:
+		rule := r.URL.Query().Get("rule")
+		returnTo := r.URL.Query().Get("returnTo")
+
+		if rule == "" {
+			http.Error(w, "missing rule", http.StatusBadRequest)
+			return
+		}
+		if returnTo == "" {
+			http.Error(w, "missing returnTo", http.StatusBadRequest)
+			return
+		}
+
+		if len(rule) > 2048 {
+			http.Error(w, "rule too long", http.StatusBadRequest)
+			return
+		}
+		if len(returnTo) > 4096 {
+			http.Error(w, "return url too long", http.StatusBadRequest)
+			return
+		}
+
+		u, err := url.Parse(returnTo)
+		if err != nil || !u.IsAbs() || (u.Scheme != "http" && u.Scheme != "https") {
+			http.Error(w, "invalid returnTo url", http.StatusBadRequest)
+			return
+		}
+
+		filterList := "Allowlist"
+		if _, err := s.networkRules.ParseRule(fmt.Sprintf("@@%s", rule), &filterList); err != nil {
+			http.Error(w, "networkrules: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, returnTo, http.StatusSeeOther)
+		return
+
+	case http.MethodOptions:
+		w.WriteHeader(http.StatusNoContent)
+		return
+
+	default:
+		w.Header().Set("Allow", "GET, OPTIONS")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	r.Body = http.MaxBytesReader(w, r.Body, 4096)
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "invalid form", http.StatusBadRequest)
-		return
-	}
-
-	rule := r.FormValue("rule")
-	if rule == "" {
-		http.Error(w, "missing rule", http.StatusBadRequest)
-		return
-	}
-
-	filterList := "Allowlist"
-	if _, err := s.networkRules.ParseRule(fmt.Sprintf("@@%s", rule), &filterList); err != nil {
-		http.Error(w, "networkrules: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("allowed rule: " + html.EscapeString(rule)))
 }
 
 func (s *Server) Start() error {
