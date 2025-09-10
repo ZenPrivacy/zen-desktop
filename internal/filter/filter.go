@@ -35,6 +35,7 @@ type networkRules interface {
 	ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error)
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
+	CreateBlockPageResponse(req *http.Request, appliedRules []rule.Rule, whitelistPort int) (*http.Response, error)
 }
 
 // config provides filter configuration.
@@ -73,6 +74,10 @@ type filterListStore interface {
 	Get(url string) (io.ReadCloser, error)
 }
 
+type whitelistSrv interface {
+	GetPort() int
+}
+
 // Filter is capable of parsing Adblock-style filter lists and hosts rules and matching URLs against them.
 //
 // Safe for concurrent use.
@@ -86,6 +91,7 @@ type Filter struct {
 	extendedCSSInjector   extendedCSSInjector
 	eventsEmitter         filterEventsEmitter
 	filterListStore       filterListStore
+	whitelistSrv          whitelistSrv
 }
 
 var (
@@ -94,7 +100,7 @@ var (
 )
 
 // NewFilter creates and initializes a new filter.
-func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, extendedCSSInjector extendedCSSInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore) (*Filter, error) {
+func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, extendedCSSInjector extendedCSSInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore, whitelistSrv whitelistSrv) (*Filter, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -122,6 +128,9 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 	if filterListStore == nil {
 		return nil, errors.New("filterListStore is nil")
 	}
+	if whitelistSrv == nil {
+		return nil, errors.New("whitelistSrv is nil")
+	}
 
 	f := &Filter{
 		config:                config,
@@ -133,6 +142,7 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 		extendedCSSInjector:   extendedCSSInjector,
 		eventsEmitter:         eventsEmitter,
 		filterListStore:       filterListStore,
+		whitelistSrv:          whitelistSrv,
 	}
 	f.init()
 
@@ -253,25 +263,39 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 
 // HandleRequest handles the given request by matching it against the filter rules.
 // If the request should be blocked, it returns a response that blocks the request. If the request should be modified, it modifies it in-place.
-func (f *Filter) HandleRequest(req *http.Request) *http.Response {
+func (f *Filter) HandleRequest(req *http.Request) (*http.Response, error) {
 	initialURL := req.URL.String()
 
 	appliedRules, shouldBlock, redirectURL := f.networkRules.ModifyReq(req)
 	if shouldBlock {
 		f.eventsEmitter.OnFilterBlock(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
-		return f.networkRules.CreateBlockResponse(req)
+
+		if isUserNavigation(req) {
+			port := f.whitelistSrv.GetPort()
+			if port <= 0 {
+				log.Printf("whitelist server not ready, falling back to simple block response for %q", logger.Redacted(req.URL))
+				return f.networkRules.CreateBlockResponse(req), nil
+			}
+
+			res, err := f.networkRules.CreateBlockPageResponse(req, appliedRules, f.whitelistSrv.GetPort())
+			if err != nil {
+				return nil, fmt.Errorf("create block page response: %v", err)
+			}
+			return res, nil
+		}
+		return f.networkRules.CreateBlockResponse(req), nil
 	}
 
 	if redirectURL != "" {
 		f.eventsEmitter.OnFilterRedirect(req.Method, initialURL, redirectURL, req.Header.Get("Referer"), appliedRules)
-		return f.networkRules.CreateRedirectResponse(req, redirectURL)
+		return f.networkRules.CreateRedirectResponse(req, redirectURL), nil
 	}
 
 	if len(appliedRules) > 0 {
 		f.eventsEmitter.OnFilterModify(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // HandleResponse handles the given response by matching it against the filter rules.
@@ -330,4 +354,15 @@ func isDocumentNavigation(req *http.Request, res *http.Response) bool {
 	}
 
 	return true
+}
+
+func isUserNavigation(req *http.Request) bool {
+	dest := req.Header.Get("Sec-Fetch-Dest")
+	mode := req.Header.Get("Sec-Fetch-Mode")
+	user := req.Header.Get("Sec-Fetch-User")
+
+	if dest == "document" && (mode == "navigate" || user == "?1") {
+		return true
+	}
+	return false
 }
