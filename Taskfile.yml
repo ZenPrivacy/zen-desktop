@@ -3,6 +3,7 @@ version: '3'
 includes:
   build: tasks/build/Taskfile-{{OS}}.yml
   scriptlets: scriptlets/Taskfile.yml
+  extended-css: extended-css/Taskfile.yml
   frontend: frontend/Taskfile.yml
 
 tasks:
@@ -27,18 +28,20 @@ tasks:
       - go test -cover -race ./...
 
   test:
-    desc: Run Go and scriptlets tests.
+    desc: Run Go, scriptlets, and extended-css tests.
     cmds:
       - task: scriptlets:test
+      - task: extended-css:test
       - task: test-go
       - cmd: echo "Tests passed"
         silent: true
 
   lint:
-    desc: Run frontend, scriptlets, and Go linters.
+    desc: Run frontend, scriptlets, extended-css, and Go linters.
     cmds:
       - task: frontend:lint
       - task: scriptlets:lint
+      - task: extended-css:lint
       - task: lint-go
       - cmd: echo "Checks passed"
         silent: true

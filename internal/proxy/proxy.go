@@ -24,7 +24,7 @@ type certGenerator interface {
 
 // filter is an interface capable of filtering HTTP requests.
 type filter interface {
-	HandleRequest(*http.Request) *http.Response
+	HandleRequest(*http.Request) (*http.Response, error)
 	HandleResponse(*http.Request, *http.Response) error
 }
 
@@ -137,7 +137,12 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // proxyHTTP proxies the HTTP request to the remote server.
 func (p *Proxy) proxyHTTP(w http.ResponseWriter, r *http.Request) {
-	if filterResp := p.filter.HandleRequest(r); filterResp != nil {
+	filterResp, err := p.filter.HandleRequest(r)
+	if err != nil {
+		log.Printf("error handling request for %q: %v", logger.Redacted(r.URL), err)
+	}
+
+	if filterResp != nil {
 		filterResp.Write(w)
 		return
 	}
@@ -255,7 +260,11 @@ func (p *Proxy) proxyConnect(w http.ResponseWriter, connReq *http.Request) {
 		removeHopHeaders(req.Header)
 		req.URL.Scheme = "https"
 
-		if filterResp := p.filter.HandleRequest(req); filterResp != nil {
+		filterResp, err := p.filter.HandleRequest(req)
+		if err != nil {
+			log.Printf("handling request for %q: %v", logger.Redacted(req.URL), err)
+		}
+		if filterResp != nil {
 			filterResp.Write(tlsConn)
 			break
 		}

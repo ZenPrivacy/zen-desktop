@@ -37,6 +37,9 @@ jobs:
       - name: Install scriptlets npm packages
         run: npm ci
         working-directory: scriptlets
+      - name: Install extended-css npm packages
+        run: npm ci
+        working-directory: extended-css
       - name: Set up Task
         uses: arduino/setup-task@v1
         with:
