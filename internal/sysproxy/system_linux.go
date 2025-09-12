@@ -157,7 +157,7 @@ func unsetKDEProxy() error {
 
 func unsetGnomeProxy() error {
 	commands := [][]string{
-		{"gsettings", "set", "org.gnome.system.proxy", "autoconfig-url", ""},
+		{"gsettings", "reset", "org.gnome.system.proxy", "autoconfig-url"},
 		{"gsettings", "set", "org.gnome.system.proxy", "mode", "none"},
 	}
 	for _, command := range commands {
