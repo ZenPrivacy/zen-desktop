@@ -1,24 +1,41 @@
 package sysproxy
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
-var (
-	platformSpecificExcludedHosts []byte
-)
+var platformSpecificExcludedHosts []byte
+
+func runCmdWithTimeout(d time.Duration, name string, args ...string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), d)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, name, args...) // #nosec G204
+	return cmd.CombinedOutput()
+}
 
 func detectDesktopEnvironment() string {
-	desktop := os.Getenv("XDG_CURRENT_DESKTOP")
-
-	if strings.ToLower(desktop) == "kde" {
+	xdg := strings.ToLower(os.Getenv("XDG_CURRENT_DESKTOP"))
+	if strings.Contains(xdg, "kde") || strings.Contains(xdg, "plasma") {
 		return "kde"
 	}
 
-	if strings.Contains(strings.ToLower(desktop), "gnome") {
+	if strings.Contains(xdg, "gnome") {
+		return "gnome"
+	}
+
+	// Fallback DE checks
+	ds := strings.ToLower(os.Getenv("DESKTOP_SESSION"))
+	if strings.Contains(ds, "kde") || strings.Contains(ds, "plasma") {
+		return "kde"
+	}
+
+	if strings.Contains(ds, "gnome") {
 		return "gnome"
 	}
 
@@ -38,7 +55,7 @@ func setSystemProxy(pacURL string) error {
 		// Set gsettings on KDE as firefox based browsers ignores KDE proxy
 		if binaryExists("gsettings") {
 			if err := setGnomeProxy(pacURL); err != nil {
-				return err
+				log.Printf("warning: failed to apply GNOME proxy on KDE: %v", err)
 			}
 		}
 		return nil
@@ -56,10 +73,11 @@ func setKDEProxy(pacURL string) error {
 
 	if binaryExists("kwriteconfig6") {
 		kwriteconfig = "kwriteconfig6"
-	}
-
-	if binaryExists("kwriteconfig5") {
+	} else if binaryExists("kwriteconfig5") {
 		kwriteconfig = "kwriteconfig5"
+	}
+	if kwriteconfig == "" {
+		return fmt.Errorf("kwriteconfig not found in PATH, cannot configure KDE proxy")
 	}
 
 	commands := [][]string{
@@ -69,8 +87,7 @@ func setKDEProxy(pacURL string) error {
 	}
 
 	for _, command := range commands {
-		cmd := exec.Command(command[0], command[1:]...)
-		out, err := cmd.CombinedOutput()
+		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
 		if err != nil {
 			return fmt.Errorf("run KDE proxy command %q: %v (%q)", strings.Join(command, " "), err, out)
 		}
@@ -80,15 +97,13 @@ func setKDEProxy(pacURL string) error {
 }
 
 func setGnomeProxy(pacURL string) error {
-
 	commands := [][]string{
 		{"gsettings", "set", "org.gnome.system.proxy", "autoconfig-url", pacURL},
 		{"gsettings", "set", "org.gnome.system.proxy", "mode", "auto"},
 	}
 
 	for _, command := range commands {
-		cmd := exec.Command(command[0], command[1:]...) // #nosec G204
-		out, err := cmd.CombinedOutput()
+		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
 		if err != nil {
 			return fmt.Errorf("run GNOME proxy command %q: %v (%q)", strings.Join(command, " "), err, out)
 		}
@@ -97,7 +112,6 @@ func setGnomeProxy(pacURL string) error {
 }
 
 func unsetSystemProxy() error {
-
 	desktop := detectDesktopEnvironment()
 	switch desktop {
 	case "kde":
@@ -107,7 +121,7 @@ func unsetSystemProxy() error {
 
 		if binaryExists("gsettings") {
 			if err := unsetGnomeProxy(); err != nil {
-				return err
+				log.Printf("warning: failed to unset GNOME proxy on KDE: %v", err)
 			}
 		}
 		return nil
@@ -121,15 +135,16 @@ func unsetSystemProxy() error {
 }
 
 func unsetKDEProxy() error {
-
 	var kwriteconfig string
 
 	if binaryExists("kwriteconfig6") {
 		kwriteconfig = "kwriteconfig6"
+	} else if binaryExists("kwriteconfig5") {
+		kwriteconfig = "kwriteconfig5"
 	}
 
-	if binaryExists("kwriteconfig5") {
-		kwriteconfig = "kwriteconfig5"
+	if kwriteconfig == "" {
+		return fmt.Errorf("kwriteconfig not found in PATH, cannot unset KDE proxy")
 	}
 
 	commands := [][]string{
@@ -138,10 +153,9 @@ func unsetKDEProxy() error {
 	}
 
 	for _, command := range commands {
-		cmd := exec.Command(command[0], command[1:]...)
-		out, err := cmd.CombinedOutput()
+		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
 		if err != nil {
-			return fmt.Errorf("unset KDE proxy: %v (%q)", err, out)
+			return fmt.Errorf("unset KDE proxy: %v (%q)", err, out) // #nosec G204
 		}
 	}
 
@@ -149,11 +163,15 @@ func unsetKDEProxy() error {
 }
 
 func unsetGnomeProxy() error {
-
-	cmd := exec.Command("gsettings", "set", "org.gnome.system.proxy", "mode", "none")
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("unset GNOME proxy: %v (%q)", err, out)
+	commands := [][]string{
+		{"gsettings", "set", "org.gnome.system.proxy", "autoconfig-url", ""},
+		{"gsettings", "set", "org.gnome.system.proxy", "mode", "none"},
+	}
+	for _, command := range commands {
+		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
+		if err != nil {
+			return fmt.Errorf("unset GNOME proxy: %v (%q)", err, out)
+		}
 	}
 
 	return nil
