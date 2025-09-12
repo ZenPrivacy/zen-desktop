@@ -12,13 +12,6 @@ import (
 
 var platformSpecificExcludedHosts []byte
 
-func runCmdWithTimeout(d time.Duration, name string, args ...string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), d)
-	defer cancel()
-	cmd := exec.CommandContext(ctx, name, args...) // #nosec G204
-	return cmd.CombinedOutput()
-}
-
 func detectDesktopEnvironment() string {
 	xdg := strings.ToLower(os.Getenv("XDG_CURRENT_DESKTOP"))
 	if strings.Contains(xdg, "kde") || strings.Contains(xdg, "plasma") {
@@ -175,6 +168,13 @@ func unsetGnomeProxy() error {
 	}
 
 	return nil
+}
+
+func runCmdWithTimeout(d time.Duration, name string, args ...string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), d)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, name, args...) // #nosec G204
+	return cmd.CombinedOutput()
 }
 
 func binaryExists(name string) bool {
