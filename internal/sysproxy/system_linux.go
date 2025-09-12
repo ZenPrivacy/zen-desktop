@@ -24,7 +24,7 @@ func detectDesktopEnvironment() string {
 
 	// Fallback DE checks
 	ds := strings.ToLower(os.Getenv("DESKTOP_SESSION"))
-	if strings.Contains(ds, "kde") || strings.Contains(ds, "plasma") {
+	if strings.Contains(ds, "kde") || strings.Contains(ds, "plasma") || strings.ToLower(os.Getenv("KDE_FULL_SESSION")) == "true" {
 		return "kde"
 	}
 
