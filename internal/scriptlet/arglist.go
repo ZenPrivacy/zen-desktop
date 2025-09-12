@@ -7,10 +7,12 @@ import (
 )
 
 // argList represents the argument list of a scriptlet, excluding the function call expression.
+//
+// The string representing argList must be non-empty.
 type argList string
 
 func (al argList) ConvertUboToCanonical() argList {
-	args := strings.Split(string(al), ",")
+	args := argSplit(string(al))
 	for i := range args {
 		// uBo scriptlets may use both quoted and unquoted strings.
 		if !isQuoted(args[i]) {
@@ -21,7 +23,7 @@ func (al argList) ConvertUboToCanonical() argList {
 }
 
 func (al argList) Normalize() (argList, error) {
-	args := strings.Split(string(al), ",")
+	args := argSplit(string(al))
 	var normalized string
 	for i, arg := range args {
 		arg = strings.TrimSpace(arg)
@@ -43,7 +45,7 @@ func (al argList) Normalize() (argList, error) {
 func (al argList) IsTrusted() bool {
 	const trustedPrefix = "trusted-"
 
-	firstArg := strings.Split(string(al), ",")[0]
+	firstArg := argSplit(string(al))[0]
 	unquoted := firstArg[1 : len(firstArg)-1]
 	return strings.HasPrefix(unquoted, trustedPrefix)
 }

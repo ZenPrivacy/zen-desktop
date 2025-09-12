@@ -15,6 +15,7 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
 	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/extendedcss"
 	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
@@ -34,6 +35,7 @@ type networkRules interface {
 	ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error)
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
+	CreateBlockPageResponse(req *http.Request, appliedRules []rule.Rule, whitelistPort int) (*http.Response, error)
 }
 
 // config provides filter configuration.
@@ -63,8 +65,17 @@ type jsRuleInjector interface {
 	Inject(*http.Request, *http.Response) error
 }
 
+type extendedCSSInjector interface {
+	AddRule(rule string) error
+	Inject(*http.Request, *http.Response) error
+}
+
 type filterListStore interface {
 	Get(url string) (io.ReadCloser, error)
+}
+
+type whitelistSrv interface {
+	GetPort() int
 }
 
 // Filter is capable of parsing Adblock-style filter lists and hosts rules and matching URLs against them.
@@ -77,8 +88,10 @@ type Filter struct {
 	cosmeticRulesInjector cosmeticRulesInjector
 	cssRulesInjector      cssRulesInjector
 	jsRuleInjector        jsRuleInjector
+	extendedCSSInjector   extendedCSSInjector
 	eventsEmitter         filterEventsEmitter
 	filterListStore       filterListStore
+	whitelistSrv          whitelistSrv
 }
 
 var (
@@ -87,7 +100,7 @@ var (
 )
 
 // NewFilter creates and initializes a new filter.
-func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore) (*Filter, error) {
+func NewFilter(config config, networkRules networkRules, scriptletsInjector scriptletsInjector, cosmeticRulesInjector cosmeticRulesInjector, cssRulesInjector cssRulesInjector, jsRuleInjector jsRuleInjector, extendedCSSInjector extendedCSSInjector, eventsEmitter filterEventsEmitter, filterListStore filterListStore, whitelistSrv whitelistSrv) (*Filter, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -109,8 +122,14 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 	if jsRuleInjector == nil {
 		return nil, errors.New("jsRuleInjector is nil")
 	}
+	if extendedCSSInjector == nil {
+		return nil, errors.New("extendedCSSInjector is nil")
+	}
 	if filterListStore == nil {
 		return nil, errors.New("filterListStore is nil")
+	}
+	if whitelistSrv == nil {
+		return nil, errors.New("whitelistSrv is nil")
 	}
 
 	f := &Filter{
@@ -120,8 +139,10 @@ func NewFilter(config config, networkRules networkRules, scriptletsInjector scri
 		cosmeticRulesInjector: cosmeticRulesInjector,
 		cssRulesInjector:      cssRulesInjector,
 		jsRuleInjector:        jsRuleInjector,
+		extendedCSSInjector:   extendedCSSInjector,
 		eventsEmitter:         eventsEmitter,
 		filterListStore:       filterListStore,
+		whitelistSrv:          whitelistSrv,
 	}
 	f.init()
 
@@ -217,6 +238,10 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 		if err := f.cosmeticRulesInjector.AddRule(rule); err != nil {
 			return false, fmt.Errorf("add cosmetic rule: %w", err)
 		}
+	case extendedcss.RuleRegex.MatchString(rule):
+		if err := f.extendedCSSInjector.AddRule(rule); err != nil {
+			return false, fmt.Errorf("add extended css rule: %w", err)
+		}
 	case filterListTrusted && cssrule.RuleRegex.MatchString(rule):
 		if err := f.cssRulesInjector.AddRule(rule); err != nil {
 			return false, fmt.Errorf("add css rule: %w", err)
@@ -238,25 +263,39 @@ func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted 
 
 // HandleRequest handles the given request by matching it against the filter rules.
 // If the request should be blocked, it returns a response that blocks the request. If the request should be modified, it modifies it in-place.
-func (f *Filter) HandleRequest(req *http.Request) *http.Response {
+func (f *Filter) HandleRequest(req *http.Request) (*http.Response, error) {
 	initialURL := req.URL.String()
 
 	appliedRules, shouldBlock, redirectURL := f.networkRules.ModifyReq(req)
 	if shouldBlock {
 		f.eventsEmitter.OnFilterBlock(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
-		return f.networkRules.CreateBlockResponse(req)
+
+		if isUserNavigation(req) {
+			port := f.whitelistSrv.GetPort()
+			if port <= 0 {
+				log.Printf("whitelist server not ready, falling back to simple block response for %q", logger.Redacted(req.URL))
+				return f.networkRules.CreateBlockResponse(req), nil
+			}
+
+			res, err := f.networkRules.CreateBlockPageResponse(req, appliedRules, f.whitelistSrv.GetPort())
+			if err != nil {
+				return nil, fmt.Errorf("create block page response: %v", err)
+			}
+			return res, nil
+		}
+		return f.networkRules.CreateBlockResponse(req), nil
 	}
 
 	if redirectURL != "" {
 		f.eventsEmitter.OnFilterRedirect(req.Method, initialURL, redirectURL, req.Header.Get("Referer"), appliedRules)
-		return f.networkRules.CreateRedirectResponse(req, redirectURL)
+		return f.networkRules.CreateRedirectResponse(req, redirectURL), nil
 	}
 
 	if len(appliedRules) > 0 {
 		f.eventsEmitter.OnFilterModify(req.Method, initialURL, req.Header.Get("Referer"), appliedRules)
 	}
 
-	return nil
+	return nil, nil
 }
 
 // HandleResponse handles the given response by matching it against the filter rules.
@@ -273,6 +312,9 @@ func (f *Filter) HandleResponse(req *http.Request, res *http.Response) error {
 
 		if err := f.cosmeticRulesInjector.Inject(req, res); err != nil {
 			log.Printf("error injecting cosmetic rules for %q: %v", logger.Redacted(req.URL), err)
+		}
+		if err := f.extendedCSSInjector.Inject(req, res); err != nil {
+			log.Printf("error injecting extended-css rules for %q: %v", logger.Redacted(req.URL), err)
 		}
 		if err := f.cssRulesInjector.Inject(req, res); err != nil {
 			log.Printf("error injecting css rules for %q: %v", logger.Redacted(req.URL), err)
@@ -312,4 +354,15 @@ func isDocumentNavigation(req *http.Request, res *http.Response) bool {
 	}
 
 	return true
+}
+
+func isUserNavigation(req *http.Request) bool {
+	dest := req.Header.Get("Sec-Fetch-Dest")
+	mode := req.Header.Get("Sec-Fetch-Mode")
+	user := req.Header.Get("Sec-Fetch-User")
+
+	if dest == "document" && (mode == "navigate" || user == "?1") {
+		return true
+	}
+	return false
 }
