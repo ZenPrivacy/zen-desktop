@@ -1,0 +1,16 @@
+.heading {
+  margin: 0 12px;
+  border-bottom: 1px dotted #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heading__logo {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-weight: 900;
+}

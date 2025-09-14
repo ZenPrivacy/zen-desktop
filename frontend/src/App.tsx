@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Icon, IconSize, FocusStyleManager, NonIdealState } from '@blueprintjs/core';
+import { Button, ButtonGroup, FocusStyleManager, NonIdealState } from '@blueprintjs/core';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,13 +6,14 @@ import './App.css';
 
 import { ThemeType, useTheme } from './common/ThemeManager';
 import { useProxyState } from './context/ProxyStateContext';
-import { DonateButton } from './DonateButton';
 import { FilterLists } from './FilterLists';
+import { IntroOverlay } from './Intro';
 import { MyRules } from './MyRules';
 import { useProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';
 import { SettingsManager } from './SettingsManager';
 import { StartStopButton } from './StartStopButton';
+import { AppHeader } from './components/AppHeader';
 
 function App() {
   const { t } = useTranslation();
@@ -26,16 +27,18 @@ function App() {
   useProxyHotkey();
 
   const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'myRules' | 'settings'>('home');
+  const [showIntro, setShowIntro] = useState(() => {
+    return !localStorage.getItem('zen-intro-completed');
+  });
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+    localStorage.setItem('zen-intro-completed', 'true');
+  };
 
   return (
     <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp5-dark' : ''}>
-      <div className="heading">
-        <h1 className="heading__logo">
-          <Icon icon="shield" size={IconSize.LARGE} />
-          ZEN
-        </h1>
-        <DonateButton />
-      </div>
+      <AppHeader />
       <ButtonGroup fill variant="minimal" className="tabs">
         <Button icon="circle" active={activeTab === 'home'} onClick={() => setActiveTab('home')}>
           {t('app.tabs.home')}
@@ -69,6 +72,8 @@ function App() {
         {activeTab === 'settings' && <SettingsManager />}
       </div>
       <StartStopButton />
+
+      <IntroOverlay isOpen={showIntro} onClose={handleIntroComplete} />
     </div>
   );
 }

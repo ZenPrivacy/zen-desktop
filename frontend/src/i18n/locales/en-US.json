@@ -11,6 +11,32 @@
       "settings": "Settings"
     }
   },
+  "introOverlay": {
+    "welcome": "Welcome to Zen!",
+    "screen1": {
+      "description": "Please select your language:"
+    },
+    "screen2": {
+      "title": "Filter Lists",
+      "description": "To enable its ad-blocking and privacy protecting functionality, Zen uses filter lists, containing rules about how to block and modify malicious requests. Following this introduction, you can check them in the app under \"Filter lists\".",
+      "recommendation": "Based on your locale we recommend you to enable the following filter list(s):"
+    },
+    "screen3": {
+      "title": "Settings",
+      "description": "Please also review the following settings:",
+      "settingsNote": "You can change these settings anytime from the preferences menu."
+    },
+    "screen4": {
+      "title": "You're All Set!",
+      "description": "You're good to go! Press \"Start\" to enable Zen's comprehensive and efficient network protection.",
+      "socialText": "If you'd like, check out our socials:",
+      "donateText": "And consider donating on"
+    },
+    "buttons": {
+      "skip": "Skip introduction",
+      "next": "Next"
+    }
+  },
   "autoStartSwitch": {
     "description": "Start Zen automatically when you log in",
     "disableError": "Failed to disable autostart: {{error}}",
