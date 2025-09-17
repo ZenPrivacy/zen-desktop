@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
 
+	"github.com/ZenPrivacy/zen-desktop/internal/csp"
 	"github.com/ZenPrivacy/zen-desktop/internal/hostmatch"
 	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
@@ -19,8 +21,7 @@ var (
 	primaryRuleRegex   = regexp.MustCompile(`(.*?)#\$#(.*)`)
 	exceptionRuleRegex = regexp.MustCompile(`(.*?)#@\$#(.+)`)
 
-	injectionStart = []byte("<style>")
-	injectionEnd   = []byte("</style>")
+	injectionTmpl = template.Must(template.New("cssrule").Parse(`<style{{if .Nonce}} nonce="{{.Nonce}}"{{end}}>{{.Rules}}</style>`))
 )
 
 type store interface {
@@ -65,15 +66,26 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	var ruleInjection bytes.Buffer
-	ruleInjection.Write(injectionStart)
-	ruleInjection.WriteString(strings.Join(cssRules, ""))
-	ruleInjection.Write(injectionEnd)
+	nonce := csp.PatchHeaders(res.Header, csp.InlineStyle)
+	stylesheet := strings.Join(cssRules, "")
+
+	var injection bytes.Buffer
+	err := injectionTmpl.Execute(&injection, struct {
+		Nonce string
+		Rules template.CSS
+	}{
+		Nonce: nonce,
+		Rules: template.CSS(stylesheet), // #nosec G203 -- CSS rules are limited to trusted filter lists
+		// TODO: Perform rule validation despite rules coming from trusted filter lists.
+	})
+	if err != nil {
+		return fmt.Errorf("execute template: %v", err)
+	}
 
 	// Why append and not prepend?
 	// When multiple CSS rules define an !important property, conflicts are resolved first by specificity and then by the order of the CSS declarations.
 	// Appending ensures our rules take precedence.
-	if err := httprewrite.AppendHTMLHeadContents(res, ruleInjection.Bytes()); err != nil {
+	if err := httprewrite.AppendHTMLHeadContents(res, injection.Bytes()); err != nil {
 		return fmt.Errorf("prepend head contents: %w", err)
 	}
 
