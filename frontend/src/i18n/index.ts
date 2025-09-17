@@ -8,8 +8,9 @@ import enUS from './locales/en-US.json';
 import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
 import zhCN from './locales/zh-CN.json';
+import zhCN from './locales/it-IT.json';
 
-export const SUPPORTED_LOCALES = ['en', 'en-US', 'de', 'de-DE', 'kk', 'kk-KZ', 'ru', 'ru-RU', 'zh', 'zh-CN'] as const;
+export const SUPPORTED_LOCALES = ['en', 'en-US', 'de', 'de-DE', 'kk', 'kk-KZ', 'ru', 'ru-RU', 'zh', 'zh-CN', 'it-IT'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const FALLBACK_LOCALE: SupportedLocale = 'en-US';
 
@@ -50,6 +51,8 @@ export async function initI18n() {
       'ru-RU': { translation: ruRU },
       zh: { translation: zhCN },
       'zh-CN': { translation: zhCN },
+      it: { translation: itIT },
+      'it-IT': { translation: itIT },
     },
     lng: locale,
     fallbackLng: FALLBACK_LOCALE,
