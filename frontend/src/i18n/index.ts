@@ -10,7 +10,7 @@ import ruRU from './locales/ru-RU.json';
 import zhCN from './locales/zh-CN.json';
 import itIT from './locales/it-IT.json';
 
-export const SUPPORTED_LOCALES = ['en', 'en-US', 'de', 'de-DE', 'kk', 'kk-KZ', 'ru', 'ru-RU', 'zh', 'zh-CN', 'it-IT'] as const;
+export const SUPPORTED_LOCALES = ['en', 'en-US', 'de', 'de-DE', 'kk', 'kk-KZ', 'ru', 'ru-RU', 'zh', 'zh-CN', 'it', 'it-IT'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const FALLBACK_LOCALE: SupportedLocale = 'en-US';
 
