@@ -8,7 +8,7 @@ import enUS from './locales/en-US.json';
 import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
 import zhCN from './locales/zh-CN.json';
-import zhCN from './locales/it-IT.json';
+import itIT from './locales/it-IT.json';
 
 export const SUPPORTED_LOCALES = ['en', 'en-US', 'de', 'de-DE', 'kk', 'kk-KZ', 'ru', 'ru-RU', 'zh', 'zh-CN', 'it-IT'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
