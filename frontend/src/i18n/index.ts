@@ -10,7 +10,6 @@ import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
 import zhCN from './locales/zh-CN.json';
 
-
 export const SUPPORTED_LOCALES = [
   'en',
   'en-US',
@@ -23,7 +22,7 @@ export const SUPPORTED_LOCALES = [
   'ru',
   'ru-RU',
   'zh',
-  'zh-CN'
+  'zh-CN',
 ] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const FALLBACK_LOCALE: SupportedLocale = 'en-US';
