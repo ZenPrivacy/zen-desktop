@@ -12,17 +12,17 @@ import zhCN from './locales/zh-CN.json';
 
 
 export const SUPPORTED_LOCALES = [
-  'en', 
-  'en-US', 
-  'de', 
-  'de-DE', 
-  'it', 
-  'it-IT', 
-  'kk', 
-  'kk-KZ', 
-  'ru', 
-  'ru-RU', 
-  'zh', 
+  'en',
+  'en-US',
+  'de',
+  'de-DE',
+  'it',
+  'it-IT',
+  'kk',
+  'kk-KZ',
+  'ru',
+  'ru-RU',
+  'zh',
   'zh-CN'
 ] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
