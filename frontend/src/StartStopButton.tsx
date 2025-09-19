@@ -91,7 +91,7 @@ export function StartStopButton() {
       fill
       intent="primary"
       className="footer"
-      large
+      size="large"
       loading={proxyState === 'loading'}
     >
       {proxyState === 'off' ? t('startStopButton.start') : t('startStopButton.stop')}

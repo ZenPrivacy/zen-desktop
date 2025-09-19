@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import './App.css';
 
 import { ThemeType, useTheme } from './common/ThemeManager';
+import { AppHeader } from './components/AppHeader';
 import { useProxyState } from './context/ProxyStateContext';
 import { FilterLists } from './FilterLists';
 import { IntroOverlay } from './Intro';
@@ -13,7 +14,6 @@ import { useProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';
 import { SettingsManager } from './SettingsManager';
 import { StartStopButton } from './StartStopButton';
-import { AppHeader } from './components/AppHeader';
 
 function App() {
   const { t } = useTranslation();
@@ -24,8 +24,6 @@ function App() {
   }, []);
 
   const { proxyState } = useProxyState();
-  useProxyHotkey();
-
   const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'myRules' | 'settings'>('home');
   const [showIntro, setShowIntro] = useState(() => {
     return !localStorage.getItem('zen-intro-completed');
@@ -35,6 +33,8 @@ function App() {
     setShowIntro(false);
     localStorage.setItem('zen-intro-completed', 'true');
   };
+
+  useProxyHotkey(showIntro);
 
   return (
     <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp5-dark' : ''}>

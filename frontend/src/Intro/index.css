@@ -8,6 +8,11 @@
   flex-direction: column;
 }
 
+.intro-fullscreen.bp5-dark {
+  background: rgb(47, 52, 60);
+  color: #fff;
+}
+
 .intro-main-content {
   display: flex;
   padding: 20px;
@@ -48,7 +53,7 @@
   margin-bottom: 20px;
 }
 
-.footer {
+.intro-footer {
   position: fixed;
   bottom: 0;
   left: 0;

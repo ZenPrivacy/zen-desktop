@@ -2,14 +2,8 @@ import { Button, FormGroup, MenuItem } from '@blueprintjs/core';
 import { ItemRenderer, Select } from '@blueprintjs/select';
 import { useTranslation } from 'react-i18next';
 
-import { SUPPORTED_LANGUAGES } from '../../constants/languages';
-
-import { changeLocale, getCurrentLocale, SupportedLocale } from '../../i18n';
-
-interface LocaleItem {
-  value: SupportedLocale;
-  label: string;
-}
+import { SUPPORTED_LANGUAGES, LocaleItem } from '../../constants/languages';
+import { changeLocale, getCurrentLocale } from '../../i18n';
 
 interface LocaleSelectorProps {
   showLabel?: boolean;

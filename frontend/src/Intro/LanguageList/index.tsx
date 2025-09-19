@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { Card, Radio } from '@blueprintjs/core';
-import { changeLocale, getCurrentLocale, SupportedLocale } from '../../i18n';
+import { useState } from 'react';
+
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
+import { changeLocale, getCurrentLocale, SupportedLocale } from '../../i18n';
 
 import './index.css';
 
@@ -28,10 +29,8 @@ export function LanguageList() {
               checked={selectedLanguage === language.value}
               onChange={() => handleLanguageSelect(language.value)}
               className="language-radio"
+              label={language.label}
             />
-            <div className="language-text">
-              <div>{language.label}</div>
-            </div>
           </div>
         </Card>
       ))}

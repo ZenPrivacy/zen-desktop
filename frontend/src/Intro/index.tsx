@@ -1,33 +1,37 @@
-import { useState, useEffect } from 'react';
+import { Button, ButtonGroup, Callout, Card, Divider, H5 } from '@blueprintjs/core';
 import i18next from 'i18next';
-
-import { Button, ButtonGroup, Callout, Card, Divider, H5, Icon } from '@blueprintjs/core';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { StartStopButton } from '../StartStopButton';
 import './index.css';
-import { UpdatePolicyRadioGroup } from '../SettingsManager/UpdatePolicyRadioGroup';
-import { AutostartSwitch } from '../SettingsManager/AutostartSwitch';
-import { FilterLists } from '../FilterLists';
-import { FilterListType } from '../FilterLists/types';
-import { AppHeader } from '../components/AppHeader';
-import { LanguageList } from './LanguageList';
-import { SUPPORTED_LANGUAGES } from '../constants/languages';
+import { IsNoSelfUpdate } from '../../wailsjs/go/app/App';
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
-import { SOCIAL_LINKS } from '../constants/urls';
-
+import BlueSkyLogo from '../assets/icons/bluesky.svg';
 import DiscordIcon from '../assets/icons/discord.svg';
 import GithubIcon from '../assets/icons/github.svg';
-import RedditIcon from '../assets/icons/reddit.svg';
-import BlueSkyLogo from '../assets/icons/bluesky.svg';
 import OpenCollectiveIcon from '../assets/icons/opencollective.svg';
+import RedditIcon from '../assets/icons/reddit.svg';
+import { ThemeType, useTheme } from '../common/ThemeManager';
+import { AppHeader } from '../components/AppHeader';
+import { SUPPORTED_LANGUAGES } from '../constants/languages';
+import { SOCIAL_LINKS } from '../constants/urls';
+import { useProxyState } from '../context/ProxyStateContext';
+import { FilterLists } from '../FilterLists';
+import { FilterListType } from '../FilterLists/types';
+import { AutostartSwitch } from '../SettingsManager/AutostartSwitch';
+import { UpdatePolicyRadioGroup } from '../SettingsManager/UpdatePolicyRadioGroup';
+import { StartStopButton } from '../StartStopButton';
+
+import { LanguageList } from './LanguageList';
 
 interface IntroOverlayProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const RegionalFilterLists = () => <FilterLists initialType={FilterListType.REGIONAL} hideTypeSelector />;
+function RegionalFilterLists() {
+  return <FilterLists initialType={FilterListType.REGIONAL} hideTypeSelector />;
+}
 
 export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
   const { t } = useTranslation();
@@ -37,21 +41,18 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
   const [animatedLanguage, setAnimatedLanguage] = useState('en-US');
   const [welcomeText, setWelcomeText] = useState(t('introOverlay.welcome'));
   const [descriptionText, setDescriptionText] = useState(t('introOverlay.screen1.description'));
+  const { proxyState } = useProxyState();
+
+  const { effectiveTheme } = useTheme();
 
   const TOTAL_SCREENS = 4;
-  const IS_SELF_UPDATE_DISABLED = false;
 
   const getTranslationsFor = (languageCode: string) => {
-    const currentLang = i18next.language;
-    i18next.changeLanguage(languageCode);
-
-    const texts = {
-      welcome: i18next.t('introOverlay.welcome'),
-      description: i18next.t('introOverlay.screen1.description'),
+    const tfixed = i18next.getFixedT(languageCode);
+    return {
+      welcome: tfixed('introOverlay.welcome'),
+      description: tfixed('introOverlay.screen1.description'),
     };
-
-    i18next.changeLanguage(currentLang);
-    return texts;
   };
 
   useEffect(() => {
@@ -59,12 +60,16 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (currentScreen !== 1 || !isOpen) return;
+    if (currentScreen !== 1 || !isOpen) {
+      return () => {};
+    }
+
+    let transitionTimeout: ReturnType<typeof setTimeout>;
 
     const animationInterval = setInterval(() => {
       setIsLanguageTransitioning(true);
 
-      const transitionTimeout = setTimeout(() => {
+      transitionTimeout = setTimeout(() => {
         const currentIndex = SUPPORTED_LANGUAGES.findIndex((lang) => lang.value === animatedLanguage);
         const nextIndex = (currentIndex + 1) % SUPPORTED_LANGUAGES.length;
         const nextLanguage = SUPPORTED_LANGUAGES[nextIndex].value;
@@ -76,20 +81,27 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
 
         setTimeout(() => setIsLanguageTransitioning(false), 50);
       }, 300);
-
-      return () => clearTimeout(transitionTimeout);
     }, 4000);
 
-    return () => clearInterval(animationInterval);
+    return () => {
+      clearInterval(animationInterval);
+      clearTimeout(transitionTimeout);
+    };
   }, [currentScreen, isOpen, animatedLanguage]);
-
-  const handleNextScreen = () => {
-    if (currentScreen < TOTAL_SCREENS) setCurrentScreen(currentScreen + 1);
-  };
 
   const completeIntro = () => {
     localStorage.setItem('zen-intro-completed', 'true');
     onClose();
+  };
+
+  useEffect(() => {
+    if (currentScreen === TOTAL_SCREENS && proxyState === 'on') {
+      completeIntro();
+    }
+  }, [proxyState, currentScreen]);
+
+  const handleNextScreen = () => {
+    if (currentScreen < TOTAL_SCREENS) setCurrentScreen(currentScreen + 1);
   };
 
   const screens = [
@@ -132,7 +144,7 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
       <Card elevation={1} className="settings-card">
         <AutostartSwitch />
 
-        {!IS_SELF_UPDATE_DISABLED && (
+        {!IsNoSelfUpdate() && (
           <>
             <Divider className="settings-divider" />
             <UpdatePolicyRadioGroup />
@@ -195,10 +207,10 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="intro-fullscreen">
+    <div className={`intro-fullscreen${effectiveTheme === ThemeType.DARK ? ' bp5-dark' : ''}`}>
       <AppHeader />
       <div className="intro-main-content">{screens[currentScreen - 1]}</div>
-      <div className="footer">
+      <div className="intro-footer">
         {currentScreen < TOTAL_SCREENS ? (
           <ButtonGroup fill size="large">
             <Button fill variant="outlined" onClick={completeIntro} className="skip-button">
@@ -209,9 +221,7 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
             </Button>
           </ButtonGroup>
         ) : (
-          <div className="intro-start-button" onClick={completeIntro}>
-            <StartStopButton />
-          </div>
+          <StartStopButton />
         )}
       </div>
     </div>

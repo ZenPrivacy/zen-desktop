@@ -1,4 +1,5 @@
 import { Icon, IconSize } from '@blueprintjs/core';
+
 import { DonateButton } from '../../DonateButton';
 import './index.css';
 
