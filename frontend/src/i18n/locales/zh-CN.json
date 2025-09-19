@@ -11,6 +11,32 @@
       "settings": "设置"
     }
   },
+  "introOverlay": {
+    "welcome": "欢迎使用 Zen!",
+    "screen1": {
+      "description": "请选择您的语言："
+    },
+    "screen2": {
+      "title": "过滤器列表",
+      "description": "为了启用广告拦截和隐私保护功能，Zen 使用过滤器列表，其中包含如何拦截和修改恶意请求的规则。在本介绍之后，您可以在应用程序的\"过滤器列表\"中查看它们。",
+      "recommendation": "根据您的地区，我们建议您启用以下过滤器列表："
+    },
+    "screen3": {
+      "title": "设置",
+      "description": "请同时查看以下设置：",
+      "settingsNote": "您可以随时在首选项菜单中更改这些设置。"
+    },
+    "screen4": {
+      "title": "准备就绪！",
+      "description": "一切就绪！按\"开始\"以启用 Zen 全面而高效的网络保护。",
+      "socialText": "如果您愿意，请查看我们的社交媒体：",
+      "donateText": "并考虑在以下平台上捐赠"
+    },
+    "buttons": {
+      "skip": "跳过介绍",
+      "next": "下一步"
+    }
+  },
   "autoStartSwitch": {
     "description": "登录时自动启动 Zen",
     "disableError": "禁用自动启动失败：{{error}}",

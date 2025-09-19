@@ -18,7 +18,12 @@ import { ExportFilterList } from './ExportFilterList';
 import { ImportFilterList } from './ImportFilterList';
 import { FilterListType } from './types';
 
-export function FilterLists() {
+interface FilterListsProps {
+  initialType?: FilterListType;
+  hideTypeSelector?: boolean;
+}
+
+export function FilterLists({ initialType = FilterListType.GENERAL, hideTypeSelector = false }: FilterListsProps = {}) {
   const { t } = useTranslation();
   const [state, setState] = useState<{
     filterLists: cfg.FilterList[];
@@ -30,7 +35,6 @@ export function FilterLists() {
 
   const fetchLists = async () => {
     const filterLists = await GetFilterLists();
-
     setState({ ...state, filterLists, loading: false });
   };
 
@@ -40,53 +44,56 @@ export function FilterLists() {
     })();
   }, []);
 
-  const [type, setType] = useState<FilterListType>(FilterListType.GENERAL);
+  const [type, setType] = useState<FilterListType>(initialType);
 
   return (
     <>
-      <div className="filter-lists__header">
-        <Select
-          items={Object.values(FilterListType)}
-          itemRenderer={(item) => (
-            <MenuItem
-              key={item}
-              text={
-                <>
-                  {t(`filterTypes.${item}`)}
-                  <span className="bp5-text-muted filter-lists__select-count">
-                    ({state.filterLists.filter((filterList) => filterList.type === item && filterList.enabled).length}/
-                    {state.filterLists.filter((filterList) => filterList.type === item).length})
-                  </span>
-                </>
-              }
-              onClick={() => {
-                setType(item);
-              }}
-              active={item === type}
-            />
-          )}
-          onItemSelect={(item) => {
-            setType(item);
-          }}
-          popoverProps={{ minimal: true }}
-          filterable={false}
-        >
-          <Button text={t(`filterTypes.${type}`)} rightIcon="caret-down" />
-        </Select>
-
-        {type === FilterListType.CUSTOM && (
-          <Popover
-            content={
-              <Menu>
-                <ExportFilterList />
-                <ImportFilterList onAdd={fetchLists} />
-              </Menu>
-            }
+      {!hideTypeSelector && (
+        <div className="filter-lists__header">
+          <Select
+            items={Object.values(FilterListType)}
+            itemRenderer={(item) => (
+              <MenuItem
+                key={item}
+                text={
+                  <>
+                    {t(`filterTypes.${item}`)}
+                    <span className="bp5-text-muted filter-lists__select-count">
+                      ({state.filterLists.filter((filterList) => filterList.type === item && filterList.enabled).length}
+                      /{state.filterLists.filter((filterList) => filterList.type === item).length})
+                    </span>
+                  </>
+                }
+                onClick={() => {
+                  setType(item);
+                }}
+                active={item === type}
+              />
+            )}
+            onItemSelect={(item) => {
+              setType(item);
+            }}
+            popoverProps={{ minimal: true }}
+            filterable={false}
           >
-            <Button icon="more" text={t('filterLists.more')} />
-          </Popover>
-        )}
-      </div>
+            <Button text={t(`filterTypes.${type}`)} endIcon="caret-down" />
+          </Select>
+
+          {type === FilterListType.CUSTOM && (
+            <Popover
+              content={
+                <Menu>
+                  <ExportFilterList />
+                  <ImportFilterList onAdd={fetchLists} />
+                </Menu>
+              }
+            >
+              <Button icon="more" text={t('filterLists.more')} />
+            </Popover>
+          )}
+        </div>
+      )}
+
       {state.loading && <Spinner size={SpinnerSize.SMALL} className="filter-lists__spinner" />}
 
       {state.filterLists

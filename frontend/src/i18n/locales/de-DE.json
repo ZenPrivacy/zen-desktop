@@ -11,6 +11,32 @@
       "settings": "Einstellungen"
     }
   },
+  "introOverlay": {
+    "welcome": "Willkommen bei Zen!",
+    "screen1": {
+      "description": "Bitte wählen Sie Ihre Sprache:"
+    },
+    "screen2": {
+      "title": "Filterlisten",
+      "description": "Um die Werbeblocker- und Datenschutzfunktionen zu aktivieren, verwendet Zen Filterlisten mit Regeln zum Blockieren und Modifizieren schädlicher Anfragen. Nach dieser Einführung können Sie diese in der App unter \"Filterlisten\" überprüfen.",
+      "recommendation": "Basierend auf Ihrem Standort empfehlen wir Ihnen, die folgenden Filterliste(n) zu aktivieren:"
+    },
+    "screen3": {
+      "title": "Einstellungen",
+      "description": "Bitte überprüfen Sie auch die folgenden Einstellungen:",
+      "settingsNote": "Sie können diese Einstellungen jederzeit im Präferenzmenü ändern."
+    },
+    "screen4": {
+      "title": "Sie sind bereit!",
+      "description": "Alles ist eingerichtet! Drücken Sie \"Start\", um Zens umfassenden und effizienten Netzwerkschutz zu aktivieren.",
+      "socialText": "Wenn Sie möchten, schauen Sie sich unsere sozialen Medien an:",
+      "donateText": "Und erwägen Sie eine Spende auf"
+    },
+    "buttons": {
+      "skip": "Einführung überspringen",
+      "next": "Weiter"
+    }
+  },
   "autoStartSwitch": {
     "description": "Zen beim Systemstart starten",
     "disableError": "Autostart kann nicht deaktiviert werden",
