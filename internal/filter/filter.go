@@ -36,6 +36,7 @@ type networkRules interface {
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
 	CreateBlockPageResponse(req *http.Request, appliedRules []rule.Rule, whitelistPort int) (*http.Response, error)
+	Compact() int
 }
 
 // config provides filter configuration.
@@ -194,6 +195,11 @@ func (f *Filter) init() {
 
 	if len(myRules) > 0 {
 		log.Printf("filter initialization: added %d rules and %d exceptions from %q", ruleCount, exceptionCount, filterName)
+	}
+
+	reds := f.networkRules.Compact()
+	if reds > 0 {
+		log.Printf("filter initialization: reduced slice capacity by %d", reds)
 	}
 }
 

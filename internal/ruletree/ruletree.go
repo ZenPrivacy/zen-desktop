@@ -109,6 +109,40 @@ func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
 	return nil
 }
 
+// Compact walks through the entire tree and compacts the slices used to store child nodes and rules.
+// This can be used to reduce memory usage after all rules have been added.
+// Note that this is a no-op if the tree is being concurrently accessed.
+// Returns the number of capacity reductions made.
+func (rt *RuleTree[T]) Compact() int {
+	var reds int
+	var compactNode func(n *node[T], totalReductions *int)
+
+	compactNode = func(n *node[T], totalReductions *int) {
+		if n == nil {
+			return
+		}
+
+		var r int
+		n.mu.Lock()
+		n.childrenArr, r = TrimSlice(n.childrenArr)
+		*totalReductions += r
+		n.data, r = TrimSlice(n.data)
+		*totalReductions += r
+		n.mu.Unlock()
+
+		// XXX: Iterates maps without holding a lock. A global lock is needed to make this safe.
+		for _, child := range n.childrenArr {
+			compactNode(child.node, totalReductions)
+		}
+		for _, child := range n.childrenMap {
+			compactNode(child, totalReductions)
+		}
+	}
+
+	compactNode(&rt.root, &reds)
+	return reds
+}
+
 // FindMatchingRulesReq finds all rules that match the given request.
 func (rt *RuleTree[T]) FindMatchingRulesReq(req *http.Request) (data []T) {
 	host := req.URL.Hostname()
