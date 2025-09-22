@@ -78,17 +78,17 @@ const nodeChildrenMaxArrSize = 8
 type node[T Data] struct {
 	childrenArr []arrNode[T]
 	childrenMap map[nodeKey]*node[T]
-	// childrenMu protects childrenArr and childrenMap from concurrent access.
-	childrenMu sync.RWMutex
 	// data holds the rules associated with this node.
-	data   []T
-	dataMu sync.RWMutex
+	data []T
+
+	// common mutex for all operations
+	mu sync.Mutex
 }
 
 // findOrAddChild finds or adds a child node with the given key.
 func (n *node[T]) findOrAddChild(key nodeKey) *node[T] {
-	n.childrenMu.Lock()
-	defer n.childrenMu.Unlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	if n.childrenMap == nil {
 		for _, arrNode := range n.childrenArr {
@@ -119,8 +119,8 @@ func (n *node[T]) findOrAddChild(key nodeKey) *node[T] {
 
 // FindChild returns the child node with the given key.
 func (n *node[T]) FindChild(key nodeKey) *node[T] {
-	n.childrenMu.RLock()
-	defer n.childrenMu.RUnlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	if n.childrenMap == nil {
 		for _, arrNode := range n.childrenArr {
@@ -210,8 +210,8 @@ func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []stri
 
 // FindMatchingRulesReq returns the rules that match the given request.
 func (n *node[T]) FindMatchingRulesReq(req *http.Request) []T {
-	n.dataMu.RLock()
-	defer n.dataMu.RUnlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	var matchingRules []T
 	for _, r := range n.data {
@@ -224,8 +224,8 @@ func (n *node[T]) FindMatchingRulesReq(req *http.Request) []T {
 
 // FindMatchingRulesRes returns the rules that match the given response.
 func (n *node[T]) FindMatchingRulesRes(res *http.Response) (rules []T) {
-	n.dataMu.RLock()
-	defer n.dataMu.RUnlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	for _, r := range n.data {
 		if r.ShouldMatchRes(res) {

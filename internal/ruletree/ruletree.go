@@ -102,9 +102,9 @@ func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
 		}
 	}
 
-	node.dataMu.Lock()
+	node.mu.Lock()
 	node.data = append(node.data, data)
-	node.dataMu.Unlock()
+	node.mu.Unlock()
 
 	return nil
 }
