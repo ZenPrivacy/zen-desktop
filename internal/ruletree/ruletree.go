@@ -81,7 +81,7 @@ func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
 	if rootKeyKind == nodeKindExactMatch {
 		node = &rt.root
 	} else {
-		node = rt.root.findOrAddChild(nodeKey{kind: rootKeyKind})
+		node = rt.root.findOrAddChild(newNodeKey(rootKeyKind, 0))
 	}
 
 	tokenIDs := make([]uint32, 0, len(rawTokens))
@@ -92,13 +92,13 @@ func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
 	for i, raw := range rawTokens {
 		switch raw {
 		case "^":
-			node = node.findOrAddChild(nodeKey{kind: nodeKindSeparator})
+			node = node.findOrAddChild(newNodeKey(nodeKindSeparator, 0))
 		case "*":
-			node = node.findOrAddChild(nodeKey{kind: nodeKindWildcard})
+			node = node.findOrAddChild(newNodeKey(nodeKindWildcard, 0))
 		default:
 			// exact‐match: use the interned ID
 			id := tokenIDs[i]
-			node = node.findOrAddChild(nodeKey{kind: nodeKindExactMatch, tokenID: id})
+			node = node.findOrAddChild(newNodeKey(nodeKindExactMatch, id))
 		}
 	}
 
@@ -124,12 +124,12 @@ func (rt *RuleTree[T]) FindMatchingRulesReq(req *http.Request) (data []T) {
 	// generic rules -> address root -> hostname root -> domain -> etc.
 
 	// generic rules
-	if genericNode := rt.root.FindChild(nodeKey{kind: nodeKindGeneric}); genericNode != nil {
+	if genericNode := rt.root.FindChild(newNodeKey(nodeKindGeneric, 0)); genericNode != nil {
 		data = append(data, genericNode.FindMatchingRulesReq(req)...)
 	}
 
 	// address root
-	data = append(data, rt.root.FindChild(nodeKey{kind: nodeKindAddressRoot}).TraverseFindMatchingRulesReq(req, tokens, func(_ *node[T], t []string) bool {
+	data = append(data, rt.root.FindChild(newNodeKey(nodeKindAddressRoot, 0)).TraverseFindMatchingRulesReq(req, tokens, func(_ *node[T], t []string) bool {
 		// address root rules have to match the entire URL
 		// TODO: look into whether we can match the rule if the remaining tokens only contain the query
 		return len(t) == 0
@@ -148,7 +148,7 @@ func (rt *RuleTree[T]) FindMatchingRulesReq(req *http.Request) (data []T) {
 			break
 		}
 		if tokens[0] != "." {
-			data = append(data, rt.root.FindChild(nodeKey{kind: nodeKindDomain}).TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
+			data = append(data, rt.root.FindChild(newNodeKey(nodeKindDomain, 0)).TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
 		}
 		data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
 		tokens = tokens[1:]
@@ -179,12 +179,12 @@ func (rt *RuleTree[T]) FindMatchingRulesRes(req *http.Request, res *http.Respons
 	// generic rules -> address root -> hostname root -> domain -> etc.
 
 	// generic rules
-	if genericNode := rt.root.FindChild(nodeKey{kind: nodeKindGeneric}); genericNode != nil {
+	if genericNode := rt.root.FindChild(newNodeKey(nodeKindGeneric, 0)); genericNode != nil {
 		rules = append(rules, genericNode.FindMatchingRulesRes(res)...)
 	}
 
 	// address root
-	rules = append(rules, rt.root.FindChild(nodeKey{kind: nodeKindAddressRoot}).TraverseFindMatchingRulesRes(res, tokens, func(_ *node[T], t []string) bool {
+	rules = append(rules, rt.root.FindChild(newNodeKey(nodeKindAddressRoot, 0)).TraverseFindMatchingRulesRes(res, tokens, func(_ *node[T], t []string) bool {
 		return len(t) == 0
 	}, rt.interner)...)
 
@@ -201,7 +201,7 @@ func (rt *RuleTree[T]) FindMatchingRulesRes(req *http.Request, res *http.Respons
 			break
 		}
 		if tokens[0] != "." {
-			rules = append(rules, rt.root.FindChild(nodeKey{kind: nodeKindDomain}).TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
+			rules = append(rules, rt.root.FindChild(newNodeKey(nodeKindDomain, 0)).TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
 		}
 		rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
 		tokens = tokens[1:]
