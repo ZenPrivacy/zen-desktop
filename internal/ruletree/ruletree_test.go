@@ -12,18 +12,16 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/ruletree"
 )
 
-var sink any
-
 func TestProfileHeap(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping in short mode")
+	if testing.Short() || os.Getenv("RULETREE_PROFILE") != "1" {
+		t.Skip("skipping heap profile (set RULETREE_PROFILE=1 to run)")
 	}
 
 	var m runtime.MemStats
 
 	runtime.GC()
 	runtime.ReadMemStats(&m)
-	fmt.Printf("Before: HeapAlloc=%s HeapSys=%s NumGC=%d\n",
+	t.Logf("Before: HeapAlloc=%s HeapSys=%s NumGC=%d\n",
 		humanizeBytes(m.HeapAlloc),
 		humanizeBytes(m.HeapSys),
 		m.NumGC)
@@ -33,7 +31,7 @@ func TestProfileHeap(t *testing.T) {
 	for _, filename := range []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"} {
 		data, err := os.ReadFile(filename)
 		if err != nil {
-			t.Fatalf("Failed to read %s: %v", filename, err)
+			t.Fatalf("read %s: %v", filename, err)
 		}
 
 		scanner := bufio.NewScanner(bytes.NewReader(data))
@@ -46,21 +44,20 @@ func TestProfileHeap(t *testing.T) {
 
 			err := tree.Add(line, &spyData{})
 			if err != nil {
-				t.Errorf("adding rule %q: %v", line, err)
+				t.Errorf("add rule %q: %v", line, err)
 			}
 		}
 
 		if err := scanner.Err(); err != nil {
-			t.Fatalf("scanning %s: %v", filename, err)
+			t.Fatalf("scan %s: %v", filename, err)
 		}
 	}
 
-	// Prevent the GC from prematurely collecting the tree.
-	sink = tree
+	defer runtime.KeepAlive(tree)
 
 	runtime.GC()
 	runtime.ReadMemStats(&m)
-	fmt.Printf("After: HeapAlloc=%s HeapSys=%s NumGC=%d\n",
+	t.Logf("After: HeapAlloc=%s HeapSys=%s NumGC=%d\n",
 		humanizeBytes(m.HeapAlloc),
 		humanizeBytes(m.HeapSys),
 		m.NumGC)
