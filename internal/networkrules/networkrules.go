@@ -34,6 +34,14 @@ func NewNetworkRules() *NetworkRules {
 	}
 }
 
+// Compact shrinks internal slice capacities in both rule trees to reduce memory usage.
+// It returns the total capacity reductions (sum of cap - len deltas) across both trees.
+func (nr *NetworkRules) Compact() int {
+	regularReductions := nr.regularRuleTree.Compact()
+	exceptionReductions := nr.exceptionRuleTree.Compact()
+	return regularReductions + exceptionReductions
+}
+
 func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isException bool, err error) {
 	if matches := reHosts.FindStringSubmatch(rawRule); matches != nil {
 		hostsField := matches[1]

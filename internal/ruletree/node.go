@@ -6,8 +6,15 @@ import (
 	"sync"
 )
 
+// Constants for bit manipulation (4 bits for kind, 28 bits for tokenID).
+const (
+	tokenIDMask uint32 = (1 << 28) - 1
+	kindMask    uint32 = 0xF
+	kindShift          = 28
+)
+
 // nodeKind defines the type of a node in the trie.
-type nodeKind int8
+type nodeKind uint8
 
 const (
 	nodeKindExactMatch  nodeKind = iota
@@ -23,9 +30,34 @@ const (
 // It comprises the node's kind and the ID of the token that the node represents.
 // The token is included only for nodes of the type 'nodeKindExactMatch'.
 // Nodes of other kinds represent the roots of subtrees without including a token.
+// The structure is optimized to use a single uint32 for storage, with 4 bits allocated for the kind
+// and 28 bits for the token ID.
 type nodeKey struct {
-	kind    nodeKind
-	tokenID uint32
+	packedData uint32
+}
+
+// newNodeKey creates a new, optimized nodeKey.
+func newNodeKey(kind nodeKind, tokenID uint32) nodeKey {
+	if uint32(kind) > kindMask {
+		panic("kind exceeds 4-bit limit")
+	}
+
+	if tokenID > tokenIDMask {
+		panic("tokenID exceeds 28-bit limit")
+	}
+
+	packed := (uint32(kind) << kindShift) | tokenID
+	return nodeKey{packedData: packed}
+}
+
+// Kind extracts the `nodeKind` from packedData.
+func (nk nodeKey) Kind() nodeKind {
+	return nodeKind((nk.packedData >> kindShift) & kindMask) //nolint:gosec
+}
+
+// TokenID extracts the `tokenID` from packedData.
+func (nk nodeKey) TokenID() uint32 {
+	return nk.packedData & tokenIDMask
 }
 
 // arrNode is a node in the trie that is stored in an array.
@@ -46,17 +78,17 @@ const nodeChildrenMaxArrSize = 8
 type node[T Data] struct {
 	childrenArr []arrNode[T]
 	childrenMap map[nodeKey]*node[T]
-	// childrenMu protects childrenArr and childrenMap from concurrent access.
-	childrenMu sync.RWMutex
 	// data holds the rules associated with this node.
-	data   []T
-	dataMu sync.RWMutex
+	data []T
+
+	// common mutex for all operations
+	mu sync.Mutex
 }
 
 // findOrAddChild finds or adds a child node with the given key.
 func (n *node[T]) findOrAddChild(key nodeKey) *node[T] {
-	n.childrenMu.Lock()
-	defer n.childrenMu.Unlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	if n.childrenMap == nil {
 		for _, arrNode := range n.childrenArr {
@@ -87,8 +119,8 @@ func (n *node[T]) findOrAddChild(key nodeKey) *node[T] {
 
 // FindChild returns the child node with the given key.
 func (n *node[T]) FindChild(key nodeKey) *node[T] {
-	n.childrenMu.RLock()
-	defer n.childrenMu.RUnlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	if n.childrenMap == nil {
 		for _, arrNode := range n.childrenArr {
@@ -127,16 +159,16 @@ func (n *node[T]) TraverseFindMatchingRulesReq(req *http.Request, tokens []strin
 	if len(tokens) == 0 {
 		// End of an address is a valid separator, see:
 		// https://adguard.com/kb/general/ad-filtering/create-own-filters/#basic-rules-special-characters.
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesReq(req, tokens, shouldUseNode, interner)...)
+		rules = append(rules, n.FindChild(newNodeKey(nodeKindSeparator, 0)).TraverseFindMatchingRulesReq(req, tokens, shouldUseNode, interner)...)
 		return rules
 	}
 	if reSeparator.MatchString(tokens[0]) {
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
+		rules = append(rules, n.FindChild(newNodeKey(nodeKindSeparator, 0)).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
 	}
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
+	rules = append(rules, n.FindChild(newNodeKey(nodeKindWildcard, 0)).TraverseFindMatchingRulesReq(req, tokens[1:], shouldUseNode, interner)...)
 
 	id := interner.Intern(tokens[0])
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesReq(req, tokens[1:],
+	rules = append(rules, n.FindChild(newNodeKey(nodeKindExactMatch, id)).TraverseFindMatchingRulesReq(req, tokens[1:],
 		shouldUseNode, interner)...)
 
 	return rules
@@ -161,16 +193,16 @@ func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []stri
 	if len(tokens) == 0 {
 		// End of an address is a valid separator, see:
 		// https://adguard.com/kb/general/ad-filtering/create-own-filters/#basic-rules-special-characters.
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesRes(res, tokens, shouldUseNode, interner)...)
+		rules = append(rules, n.FindChild(newNodeKey(nodeKindSeparator, 0)).TraverseFindMatchingRulesRes(res, tokens, shouldUseNode, interner)...)
 		return rules
 	}
 	if reSeparator.MatchString(tokens[0]) {
-		rules = append(rules, n.FindChild(nodeKey{kind: nodeKindSeparator}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
+		rules = append(rules, n.FindChild(newNodeKey(nodeKindSeparator, 0)).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
 	}
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindWildcard}).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
+	rules = append(rules, n.FindChild(newNodeKey(nodeKindWildcard, 0)).TraverseFindMatchingRulesRes(res, tokens[1:], shouldUseNode, interner)...)
 
 	id := interner.Intern(tokens[0])
-	rules = append(rules, n.FindChild(nodeKey{kind: nodeKindExactMatch, tokenID: id}).TraverseFindMatchingRulesRes(res, tokens[1:],
+	rules = append(rules, n.FindChild(newNodeKey(nodeKindExactMatch, id)).TraverseFindMatchingRulesRes(res, tokens[1:],
 		shouldUseNode, interner)...)
 
 	return rules
@@ -178,8 +210,8 @@ func (n *node[T]) TraverseFindMatchingRulesRes(res *http.Response, tokens []stri
 
 // FindMatchingRulesReq returns the rules that match the given request.
 func (n *node[T]) FindMatchingRulesReq(req *http.Request) []T {
-	n.dataMu.RLock()
-	defer n.dataMu.RUnlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	var matchingRules []T
 	for _, r := range n.data {
@@ -192,8 +224,8 @@ func (n *node[T]) FindMatchingRulesReq(req *http.Request) []T {
 
 // FindMatchingRulesRes returns the rules that match the given response.
 func (n *node[T]) FindMatchingRulesRes(res *http.Response) (rules []T) {
-	n.dataMu.RLock()
-	defer n.dataMu.RUnlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
 	for _, r := range n.data {
 		if r.ShouldMatchRes(res) {
