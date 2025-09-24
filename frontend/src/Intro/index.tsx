@@ -1,5 +1,5 @@
 import { Button, ButtonGroup, Callout, Card, Divider, H5 } from '@blueprintjs/core';
-import i18next from 'i18next';
+import i18next, { changeLanguage } from 'i18next';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -38,9 +38,9 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
 
   const [currentScreen, setCurrentScreen] = useState(4);
   const [isLanguageTransitioning, setIsLanguageTransitioning] = useState(false);
-  const [animatedLanguage, setAnimatedLanguage] = useState('en-US');
-  const [welcomeText, setWelcomeText] = useState(t('introOverlay.welcome'));
-  const [descriptionText, setDescriptionText] = useState(t('introOverlay.screen1.description'));
+  const [animatedLanguage, setAnimatedLanguage] = useState<string | null>(null);
+  const [welcomeText, setWelcomeText] = useState('');
+  const [descriptionText, setDescriptionText] = useState('');
   const { proxyState } = useProxyState();
 
   const { effectiveTheme } = useTheme();
@@ -60,26 +60,26 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (currentScreen !== 1 || !isOpen) {
-      return () => {};
-    }
+    if (currentScreen !== 1 || !isOpen || animatedLanguage) return undefined;
 
+    let langIndex = 0;
     let transitionTimeout: ReturnType<typeof setTimeout>;
+
+    const setTexts = (language: string) => {
+      const texts = getTranslationsFor(language);
+      setWelcomeText(texts.welcome);
+      setDescriptionText(texts.description);
+    };
+
+    setTexts(SUPPORTED_LANGUAGES[langIndex].value);
 
     const animationInterval = setInterval(() => {
       setIsLanguageTransitioning(true);
 
       transitionTimeout = setTimeout(() => {
-        const currentIndex = SUPPORTED_LANGUAGES.findIndex((lang) => lang.value === animatedLanguage);
-        const nextIndex = (currentIndex + 1) % SUPPORTED_LANGUAGES.length;
-        const nextLanguage = SUPPORTED_LANGUAGES[nextIndex].value;
-
-        setAnimatedLanguage(nextLanguage);
-        const texts = getTranslationsFor(nextLanguage);
-        setWelcomeText(texts.welcome);
-        setDescriptionText(texts.description);
-
-        setTimeout(() => setIsLanguageTransitioning(false), 50);
+        langIndex = (langIndex + 1) % SUPPORTED_LANGUAGES.length;
+        setTexts(SUPPORTED_LANGUAGES[langIndex].value);
+        setIsLanguageTransitioning(false);
       }, 300);
     }, 4000);
 
@@ -88,6 +88,20 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
       clearTimeout(transitionTimeout);
     };
   }, [currentScreen, isOpen, animatedLanguage]);
+
+  useEffect(() => {
+    if (animatedLanguage) {
+      const texts = getTranslationsFor(animatedLanguage);
+      setWelcomeText(texts.welcome);
+      setDescriptionText(texts.description);
+      setIsLanguageTransitioning(false);
+    }
+  }, [animatedLanguage]);
+
+  const handleLanguageSelect = (lang: string) => {
+    setAnimatedLanguage(lang);
+    changeLanguage(lang);
+  };
 
   const completeIntro = () => {
     localStorage.setItem('zen-intro-completed', 'true');
@@ -123,7 +137,7 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
           {descriptionText}
         </p>
       </div>
-      <LanguageList />
+      <LanguageList onSelect={handleLanguageSelect} selectedLanguage={animatedLanguage ?? ''} />
     </div>,
 
     // Screen 2: Filter Lists
