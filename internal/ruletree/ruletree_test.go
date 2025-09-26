@@ -15,6 +15,40 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/ruletree"
 )
 
+var rnd = rand.New(rand.NewSource(1))
+
+func BenchmarkLoadTree(b *testing.B) {
+	for b.Loop() {
+		_, err := loadTree()
+		if err != nil {
+			b.Fatalf("load tree: %v", err)
+		}
+	}
+
+	b.ReportAllocs()
+}
+
+func BenchmarkMatch(b *testing.B) {
+	checkStr := rndStr(5)
+	if checkStr != "XVlBz" {
+		b.Fatalf("random generator seed mismatch: %s", checkStr)
+	}
+
+	tree, err := loadTree()
+	if err != nil {
+		b.Fatalf("load tree: %v", err)
+	}
+
+	writeHeapProfile(b, "test_heap_before.pprof")
+	for b.Loop() {
+		tree.FindMatchingRulesReq(genRequest())
+	}
+	writeHeapProfile(b, "test_heap_after.pprof")
+	runtime.KeepAlive(tree)
+
+	b.ReportAllocs()
+}
+
 func loadTree() (*ruletree.RuleTree[*spyData], error) {
 	tree := ruletree.NewRuleTree[*spyData]()
 
@@ -45,20 +79,6 @@ func loadTree() (*ruletree.RuleTree[*spyData], error) {
 	return tree, nil
 }
 
-func BenchmarkLoadTree(b *testing.B) {
-	for b.Loop() {
-		tree, err := loadTree()
-		if err != nil {
-			b.Fatalf("load tree: %v", err)
-		}
-		runtime.KeepAlive(tree)
-	}
-
-	b.ReportAllocs()
-}
-
-var rnd = rand.New(rand.NewSource(1))
-
 func rndStr(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	b := make([]byte, n)
@@ -88,27 +108,6 @@ func writeHeapProfile(b *testing.B, name string) {
 	if err := pprof.WriteHeapProfile(f); err != nil {
 		b.Fatal(err)
 	}
-}
-
-func BenchmarkMatch(b *testing.B) {
-	checkStr := rndStr(5)
-	if checkStr != "XVlBz" {
-		b.Fatalf("random generator seed mismatch: %s", checkStr)
-	}
-
-	tree, err := loadTree()
-	if err != nil {
-		b.Fatalf("load tree: %v", err)
-	}
-
-	writeHeapProfile(b, "ruletree_test_heap_before.pprof")
-	for b.Loop() {
-		tree.FindMatchingRulesReq(genRequest())
-	}
-	writeHeapProfile(b, "ruletree_test_heap_after.pprof")
-	runtime.KeepAlive(tree)
-
-	b.ReportAllocs()
 }
 
 type spyData struct {
