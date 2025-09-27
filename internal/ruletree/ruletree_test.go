@@ -41,12 +41,12 @@ import (
 )
 
 var (
-	rnd         = rand.New(rand.NewSource(42))
+	rnd         = rand.New(rand.NewSource(42)) // #nosec G404 -- Not used for cryptographic purposes.
 	filterLists = []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"}
 )
 
 func BenchmarkLoadTree(b *testing.B) {
-	var rawLists [][]byte
+	rawLists := make([][]byte, 0, len(filterLists))
 	var totalBytes int64
 	for _, filename := range filterLists {
 		data, err := os.ReadFile(filename)
@@ -124,7 +124,7 @@ func BenchmarkMatchParallel(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		// Custom rand Sources aren't thread-safe, and making parallel code
 		// deterministic is hard anyway, so we just use the global rand.
-		i := rand.Intn(len(reqs))
+		i := rand.Intn(len(reqs)) // #nosec G404 -- Not used for cryptographic purposes.
 		for pb.Next() {
 			r := reqs[i]
 			i++
