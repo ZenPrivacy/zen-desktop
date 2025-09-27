@@ -1,3 +1,29 @@
+/*
+Benchmarks for building and querying the rule tree.
+
+Run benchmarks with:
+
+	// Run all benchmarks
+	go test -bench=. ./internal/ruletree
+
+	// Run BenchmarkMatch and export a memory profile
+	go test -bench=Match$ -memprofile=mem.out ./internal/ruletree
+
+	// Run BenchmarkLoadTree and export a CPU profile
+	go test -bench=LoadTree -cpuprofile=cpu.out ./internal/ruletree
+
+Inspect profile:
+
+	go tool pprof -lines -focus=FindMatchingRulesReq mem.out
+
+pprof tips:
+  - -lines: show line-level metric attribution
+  - -focus=FindMatchingRulesReq: restrict output to FindMatchingRulesReq; filters out setup/teardown noise
+  - -ignore=runtime: hide nodes matching "runtime" (includes GC)
+  - top: show top entries (usually somewhat hard to make sense of)
+  - list <func>: show annotated source for the given function
+  - web: generate an SVG call graph and open in browser
+*/
 package ruletree_test
 
 import (
