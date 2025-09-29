@@ -18,11 +18,11 @@ import (
 )
 
 var (
-	// RuleRegex matches extended CSS rules.
-	RuleRegex = regexp.MustCompile(`.+?#@?\?#.+$`)
+	// ExtPseudoClassRegex matches extended pseudo-classes.
+	ExtPseudoClassRegex = regexp.MustCompile(`:(?:has-text|contains|matches-attr|matches-css(?:-before|-after)?|matches-media|matches-path|matches-prop(?:erty)?|min-text-length|others|upward|xpath|nth-ancestor|-abp-(?:contains|has))`)
 
-	primaryRuleRegex   = regexp.MustCompile(`(.+?)#\?#(.+)`)
-	exceptionRuleRegex = regexp.MustCompile(`(.+?)#@\?#(.+)`)
+	primaryRuleRegex   = regexp.MustCompile(`(.+?)#\??#(.+)`)
+	exceptionRuleRegex = regexp.MustCompile(`(.+?)#@\??#(.+)`)
 
 	//go:embed bundle.js
 	defaultExtendedCSSBundle []byte
