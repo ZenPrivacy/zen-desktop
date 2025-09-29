@@ -34,14 +34,16 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/ruletree"
 )
 
+const baseSeed = 42
+
 var (
-	rnd         = rand.New(rand.NewSource(42)) // #nosec G404 -- Not used for cryptographic purposes.
+	rnd         = rand.New(rand.NewSource(baseSeed)) // #nosec G404 -- Not used for cryptographic purposes.
 	filterLists = []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"}
 )
 
@@ -121,10 +123,13 @@ func BenchmarkMatchParallel(b *testing.B) {
 	b.SetBytes(avgBytes)
 
 	b.ResetTimer()
+
+	var seedCounter int64
 	b.RunParallel(func(pb *testing.PB) {
-		// Custom rand Sources aren't thread-safe, and making parallel code
-		// deterministic is hard anyway, so we just use the global rand.
-		i := rand.Intn(len(reqs)) // #nosec G404 -- Not used for cryptographic purposes.
+		id := atomic.AddInt64(&seedCounter, 1)
+		r := rand.New(rand.NewSource(baseSeed + id)) // #nosec G404 -- Not used for cryptographic purposes.
+
+		i := r.Intn(len(reqs))
 		for pb.Next() {
 			r := reqs[i]
 			i++
@@ -222,80 +227,7 @@ func loadURLs() ([]*url.URL, error) {
 		return nil, fmt.Errorf("scan %s: %v", filename, err)
 	}
 
-	// Enrich with synthetic URLs
-	urls = append(urls, genSyntheticURLs(len(urls))...)
 	return urls, nil
-}
-
-func genSyntheticURLs(n int) []*url.URL {
-	paths := []string{"ads", "static", "assets", "banner", "pixel", "collect", "metrics", "tag", "video", "js", "css", "img", "cdn", "widgets", "script", "log", "measure"}
-	tlds := []string{"com", "net", "org", "io", "co"}
-	params := []string{"utm_source", "utm_medium", "utm_campaign", "gclid", "fbclid", "adid", "track", "ref", "src"}
-	out := make([]*url.URL, 0, n)
-
-	for range n {
-		var b strings.Builder
-		if rnd.Float64() < 0.99 {
-			b.WriteString("https://")
-		} else {
-			b.WriteString("http://")
-		}
-
-		labels := rnd.Intn(3) + 1
-		for range labels {
-			if rnd.Float64() < 0.5 {
-				b.WriteString(paths[rnd.Intn(len(paths))])
-			} else {
-				b.WriteString(rndStr(rnd.Intn(7) + 3))
-			}
-			b.WriteByte('.')
-		}
-		b.WriteString(tlds[rnd.Intn(len(tlds))])
-		b.WriteByte('/')
-
-		segs := rnd.Intn(7)
-		for range segs {
-			if rnd.Float64() < 0.3 {
-				b.WriteString(paths[rnd.Intn(len(paths))])
-			} else {
-				b.WriteString(rndStr(rnd.Intn(10) + 2))
-			}
-			b.WriteByte('/')
-		}
-
-		if rnd.Float64() < 0.7 {
-			b.WriteByte('?')
-
-			qn := rnd.Intn(4) + 1
-			for j := 0; j < qn; j++ {
-				if j > 0 {
-					b.WriteByte('&')
-				}
-				if rnd.Float64() < 0.2 {
-					b.WriteString(params[rnd.Intn(len(params))])
-				} else {
-					b.WriteString(rndStr(rnd.Intn(5) + 2))
-				}
-				b.WriteByte('=')
-				b.WriteString(rndStr(rnd.Intn(8) + 3))
-			}
-		}
-
-		if u, err := url.Parse(b.String()); err == nil {
-			out = append(out, u)
-		}
-	}
-
-	return out
-}
-
-func rndStr(n int) string {
-	const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = alphabet[rnd.Intn(len(alphabet))]
-	}
-	return string(b)
 }
 
 type spyData struct {
