@@ -3,6 +3,9 @@ package extendedcss
 import "regexp"
 
 var (
+	// ExtPseudoClassRegex matches extended pseudo-classes.
+	ExtPseudoClassRegex = regexp.MustCompile(`:(?:has-text|contains|matches-attr|matches-css(?:-before|-after)?|matches-media|matches-path|matches-prop(?:erty)?|min-text-length|others|upward|xpath|nth-ancestor|-abp-(?:contains|has))`)
+
 	ruleRegex = regexp.MustCompile(`^.+#@?\??#.+$`)
 )
 
