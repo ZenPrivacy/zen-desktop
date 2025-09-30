@@ -112,9 +112,9 @@ func (a *App) commonStartup(ctx context.Context) {
 			return
 		}
 
-		if err := su.ApplyUpdate(ctx); err != nil {
-			log.Printf("failed to apply update: %v", err)
-		}
+		su.StartPeriodicChecks(ctx, time.Second*10, func() {
+			a.eventsHandler.OnUpdateAvailable()
+		})
 	}()
 
 	time.AfterFunc(time.Second, func() {
@@ -170,6 +170,7 @@ func (a *App) StartProxy() (err error) {
 	}
 
 	log.Println("starting proxy")
+	a.eventsHandler.OnUpdateAvailable()
 
 	a.eventsHandler.OnProxyStarting()
 	defer func() {
@@ -417,4 +418,8 @@ func parseLaunchArgs(args []string) (start, hidden bool) {
 		}
 	}
 	return start, hidden
+}
+
+func (a *App) RestartApp() error {
+	return selfupdate.RestartApplication(a.ctx)
 }

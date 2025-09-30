@@ -1,10 +1,14 @@
-import { Button, ButtonGroup, Icon, IconSize, FocusStyleManager, NonIdealState } from '@blueprintjs/core';
-import { useState, useEffect } from 'react';
+import { Button, ButtonGroup, FocusStyleManager, Icon, IconSize, NonIdealState } from '@blueprintjs/core';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import './App.css';
 
+import { RestartApp } from '../wailsjs/go/app/App';
+import { EventsOn } from '../wailsjs/runtime/runtime';
+
 import { ThemeType, useTheme } from './common/ThemeManager';
+import { AppToaster } from './common/toaster';
 import { useProxyState } from './context/ProxyStateContext';
 import { DonateButton } from './DonateButton';
 import { FilterLists } from './FilterLists';
@@ -20,6 +24,26 @@ function App() {
 
   useEffect(() => {
     FocusStyleManager.onlyShowFocusOnTabs();
+  }, []);
+
+  useEffect(() => {
+    const cancel = EventsOn('app:update', (action: any) => {
+      if (action.kind === 'updateAvailable') {
+        AppToaster.show({
+          message: 'An update available.',
+          intent: 'primary',
+          timeout: 0,
+          action: {
+            text: 'Restart',
+            onClick: () => {
+              RestartApp();
+            },
+          },
+        });
+      }
+    });
+
+    return cancel;
   }, []);
 
   const { proxyState } = useProxyState();

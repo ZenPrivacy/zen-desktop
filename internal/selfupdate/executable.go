@@ -2,6 +2,7 @@ package selfupdate
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -10,27 +11,63 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
-func replaceExecutable(tempDir string) error {
+func replaceExecutable(tempDir, destPath string) error {
 	expectedExecName := constants.AppName
 	if runtime.GOOS == "windows" {
 		expectedExecName += ".exe"
 	}
-	newExecPath := filepath.Join(tempDir, expectedExecName)
+	src := filepath.Join(tempDir, expectedExecName)
 
-	if _, err := os.Stat(newExecPath); os.IsNotExist(err) {
+	if _, err := os.Stat(src); os.IsNotExist(err) {
 		return fmt.Errorf("expected executable '%s' not found", expectedExecName)
 	}
 
-	currentExecPath, err := getExecPath()
-	if err != nil {
-		return fmt.Errorf("get exec path: %w", err)
+	tmpDst := destPath + ".part"
+
+	if err := copyFile(src, tmpDst); err != nil {
+		_ = os.Remove(tmpDst)
+		return fmt.Errorf("copy new executable: %w", err)
 	}
 
-	if err := os.Rename(newExecPath, currentExecPath); err != nil {
-		return fmt.Errorf("move new executable: %w", err)
+	if fi, err := os.Stat(destPath); err == nil {
+		_ = os.Chmod(tmpDst, fi.Mode())
+	} else {
+		_ = os.Chmod(tmpDst, 0755)
+	}
+
+	if err := os.Rename(tmpDst, destPath); err != nil {
+		_ = os.Remove(tmpDst)
+		return fmt.Errorf("rename new executable: %w", err)
 	}
 
 	return nil
+}
+
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("open src: %w", err)
+	}
+	defer in.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return fmt.Errorf("mkdir dst dir: %w", err)
+	}
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("create dst: %w", err)
+	}
+
+	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		return fmt.Errorf("copy: %w", err)
+	}
+	if err := out.Sync(); err != nil {
+		out.Close()
+		return fmt.Errorf("sync: %w", err)
+	}
+	return out.Close()
 }
 
 func getExecPath() (string, error) {
