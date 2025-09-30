@@ -147,7 +147,7 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install NSIS
-        run: winget install NSIS.NSIS --silent
+        run: choco install nsis
       - name: Build EXEs
         run: |
           # Prepare output directories
