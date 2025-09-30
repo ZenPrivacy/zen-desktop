@@ -146,8 +146,8 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check if makensis is installed
-        run: makensis -VERSION
+      - name: Install NSIS
+        run: winget install NSIS.NSIS --silent
       - name: Build EXEs
         run: |
           # Prepare output directories
