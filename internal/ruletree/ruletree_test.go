@@ -34,7 +34,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"sync/atomic"
 	"testing"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/ruletree"
@@ -99,12 +98,9 @@ func BenchmarkMatch(b *testing.B) {
 
 	var i int
 	for b.Loop() {
-		r := reqs[i]
-		i++
-		if i == len(reqs) {
-			i = 0
-		}
+		r := reqs[i%len(reqs)]
 		tree.FindMatchingRulesReq(r)
+		i++
 	}
 
 	b.ReportAllocs()
@@ -124,19 +120,12 @@ func BenchmarkMatchParallel(b *testing.B) {
 
 	b.ResetTimer()
 
-	var seedCounter int64
 	b.RunParallel(func(pb *testing.PB) {
-		id := atomic.AddInt64(&seedCounter, 1)
-		r := rand.New(rand.NewSource(baseSeed + id)) // #nosec G404 -- Not used for cryptographic purposes.
-
-		i := r.Intn(len(reqs))
+		var i int
 		for pb.Next() {
-			r := reqs[i]
-			i++
-			if i == len(reqs) {
-				i = 0
-			}
+			r := reqs[i%len(reqs)]
 			tree.FindMatchingRulesReq(r)
+			i++
 		}
 	})
 
