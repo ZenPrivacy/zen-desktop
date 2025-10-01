@@ -43,6 +43,7 @@ type SelfUpdater struct {
 
 	mu            sync.Mutex
 	updateApplied bool
+	inProgress    bool
 }
 
 type release struct {
@@ -149,12 +150,21 @@ func (su *SelfUpdater) isNewer(version string) (bool, error) {
 
 func (su *SelfUpdater) applyUpdate() (bool, error) {
 	su.mu.Lock()
-	if su.updateApplied {
-		log.Println("update already applied, skipping further checks")
+	if su.updateApplied || su.inProgress {
+		if su.updateApplied {
+			log.Println("update already applied, skipping further checks")
+		}
 		su.mu.Unlock()
 		return false, nil
 	}
+	su.inProgress = true
 	su.mu.Unlock()
+
+	defer func() {
+		su.mu.Lock()
+		su.inProgress = false
+		su.mu.Unlock()
+	}()
 
 	rel, err := su.checkForUpdates()
 	if err != nil {
@@ -192,11 +202,6 @@ func (su *SelfUpdater) applyUpdate() (bool, error) {
 	}
 
 	log.Println("update installed successfully")
-
-	su.mu.Lock()
-	su.updateApplied = true
-	su.mu.Unlock()
-
 	return true, nil
 }
 
