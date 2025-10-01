@@ -53,6 +53,17 @@ type proxyAction struct {
 	Error string     `json:"error"`
 }
 
+type updateActionKind string
+
+const (
+	updateChannel                    = "app:update"
+	updateAvailable updateActionKind = "updateAvailable"
+)
+
+type updateAction struct {
+	Kind updateActionKind `json:"kind"`
+}
+
 func (e *eventsHandler) OnFilterBlock(method, url, referer string, rules []rule.Rule) {
 	runtime.EventsEmit(e.ctx, filterChannel, filterAction{
 		Kind:    filterActionBlock,
@@ -126,5 +137,11 @@ func (e *eventsHandler) OnUnsupportedDE(err error) {
 	runtime.EventsEmit(e.ctx, proxyChannel, proxyAction{
 		Kind:  unsupportedDE,
 		Error: fmt.Sprint(err),
+	})
+}
+
+func (e *eventsHandler) OnUpdateAvailable() {
+	runtime.EventsEmit(e.ctx, updateChannel, updateAction{
+		Kind: updateAvailable,
 	})
 }

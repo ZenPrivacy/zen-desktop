@@ -11,14 +11,13 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // NoSelfUpdate is set to "true" for builds distributed to package managers to prevent auto-updating. It is typed as a string because the linker allows only setting string variables at compile time (see https://pkg.go.dev/cmd/link).
@@ -41,6 +40,10 @@ type SelfUpdater struct {
 	policy       cfg.UpdatePolicyType
 	releaseTrack string
 	httpClient   httpClient
+
+	mu            sync.Mutex
+	updateApplied bool
+	inProgress    bool
 }
 
 type release struct {
@@ -145,63 +148,61 @@ func (su *SelfUpdater) isNewer(version string) (bool, error) {
 	return false, nil
 }
 
-func (su *SelfUpdater) ApplyUpdate(ctx context.Context) error {
+func (su *SelfUpdater) applyUpdate() (bool, error) {
+	su.mu.Lock()
+	if su.updateApplied || su.inProgress {
+		if su.updateApplied {
+			log.Println("update already applied, skipping further checks")
+		}
+		su.mu.Unlock()
+		return false, nil
+	}
+	su.inProgress = true
+	su.mu.Unlock()
+
+	defer func() {
+		su.mu.Lock()
+		su.inProgress = false
+		su.mu.Unlock()
+	}()
+
 	rel, err := su.checkForUpdates()
 	if err != nil {
-		return fmt.Errorf("check for updates: %w", err)
+		return false, fmt.Errorf("check for updates: %w", err)
 	}
 	if rel == nil {
-		return nil
+		return false, nil
 	}
 
-	if isNewer, err := su.isNewer(rel.Version); err != nil {
-		return fmt.Errorf("check if newer: %w", err)
-	} else if !isNewer {
-		log.Println("no newer version available")
-		return nil
+	isNewer, err := su.isNewer(rel.Version)
+	if err != nil {
+		return false, fmt.Errorf("check if newer: %w", err)
 	}
-
-	if su.policy == cfg.UpdatePolicyPrompt {
-		if proceed, err := su.showUpdateDialog(ctx, rel.Description); err != nil {
-			return fmt.Errorf("show update dialog: %w", err)
-		} else if !proceed {
-			log.Println("aborting update, user declined")
-			return nil
-		}
+	if !isNewer {
+		return false, nil
 	}
 
 	tmpFile, err := su.downloadAndVerifyFile(rel.AssetURL, rel.SHA256)
 	if err != nil {
-		return fmt.Errorf("download and verify file: %w", err)
+		return false, fmt.Errorf("download and verify file: %w", err)
 	}
 	defer os.Remove(tmpFile)
 
 	switch runtime.GOOS {
 	case "darwin":
 		if err := su.applyUpdateForDarwin(tmpFile); err != nil {
-			return fmt.Errorf("apply update: %w", err)
+			return false, fmt.Errorf("apply update: %w", err)
 		}
 	case "windows", "linux":
 		if err := su.applyUpdateForWindowsOrLinux(tmpFile); err != nil {
-			return fmt.Errorf("apply update: %w", err)
+			return false, fmt.Errorf("apply update: %w", err)
 		}
 	default:
 		panic("unsupported platform")
 	}
 
-	if su.policy == cfg.UpdatePolicyPrompt {
-		if restart, err := su.showRestartDialog(ctx); err != nil {
-			return fmt.Errorf("show restart dialog: %w", err)
-		} else if !restart {
-			log.Println("user declined to restart")
-			return nil
-		}
-	}
-
-	if err := su.restartApplication(ctx); err != nil {
-		return fmt.Errorf("restart application: %w", err)
-	}
-	return nil
+	log.Println("update installed successfully")
+	return true, nil
 }
 
 func (su *SelfUpdater) downloadFile(url, filePath string) error {
@@ -255,37 +256,6 @@ func verifyFileHash(filePath, expectedHash string) error {
 	}
 
 	return nil
-}
-
-func (su *SelfUpdater) showUpdateDialog(ctx context.Context, description string) (bool, error) {
-	action, err := wailsruntime.MessageDialog(ctx, wailsruntime.MessageDialogOptions{
-		Title:         "Would you like to update Zen?",
-		Message:       description,
-		Buttons:       []string{"Yes", "No"},
-		Type:          wailsruntime.QuestionDialog,
-		DefaultButton: "Yes",
-		CancelButton:  "No",
-	})
-	if err != nil {
-		return false, fmt.Errorf("show update dialog: %w", err)
-	}
-
-	return action == "Yes", nil
-}
-
-func (su *SelfUpdater) showRestartDialog(ctx context.Context) (bool, error) {
-	action, err := wailsruntime.MessageDialog(ctx, wailsruntime.MessageDialogOptions{
-		Title:         "Zen has been updated",
-		Message:       "Zen has been updated to the latest version. Would you like to restart it now?",
-		Buttons:       []string{"Yes", "No"},
-		Type:          wailsruntime.QuestionDialog,
-		DefaultButton: "Yes",
-		CancelButton:  "No",
-	})
-	if err != nil {
-		return false, fmt.Errorf("show restart dialog: %w", err)
-	}
-	return action == "Yes", nil
 }
 
 func (su *SelfUpdater) downloadAndVerifyFile(assetURL, expectedHash string) (string, error) {
@@ -348,16 +318,16 @@ func (su *SelfUpdater) applyUpdateForDarwin(tmpFile string) error {
 	rollback := false
 	defer func() {
 		if rollback {
-			log.Printf("Restoring old app bundle from: %s", oldBundlePath)
+			log.Printf("restoring old app bundle from: %s", oldBundlePath)
 
 			if err := os.Rename(oldBundlePath, appBundlePath); err != nil {
-				log.Printf("Failed to restore old app bundle: %v", err)
+				log.Printf("failed to restore old app bundle: %v", err)
 			}
 		} else {
-			log.Printf("Removing old app bundle backup: %s", oldBundlePath)
+			log.Printf("removing old app bundle backup: %s", oldBundlePath)
 
 			if err := os.RemoveAll(oldBundlePath); err != nil {
-				log.Printf("Failed to remove old app bundle backup: %v", err)
+				log.Printf("failed to remove old app bundle backup: %v", err)
 			}
 		}
 	}()
@@ -378,32 +348,32 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 	defer os.RemoveAll(tempDir)
 
 	if err := unarchive(tmpFile, tempDir); err != nil {
-		return fmt.Errorf("unzip file: %w", err)
+		return fmt.Errorf("unarchive file: %w", err)
 	}
 
-	currentExecPath, err := getExecPath()
+	installPath, err := getExecPath()
 	if err != nil {
 		return fmt.Errorf("get exec path: %w", err)
 	}
 
-	oldExecPath := generateBackupName(currentExecPath)
-	if err := os.Rename(currentExecPath, oldExecPath); err != nil {
-		return fmt.Errorf("rename current executable to backup: %w", err)
+	oldExecPath := generateBackupName(installPath)
+	if err := copyFile(installPath, oldExecPath); err != nil {
+		return fmt.Errorf("backup current executable: %w", err)
 	}
 
 	rollback := false
 	defer func() {
 		if rollback {
-			log.Printf("Restoring original executable from: %s", oldExecPath)
-			if err := os.Rename(oldExecPath, currentExecPath); err != nil {
-				log.Printf("Failed to restore original executable: %v", err)
+			log.Printf("restoring original executable from: %s", oldExecPath)
+			if err := os.Rename(oldExecPath, installPath); err != nil {
+				log.Printf("failed to restore original executable: %v", err)
 			}
 		} else {
-			log.Printf("Removing backup executable: %s", oldExecPath)
+			log.Printf("removing backup executable: %s", oldExecPath)
 			if err := os.Remove(oldExecPath); err != nil {
-				log.Printf("Failed to remove backup executable: %v", err)
+				log.Printf("failed to remove backup executable: %v", err)
 
-				log.Printf("Attempting to hide file: %s", oldExecPath)
+				log.Printf("attempting to hide file: %s", oldExecPath)
 				err = hideFile(oldExecPath)
 				if err != nil {
 					log.Printf("Failed to hide backup executable: %v", err)
@@ -412,20 +382,11 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 		}
 	}()
 
-	if err := replaceExecutable(tempDir); err != nil {
+	if err := replaceExecutable(tempDir, installPath); err != nil {
 		rollback = true
 		return fmt.Errorf("replace executable: %w", err)
 	}
 
-	return nil
-}
-
-func (su *SelfUpdater) restartApplication(ctx context.Context) error {
-	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("restart application: %w", err)
-	}
-	wailsruntime.Quit(ctx)
 	return nil
 }
 
@@ -438,7 +399,7 @@ func hideFile(path string) error {
 		return fmt.Errorf("move file to temp storage: %w", err)
 	}
 
-	log.Printf("Moved file to temporary storage: %s", newPath)
+	log.Printf("moved file to temporary storage: %s", newPath)
 	return nil
 }
 
@@ -458,4 +419,39 @@ func findAppBundleInDir(dir string) (string, error) {
 func generateBackupName(originalName string) string {
 	timestamp := time.Now().UnixMilli()
 	return fmt.Sprintf("%s.backup-%d", originalName, timestamp)
+}
+
+func (su *SelfUpdater) StartPeriodicChecks(ctx context.Context, interval time.Duration, onUpdate func()) {
+	if su.noSelfUpdate || su.policy == cfg.UpdatePolicyDisabled {
+		log.Println("self-update disabled, skipping periodic checks")
+		return
+	}
+
+	if updated, err := su.applyUpdate(); err != nil {
+		log.Printf("failed to apply update: %v", err)
+	} else if updated {
+		onUpdate()
+	}
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				log.Println("stopping periodic update checks")
+				return
+			case <-ticker.C:
+				updated, err := su.applyUpdate()
+				if err != nil {
+					log.Printf("failed to apply update: %v", err)
+					continue
+				}
+				if updated {
+					onUpdate()
+				}
+			}
+		}
+	}()
 }

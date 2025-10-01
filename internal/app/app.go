@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -112,9 +113,9 @@ func (a *App) commonStartup(ctx context.Context) {
 			return
 		}
 
-		if err := su.ApplyUpdate(ctx); err != nil {
-			log.Printf("failed to apply update: %v", err)
-		}
+		su.StartPeriodicChecks(ctx, time.Hour, func() {
+			a.eventsHandler.OnUpdateAvailable()
+		})
 	}()
 
 	time.AfterFunc(time.Second, func() {
@@ -417,4 +418,13 @@ func parseLaunchArgs(args []string) (start, hidden bool) {
 		}
 	}
 	return start, hidden
+}
+
+func (a *App) RestartApplication() error {
+	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("restart application: %w", err)
+	}
+	runtime.Quit(a.ctx)
+	return nil
 }
