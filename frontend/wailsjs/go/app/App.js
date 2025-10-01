@@ -22,8 +22,8 @@ export function OpenLogsDirectory() {
   return window['go']['app']['App']['OpenLogsDirectory']();
 }
 
-export function RestartApp() {
-  return window['go']['app']['App']['RestartApp']();
+export function RestartApplication() {
+  return window['go']['app']['App']['RestartApplication']();
 }
 
 export function StartProxy() {

@@ -9,6 +9,10 @@
       "home": "Home",
       "myRules": "My rules",
       "settings": "Settings"
+    },
+    "update": {
+      "restartFailed": "Failed to restart app: {{error}}",
+      "updateAvailable": "A new version of Zen is available."
     }
   },
   "autoStartSwitch": {

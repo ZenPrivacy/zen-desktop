@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -112,7 +113,7 @@ func (a *App) commonStartup(ctx context.Context) {
 			return
 		}
 
-		su.StartPeriodicChecks(ctx, time.Second*10, func() {
+		su.StartPeriodicChecks(ctx, time.Hour, func() {
 			a.eventsHandler.OnUpdateAvailable()
 		})
 	}()
@@ -170,7 +171,6 @@ func (a *App) StartProxy() (err error) {
 	}
 
 	log.Println("starting proxy")
-	a.eventsHandler.OnUpdateAvailable()
 
 	a.eventsHandler.OnProxyStarting()
 	defer func() {
@@ -420,6 +420,11 @@ func parseLaunchArgs(args []string) (start, hidden bool) {
 	return start, hidden
 }
 
-func (a *App) RestartApp() error {
-	return selfupdate.RestartApplication(a.ctx)
+func (a *App) RestartApplication() error {
+	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("restart application: %w", err)
+	}
+	runtime.Quit(a.ctx)
+	return nil
 }

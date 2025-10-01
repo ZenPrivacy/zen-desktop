@@ -142,6 +142,6 @@ func (e *eventsHandler) OnUnsupportedDE(err error) {
 
 func (e *eventsHandler) OnUpdateAvailable() {
 	runtime.EventsEmit(e.ctx, updateChannel, updateAction{
-		Kind: updateActionKind(updateAvailable),
+		Kind: updateAvailable,
 	})
 }

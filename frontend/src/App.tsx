@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import './App.css';
 
-import { RestartApp } from '../wailsjs/go/app/App';
+import { RestartApplication } from '../wailsjs/go/app/App';
 import { EventsOn } from '../wailsjs/runtime/runtime';
 
 import { ThemeType, useTheme } from './common/ThemeManager';
@@ -30,13 +30,20 @@ function App() {
     const cancel = EventsOn('app:update', (action: any) => {
       if (action.kind === 'updateAvailable') {
         AppToaster.show({
-          message: 'An update available.',
+          message: t('app.update.updateAvailable'),
           intent: 'primary',
           timeout: 0,
           action: {
             text: 'Restart',
             onClick: () => {
-              RestartApp();
+              try {
+                RestartApplication();
+              } catch (error) {
+                AppToaster.show({
+                  message: t('app.update.restartFailed', { err: error }),
+                  intent: 'danger',
+                });
+              }
             },
           },
         });

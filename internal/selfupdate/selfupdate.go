@@ -11,14 +11,13 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // NoSelfUpdate is set to "true" for builds distributed to package managers to prevent auto-updating. It is typed as a string because the linker allows only setting string variables at compile time (see https://pkg.go.dev/cmd/link).
@@ -41,6 +40,9 @@ type SelfUpdater struct {
 	policy       cfg.UpdatePolicyType
 	releaseTrack string
 	httpClient   httpClient
+
+	mu            sync.Mutex
+	updateApplied bool
 }
 
 type release struct {
@@ -145,7 +147,15 @@ func (su *SelfUpdater) isNewer(version string) (bool, error) {
 	return false, nil
 }
 
-func (su *SelfUpdater) applyUpdate(ctx context.Context) (bool, error) {
+func (su *SelfUpdater) applyUpdate() (bool, error) {
+	su.mu.Lock()
+	if su.updateApplied {
+		log.Println("update already applied, skipping further checks")
+		su.mu.Unlock()
+		return false, nil
+	}
+	su.mu.Unlock()
+
 	rel, err := su.checkForUpdates()
 	if err != nil {
 		return false, fmt.Errorf("check for updates: %w", err)
@@ -182,6 +192,11 @@ func (su *SelfUpdater) applyUpdate(ctx context.Context) (bool, error) {
 	}
 
 	log.Println("update installed successfully")
+
+	su.mu.Lock()
+	su.updateApplied = true
+	su.mu.Unlock()
+
 	return true, nil
 }
 
@@ -298,16 +313,16 @@ func (su *SelfUpdater) applyUpdateForDarwin(tmpFile string) error {
 	rollback := false
 	defer func() {
 		if rollback {
-			log.Printf("Restoring old app bundle from: %s", oldBundlePath)
+			log.Printf("restoring old app bundle from: %s", oldBundlePath)
 
 			if err := os.Rename(oldBundlePath, appBundlePath); err != nil {
-				log.Printf("Failed to restore old app bundle: %v", err)
+				log.Printf("failed to restore old app bundle: %v", err)
 			}
 		} else {
-			log.Printf("Removing old app bundle backup: %s", oldBundlePath)
+			log.Printf("removing old app bundle backup: %s", oldBundlePath)
 
 			if err := os.RemoveAll(oldBundlePath); err != nil {
-				log.Printf("Failed to remove old app bundle backup: %v", err)
+				log.Printf("failed to remove old app bundle backup: %v", err)
 			}
 		}
 	}()
@@ -344,16 +359,16 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 	rollback := false
 	defer func() {
 		if rollback {
-			log.Printf("Restoring original executable from: %s", oldExecPath)
+			log.Printf("restoring original executable from: %s", oldExecPath)
 			if err := os.Rename(oldExecPath, installPath); err != nil {
-				log.Printf("Failed to restore original executable: %v", err)
+				log.Printf("failed to restore original executable: %v", err)
 			}
 		} else {
-			log.Printf("Removing backup executable: %s", oldExecPath)
+			log.Printf("removing backup executable: %s", oldExecPath)
 			if err := os.Remove(oldExecPath); err != nil {
-				log.Printf("Failed to remove backup executable: %v", err)
+				log.Printf("failed to remove backup executable: %v", err)
 
-				log.Printf("Attempting to hide file: %s", oldExecPath)
+				log.Printf("attempting to hide file: %s", oldExecPath)
 				err = hideFile(oldExecPath)
 				if err != nil {
 					log.Printf("Failed to hide backup executable: %v", err)
@@ -370,15 +385,6 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 	return nil
 }
 
-func RestartApplication(ctx context.Context) error {
-	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("restart application: %w", err)
-	}
-	wailsruntime.Quit(ctx)
-	return nil
-}
-
 // hideFile moves the file at the given path to a temporary directory in case it cannot be removed.
 func hideFile(path string) error {
 	tmpDir := os.TempDir()
@@ -388,7 +394,7 @@ func hideFile(path string) error {
 		return fmt.Errorf("move file to temp storage: %w", err)
 	}
 
-	log.Printf("Moved file to temporary storage: %s", newPath)
+	log.Printf("moved file to temporary storage: %s", newPath)
 	return nil
 }
 
@@ -416,6 +422,12 @@ func (su *SelfUpdater) StartPeriodicChecks(ctx context.Context, interval time.Du
 		return
 	}
 
+	if updated, err := su.applyUpdate(); err != nil {
+		log.Printf("failed to apply update: %v", err)
+	} else if updated {
+		onUpdate()
+	}
+
 	go func() {
 		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
@@ -426,7 +438,7 @@ func (su *SelfUpdater) StartPeriodicChecks(ctx context.Context, interval time.Du
 				log.Println("stopping periodic update checks")
 				return
 			case <-ticker.C:
-				updated, err := su.applyUpdate(ctx)
+				updated, err := su.applyUpdate()
 				if err != nil {
 					log.Printf("failed to apply update: %v", err)
 					continue

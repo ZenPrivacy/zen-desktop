@@ -12,7 +12,7 @@ export function OnSecondInstanceLaunch(arg1:options.SecondInstanceData):Promise<
 
 export function OpenLogsDirectory():Promise<void>;
 
-export function RestartApp():Promise<void>;
+export function RestartApplication():Promise<void>;
 
 export function StartProxy():Promise<void>;
 
