@@ -23,6 +23,9 @@ export class RawMatches implements Step {
   constructor(private query: string) {}
 
   run(input: Element[]) {
+    if (this.query === '*') {
+      return input;
+    }
     return input.filter((el) => el.matches(this.query));
   }
 

@@ -101,24 +101,50 @@ export function plan(tokens: IRToken[]): Selector {
     const t = tokens[i];
 
     switch (t.kind) {
-      case 'raw':
-        cssBuilder += t.literal;
+      case 'raw': {
+        const prevStep = steps[steps.length - 1];
+        const isPrevComb =
+          prevStep instanceof Child ||
+          prevStep instanceof Descendant ||
+          prevStep instanceof NextSibling ||
+          prevStep instanceof SubsequentSibling;
+
+        if (isPrevComb) {
+          steps.push(new RawMatches(t.literal));
+        } else {
+          cssBuilder += t.literal;
+        }
         break;
+      }
 
       case 'comb': {
-        const next = tokens[i + 1];
-        if (!next) {
+        const nextTok = tokens[i + 1];
+        if (!nextTok) {
           throw new Error('Last token is a dangling combinator');
         }
-        if (next.kind === 'comb') {
+        if (nextTok.kind === 'comb') {
           throw new Error('Multiple subsequent combinator tokens');
         }
 
-        if (next.kind === 'raw') {
-          // If the next token is raw, prefer declarative bridging for performance.
+        if (cssBuilder.length > 0 && nextTok.kind === 'raw') {
+          // Prefer declarative bridging for performance.
           cssBuilder += t.literal;
+        } else if (nextTok.kind === 'raw') {
+          switch (t.literal) {
+            case ' ':
+              // No bridging necessary. The next step is going to be RawQuery, which matches descendant elements by nature.
+              break;
+            case '>':
+              // Micro-optimization: Use :scope to match direct descendants when calling querySelectorAll.
+              // Reference: https://developer.mozilla.org/en-US/docs/Web/CSS/:scope
+              cssBuilder += ':scope' + t.literal;
+              break;
+            default:
+              // :scope-d queries do not match siblings, so bridge imperatively.
+              emitBridge(t);
+          }
         } else {
-          // Next is ext: end the merged raw run and bridge imperatively.
+          // Next is ext; end the merged raw run and bridge imperatively.
           flushRaw();
           emitBridge(t);
         }

@@ -20,6 +20,6 @@ export class Has implements Step {
     // A complete implementation would store the "arg" passed to the
     // constructor. However, since it's unused in production methods, we avoid
     // the memory overhead at the cost of slightly less thorough testing.
-    return ':Has(...selectors)';
+    return ':Has(...)';
   }
 }

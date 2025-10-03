@@ -27,4 +27,11 @@ export class Not implements Step {
     }
     return filtered;
   }
+
+  toString() {
+    // A complete implementation would store the selector passed to the
+    // constructor. However, since it's unused in production methods, we avoid
+    // the memory overhead at the cost of slightly less thorough testing.
+    return ':Not(...)';
+  }
 }
