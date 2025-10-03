@@ -7,11 +7,11 @@ describe('tokenize', () => {
     ['div', 'RawTok(div)'],
     ['*', 'RawTok(*)'],
     ['a[href^="http"]', 'RawTok(a[href^="http"])'],
-    ['div:not(.ad)', 'RawTok(div:not(.ad))'],
+    ['div:not(.ad)', 'RawTok(div) ExtTok(:not(.ad))'],
 
     ['div>.x+span~a', 'RawTok(div) CombTok(>) RawTok(.x) CombTok(+) RawTok(span) CombTok(~) RawTok(a)'],
 
-    ['div :not(.ad)', 'RawTok(div) CombTok( ) RawTok(:not(.ad))'],
+    ['div :not(.ad)', 'RawTok(div) CombTok( ) ExtTok(:not(.ad))'],
 
     ['div:contains(ad)', 'RawTok(div) ExtTok(:contains(ad))'],
     ['div.banner:matches-css(color: red)', 'RawTok(div.banner) ExtTok(:matches-css(color: red))'],
