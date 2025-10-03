@@ -426,5 +426,34 @@ describe('Engine', () => {
       expect(getVisibleElements('.social-widget')).toHaveLength(0);
       expect(getVisibleElements('.content')).toHaveLength(1);
     });
+
+    test('hides elements using :matches-attr', () => {
+      createTestDOM(`
+        <div id="banner" data-ad-format="horizontal">Horizontal Ad</div>
+        <div id="sidebar" data-ad-format="vertical">Vertical Ad</div>
+        <div id="popup" data-sponsored="true">
+          <span>Sponsored</span>
+          <span>Content</span>
+        </div>
+        <div id="gtm" gtm-module="tracking">GTM module</div>
+        <div id="content" class="article">Normal content</div>
+        <div id="recommendation" data-recommendation="products">Product recommendations</div>
+      `);
+
+      const rules = `
+        div:matches-attr(*ad*)
+        div:matches-attr(data-sponsored=true) > *
+        div:matches-attr(/^gtm-/)
+      `;
+
+      startEngine(rules);
+
+      expect(getVisibleElements('#banner')).toHaveLength(0);
+      expect(getVisibleElements('#sidebar')).toHaveLength(0);
+      expect(getVisibleElements('#popup > *')).toHaveLength(0);
+      expect(getVisibleElements('#gtm')).toHaveLength(0);
+      expect(getVisibleElements('#content')).toHaveLength(1);
+      expect(getVisibleElements('#recommendation')).toHaveLength(1);
+    });
   });
 });
