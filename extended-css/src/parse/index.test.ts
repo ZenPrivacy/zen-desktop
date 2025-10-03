@@ -7,7 +7,7 @@ describe('parse', () => {
     ['div', 'RawQuery(div)'],
     ['div span', 'RawQuery(div span)'],
     ['a[href^="http"]', 'RawQuery(a[href^="http"])'],
-    ['div:not(.ad)', 'RawQuery(div:not(.ad))'],
+    ['div:not(.ad)', 'RawQuery(div) :Not(...selectors)'],
 
     // Pure CSS with combinators is bridged into a single Raw
     ['div>.x+span~a', 'RawQuery(div>.x+span~a)'],
@@ -44,6 +44,15 @@ describe('parse', () => {
     [
       'div:contains(ad) span:has(.banner), > .x + p, code',
       'RawQuery(div) :Contains(ad) RawQuery(span) :Has(...selectors), ChildComb RawMatches(.x) NextSiblComb RawMatches(p), RawQuery(code)',
+    ],
+
+    // Combinators between a mix of raw and extended tokens
+    ['#parent:min-text-length(2) *', 'RawQuery(#parent) :MinTextLength(2) RawQuery(*)'],
+    [':min-text-length(2) > div', 'RawQuery(*) :MinTextLength(2) RawQuery(:scope>div)'],
+    [':min-text-length(2) + div', 'RawQuery(*) :MinTextLength(2) NextSiblComb RawMatches(div)'],
+    [
+      ':min-text-length(2) + div > div:is(.class) + span',
+      'RawQuery(*) :MinTextLength(2) NextSiblComb RawMatches(div) RawQuery(:scope>div) :Is(...selectors) NextSiblComb RawMatches(span)',
     ],
   ])('parse %j', (input, expected) => {
     const got = parse(input)
