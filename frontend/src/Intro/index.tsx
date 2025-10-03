@@ -36,7 +36,7 @@ function RegionalFilterLists() {
 export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
   const { t } = useTranslation();
 
-  const [currentScreen, setCurrentScreen] = useState(4);
+  const [currentScreen, setCurrentScreen] = useState(1);
   const [isLanguageTransitioning, setIsLanguageTransitioning] = useState(false);
   const [animatedLanguage, setAnimatedLanguage] = useState<string | null>(null);
   const [welcomeText, setWelcomeText] = useState('');
