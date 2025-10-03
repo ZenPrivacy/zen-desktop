@@ -308,6 +308,37 @@ describe('Engine', () => {
       expect(getVisibleElements('#another span')).toHaveLength(1);
     });
 
+    test('handles complex multi-step selector', () => {
+      createTestDOM(`
+        <section>
+          <p>Text with more than 2 chars</p>
+          <div id="parent-div">
+            <div class="cls">Target parent</div>
+            <span id="target1">Should be hidden</span>
+            <span>Not adjacent, should remain visible</span>
+          </div>
+          <div>
+            <div class="cls">Another target parent</div>
+            <span id="target2">Should also be hidden</span>
+          </div>
+          <span>Not in the pattern, should remain visible</span>
+          <p>s</p>
+          <div>
+            <div class="cls">Not after text with min-length, should remain visible</div>
+            <span id="not-target">Should remain visible</span>
+          </div>
+        </section>
+      `);
+
+      startEngine(':min-text-length(2) + div > div:is(.cls) + span');
+
+      expect(getVisibleElements('#target1')).toHaveLength(0);
+      expect(getVisibleElements('#target2')).toHaveLength(0);
+      expect(getVisibleElements('#not-target')).toHaveLength(1);
+      expect(getVisibleElements('span:not(#target1):not(#target2)')).toHaveLength(3);
+      expect(getVisibleElements('.cls')).toHaveLength(document.querySelectorAll('.cls').length);
+    });
+
     test('"unhides" elements after they no longer match the selector', async () => {
       jest.useFakeTimers();
 
