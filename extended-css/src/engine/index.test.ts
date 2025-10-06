@@ -540,6 +540,7 @@ describe('Engine', () => {
 
       expect(getVisibleElements('#banner')).toHaveLength(0);
       expect(getVisibleElements('#sidebar')).toHaveLength(0);
+      expect(getVisibleElements('#popup')).toHaveLength(1);
       expect(getVisibleElements('#popup > *')).toHaveLength(0);
       expect(getVisibleElements('#gtm')).toHaveLength(0);
       expect(getVisibleElements('#content')).toHaveLength(1);
