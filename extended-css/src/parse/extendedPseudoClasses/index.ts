@@ -1,9 +1,11 @@
 import { Contains } from './contains';
 import { Has } from './has';
+import { Is } from './is';
 import { MatchesAttr } from './matchesAttr';
 import { MatchesCSS } from './matchesCSS';
 import { MatchesPath } from './matchesPath';
 import { MinTextLength } from './minTextLength';
+import { Not } from './not';
 import { Upward } from './upward';
 
 /**
@@ -20,4 +22,6 @@ export const extPseudoClasses = {
   'matches-attr': MatchesAttr,
   'min-text-length': MinTextLength,
   upward: Upward,
+  is: Is,
+  not: Not,
 };
