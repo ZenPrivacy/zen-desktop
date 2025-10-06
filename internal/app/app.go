@@ -105,16 +105,21 @@ func (a *App) commonStartup(ctx context.Context) {
 	a.systrayMgr.Init(ctx)
 
 	go func() {
+		updPolicy := a.config.GetUpdatePolicy()
 		su, err := selfupdate.NewSelfUpdater(&http.Client{
 			Timeout: 20 * time.Second,
-		}, a.config.GetUpdatePolicy())
+		}, updPolicy)
 		if err != nil {
 			log.Printf("error creating self updater: %v", err)
 			return
 		}
 
 		su.StartPeriodicChecks(ctx, time.Hour, func() {
-			a.eventsHandler.OnUpdateAvailable()
+			if updPolicy == cfg.UpdatePolicyAutomatic {
+				a.RestartApplication()
+			} else {
+				a.eventsHandler.OnUpdateAvailable()
+			}
 		})
 	}()
 
