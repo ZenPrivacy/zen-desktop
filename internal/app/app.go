@@ -432,10 +432,13 @@ func (a *App) startUpdateChecks() {
 
 	a.updateChecker.StartPeriodicChecks(
 		a.updateCheckerCtx,
-		time.Second*10,
+		time.Hour,
 		func(checkType selfupdate.UpdateCheckType) {
 			if checkType == selfupdate.StartupCheck {
-				a.RestartApplication()
+				if err := a.RestartApplication(); err != nil {
+					log.Printf("app restart failed: %v", err)
+					a.eventsHandler.OnUpdateAvailable()
+				}
 			} else {
 				a.eventsHandler.OnUpdateAvailable()
 			}

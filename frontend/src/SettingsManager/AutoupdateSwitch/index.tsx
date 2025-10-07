@@ -17,11 +17,10 @@ export function AutoupdateSwitch() {
   useEffect(() => {
     (async () => {
       const policy = await GetUpdatePolicy();
-      setState((prev) => ({
-        ...prev,
+      setState({
         policy,
-        enabled: prev.policy === cfg.UpdatePolicyType.AUTOMATIC,
-      }));
+        enabled: policy === cfg.UpdatePolicyType.AUTOMATIC,
+      });
     })();
   }, []);
 

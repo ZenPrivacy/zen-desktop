@@ -113,7 +113,7 @@
     },
     "updates": {
       "automaticUpdates": "自动下载更新",
-      "description": "启用后，Zen 将在启动时自动检查并应用更新。",
+      "description": "启用后，Zen 将自动检查更新。",
       "disableError": "无法禁用自动更新：{{error}}",
       "enableError": "无法启用自动更新：{{error}}"
     }

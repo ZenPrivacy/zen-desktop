@@ -113,7 +113,7 @@
     },
     "updates": {
       "automaticUpdates": "Updates automatisch herunterladen",
-      "description": "Wenn aktiviert, prüft Zen beim Start automatisch auf Updates und wendet diese an.",
+      "description": "Wenn aktiviert, prüft Zen automatisch auf Updates.",
       "disableError": "Automatische Updates kann nicht deaktiviert werden: {{error}}",
       "enableError": "Automatische Updates kann nicht aktiviert werden: {{error}}"
     }

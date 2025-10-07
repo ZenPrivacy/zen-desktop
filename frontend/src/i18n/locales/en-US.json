@@ -126,7 +126,7 @@
     },
     "updates": {
       "automaticUpdates": "Automatically download updates",
-      "description": "When enabled, Zen will automatically check for and apply updates on launch.",
+      "description": "When enabled, Zen will automatically check for updates",
       "disableError": "Failed to disable automatic updates: {{error}}",
       "enableError": "Failed to enable automatic updates: {{error}}"
     }

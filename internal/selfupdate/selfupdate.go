@@ -160,8 +160,13 @@ func (su *SelfUpdater) applyUpdate() (bool, error) {
 	su.inProgress = true
 	su.mu.Unlock()
 
+	success := false
 	defer func() {
 		su.mu.Lock()
+		if success {
+			su.updateApplied = true
+		}
+
 		su.inProgress = false
 		su.mu.Unlock()
 	}()
@@ -202,6 +207,7 @@ func (su *SelfUpdater) applyUpdate() (bool, error) {
 	}
 
 	log.Println("update installed successfully")
+	success = true
 	return true, nil
 }
 

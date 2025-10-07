@@ -122,7 +122,7 @@
     },
     "updates": {
       "automaticUpdates": "Scarica aggiornamenti automaticamente",
-      "description": "Se abilitato, Zen controllerà e applicherà automaticamente gli aggiornamenti all'avvio.",
+      "description": "Se abilitato, Zen controllerà automaticamente gli aggiornamenti.",
       "disableError": "Impossibile disabilitare gli aggiornamenti automatici: {{error}}",
       "enableError": "Impossibile abilitare gli aggiornamenti automatici: {{error}}"
     }
