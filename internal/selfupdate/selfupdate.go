@@ -421,16 +421,33 @@ func generateBackupName(originalName string) string {
 	return fmt.Sprintf("%s.backup-%d", originalName, timestamp)
 }
 
-func (su *SelfUpdater) StartPeriodicChecks(ctx context.Context, interval time.Duration, onUpdate func()) {
-	if su.noSelfUpdate || su.policy == cfg.UpdatePolicyDisabled {
-		log.Println("self-update disabled, skipping periodic checks")
+type UpdateCheckType int
+
+const (
+	StartupCheck UpdateCheckType = iota
+	BackgroundCheck
+)
+
+func (su *SelfUpdater) StartPeriodicChecks(
+	ctx context.Context,
+	interval time.Duration,
+	onUpdate func(checkType UpdateCheckType),
+) {
+	if su.noSelfUpdate {
+		log.Println("self-update disabled, skipping periodic update checks")
+		return
+	}
+
+	if su.policy != cfg.UpdatePolicyAutomatic {
+		log.Println("automatic updates disabled, skipping periodic update checks")
 		return
 	}
 
 	if updated, err := su.applyUpdate(); err != nil {
 		log.Printf("failed to apply update: %v", err)
 	} else if updated {
-		onUpdate()
+		onUpdate(StartupCheck)
+		return // Stop if update found during startup
 	}
 
 	go func() {
@@ -449,7 +466,8 @@ func (su *SelfUpdater) StartPeriodicChecks(ctx context.Context, interval time.Du
 					continue
 				}
 				if updated {
-					onUpdate()
+					onUpdate(BackgroundCheck)
+					return // Stop further checks
 				}
 			}
 		}

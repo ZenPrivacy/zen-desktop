@@ -10,6 +10,8 @@ export function IsNoSelfUpdate():Promise<boolean>;
 
 export function OnSecondInstanceLaunch(arg1:options.SecondInstanceData):Promise<void>;
 
+export function OnUpdatePolicyChanged():Promise<void>;
+
 export function OpenLogsDirectory():Promise<void>;
 
 export function RestartApplication():Promise<void>;
