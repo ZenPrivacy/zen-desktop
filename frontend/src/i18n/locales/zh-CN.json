@@ -112,12 +112,10 @@
       "system": "跟随系统主题"
     },
     "updates": {
-      "automatic": "自动更新",
-      "choosePolicy": "选择更新安装方式",
-      "description": "若选择“自动更新”，应用将在启动时自动检查并应用更新。",
-      "disabled": "禁用更新",
-      "prompt": "更新前询问",
-      "title": "更新"
+      "automaticUpdates": "自动下载更新",
+      "description": "启用后，Zen 将在启动时自动检查并应用更新。",
+      "disableError": "无法禁用自动更新：{{error}}",
+      "enableError": "无法启用自动更新：{{error}}"
     }
   },
   "startStopButton": {

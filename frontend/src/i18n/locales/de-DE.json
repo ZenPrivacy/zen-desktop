@@ -13,8 +13,8 @@
   },
   "autoStartSwitch": {
     "description": "Zen beim Systemstart starten",
-    "disableError": "Autostart kann nicht deaktiviert werden",
-    "enableError": "Autostart kann nicht aktiviert werden",
+    "disableError": "Autostart kann nicht deaktiviert werden: {{error}}",
+    "enableError": "Autostart kann nicht aktiviert werden: {{error}}",
     "label": "Autostart"
   },
   "createFilterList": {
@@ -112,12 +112,10 @@
       "system": "Systemdesign verwenden"
     },
     "updates": {
-      "automatic": "Automatische Updates",
-      "choosePolicy": "Wählen Sie, wie Updates installiert werden",
-      "description": "Wenn \"Automatische Updates\" ausgewählt ist, sucht die Anwendung beim Start automatisch nach Updates und installiert sie.",
-      "disabled": "Updates deaktivieren",
-      "prompt": "Vor dem Aktualisieren nachfragen",
-      "title": "Updates"
+      "automaticUpdates": "Updates automatisch herunterladen",
+      "description": "Wenn aktiviert, prüft Zen beim Start automatisch auf Updates und wendet diese an.",
+      "disableError": "Automatische Updates kann nicht deaktiviert werden: {{error}}",
+      "enableError": "Automatische Updates kann nicht aktiviert werden: {{error}}"
     }
   },
   "startStopButton": {
