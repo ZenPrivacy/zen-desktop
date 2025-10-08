@@ -96,7 +96,7 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 				prefix: tokens[commonPrefix:],
 			}
 			child.addEdge(edge[T]{
-				label: tokens[0],
+				label: tokens[commonPrefix],
 				node:  n,
 			})
 		}
