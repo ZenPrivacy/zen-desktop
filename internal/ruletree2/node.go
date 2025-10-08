@@ -97,8 +97,9 @@ func (n *node[T]) traverse(url string) []T {
 
 		switch prefix[0] {
 		case tokenWildcard:
-			traversePrefix(prefix[1:], url[1:])
-			traversePrefix(prefix, url[1:])
+			traversePrefix(prefix[1:], url)     // Wildcard can match zero chars,
+			traversePrefix(prefix[1:], url[1:]) // one,
+			traversePrefix(prefix, url[1:])     // or many.
 		case tokenSeparator:
 			switch isSeparator(url[0]) {
 			case true:
