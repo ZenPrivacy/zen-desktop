@@ -1,21 +1,44 @@
 package ruletree2
 
+import (
+	"errors"
+	"strings"
+)
+
 type Data any
 
 type Tree[T Data] struct {
-	root *node[T]
+	root       *node[T]
+	domainRoot *node[T]
+	startRoot  *node[T]
 }
 
 func New[T Data]() *Tree[T] {
 	return &Tree[T]{}
 }
 
-func (t *Tree[T]) Insert(s []token, v T) {
+func (t *Tree[T]) Insert(pattern string, v T) error {
+	if pattern == "" {
+		return errors.New("empty pattern")
+	}
+
 	var parent *node[T]
-	n := t.root
-	search := s
+	var n *node[T]
+
+	tokens := tokenize(pattern)
+	switch tokens[0] {
+	case tokenDomainRoot:
+		n = t.domainRoot
+		tokens = tokens[1:]
+	case tokenStartEnd:
+		n = t.startRoot
+		tokens = tokens[1:]
+	default:
+		n = t.root
+	}
+
 	for {
-		if len(search) == 0 {
+		if len(tokens) == 0 {
 			if n.isLeaf() {
 				n.leaf.val = append(n.leaf.val, v)
 			} else {
@@ -23,36 +46,36 @@ func (t *Tree[T]) Insert(s []token, v T) {
 					val: []T{v},
 				}
 			}
-			return
+			return nil
 		}
 
 		parent = n
-		n = n.getEdge(search[0])
+		n = n.getEdge(tokens[0])
 
 		if n == nil {
 			n := &node[T]{
-				prefix: search,
+				prefix: tokens,
 				leaf: &leaf[T]{
 					val: []T{v},
 				},
 			}
 			parent.addEdge(edge[T]{
-				label: search[0],
+				label: tokens[0],
 				node:  n,
 			})
-			return
+			return nil
 		}
 
-		commonPrefix := longestPrefix(search, n.prefix)
+		commonPrefix := longestPrefix(tokens, n.prefix)
 		if commonPrefix == len(n.prefix) {
-			search = search[commonPrefix:]
+			tokens = tokens[commonPrefix:]
 			continue
 		}
 
 		child := &node[T]{
-			prefix: search[:commonPrefix],
+			prefix: tokens[:commonPrefix],
 		}
-		parent.updateEdge(search[0], child)
+		parent.updateEdge(tokens[0], child)
 
 		child.addEdge(edge[T]{
 			label: n.prefix[commonPrefix],
@@ -63,33 +86,52 @@ func (t *Tree[T]) Insert(s []token, v T) {
 		l := &leaf[T]{
 			val: []T{v},
 		}
-		if commonPrefix == len(search) {
+		if commonPrefix == len(tokens) {
 			child.leaf = l
 		} else {
 			n := &node[T]{
 				leaf:   l,
-				prefix: search[commonPrefix:],
+				prefix: tokens[commonPrefix:],
 			}
 			child.addEdge(edge[T]{
-				label: search[0],
+				label: tokens[0],
 				node:  n,
 			})
 		}
-		return
+		return nil
 	}
 }
 
-func (t *Tree[T]) Get(s string) []T {
+func (t *Tree[T]) Get(url string) []T {
 	var data []T
-	data = append(data, t.root.traverse(s, true)...)
-	if dr := t.root.getEdge(tokenDomainRoot); dr != nil {
-		data = append(data, dr.traverse(s, true)...)
-	}
-	if re := t.root.getEdge(tokenRootEnd); re != nil {
-		data = append(data, re.traverse(s, true)...)
+	data = append(data, t.root.traverse(url)...)
+	data = append(data, t.startRoot.traverse(url)...)
+
+	inScheme := true
+	inHost := false
+	for i, c := range url {
+		data = append(data, t.root.traverse(url[i:])...)
+
+		if inHost {
+			if c == '.' {
+				data = append(data, t.domainRoot.traverse(url[i+1:])...)
+			}
+
+			if c == '/' {
+				inHost = false
+			}
+		}
+
+		if inScheme {
+			if strings.HasSuffix(url[:i+1], "://") {
+				data = append(data, t.domainRoot.traverse(url[i+1:])...)
+				inScheme = false
+				inHost = true
+			}
+		}
 	}
 
-	for 
+	return data
 }
 
 func longestPrefix(a, b []token) int {

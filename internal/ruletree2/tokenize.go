@@ -2,22 +2,15 @@ package ruletree2
 
 type token uint16
 
-func (t token) matches(ch byte) bool {
-	switch t {
-	case tokenWildcard:
-		return true
-	case tokenSeparator:
-		return isSeparator(ch)
-	default:
-		return t == token(ch)
-	}
-}
-
 const (
-	tokenWildcard   token = (2 << 7)
+	// tokenWildcard represents "*" and matches any set of characters.
+	tokenWildcard token = (2 << 7)
+	// tokenDomainRoot represents "||" and matches domain and subdomain roots.
 	tokenDomainRoot token = (2 << 7) + iota
-	tokenSeparator  token = (2 << 7) + iota
-	tokenRootEnd    token = (2 << 7) + iota
+	// tokenSeparator represents "^" and matches any character except a letter, digit, or _-.%.
+	tokenSeparator token = (2 << 7) + iota
+	// tokenStartEnd represents "|" and matches the beginning or the end of an address.
+	tokenStartEnd token = (2 << 7) + iota
 )
 
 func tokenize(s string) []token {
@@ -32,7 +25,7 @@ func tokenize(s string) []token {
 				tokens = append(tokens, tokenDomainRoot)
 				i++
 			default:
-				tokens = append(tokens, tokenRootEnd)
+				tokens = append(tokens, tokenStartEnd)
 			}
 		case '^':
 			tokens = append(tokens, tokenSeparator)

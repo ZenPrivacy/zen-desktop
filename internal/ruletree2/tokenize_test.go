@@ -33,7 +33,7 @@ func TestTokenize(t *testing.T) {
 		},
 		{
 			s:      "|||||",
-			tokens: []token{tokenDomainRoot, tokenDomainRoot, tokenRootEnd},
+			tokens: []token{tokenDomainRoot, tokenDomainRoot, tokenStartEnd},
 		},
 		{
 			s:      "||example.com",
@@ -41,11 +41,11 @@ func TestTokenize(t *testing.T) {
 		},
 		{
 			s:      "|",
-			tokens: []token{tokenRootEnd},
+			tokens: []token{tokenStartEnd},
 		},
 		{
 			s:      "example|",
-			tokens: []token{'e', 'x', 'a', 'm', 'p', 'l', 'e', tokenRootEnd},
+			tokens: []token{'e', 'x', 'a', 'm', 'p', 'l', 'e', tokenStartEnd},
 		},
 		{
 			s:      "^",
@@ -57,11 +57,11 @@ func TestTokenize(t *testing.T) {
 		},
 		{
 			s:      "*||^|",
-			tokens: []token{tokenWildcard, tokenDomainRoot, tokenSeparator, tokenRootEnd},
+			tokens: []token{tokenWildcard, tokenDomainRoot, tokenSeparator, tokenStartEnd},
 		},
 		{
 			s:      "a*b||c^d|e",
-			tokens: []token{'a', tokenWildcard, 'b', tokenDomainRoot, 'c', tokenSeparator, 'd', tokenRootEnd, 'e'},
+			tokens: []token{'a', tokenWildcard, 'b', tokenDomainRoot, 'c', tokenSeparator, 'd', tokenStartEnd, 'e'},
 		},
 	}
 

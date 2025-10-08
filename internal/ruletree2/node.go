@@ -49,13 +49,13 @@ func (n *node[T]) getEdge(label token) *node[T] {
 	return nil
 }
 
-func (n *node[T]) traverse(url string, root bool) []T {
+func (n *node[T]) traverse(url string) []T {
 	var data []T
 
 	sep := n.getEdge(tokenSeparator)
 
 	if len(url) == 0 {
-		if re := n.getEdge(tokenRootEnd); re != nil && re.isLeaf() {
+		if re := n.getEdge(tokenStartEnd); re != nil && re.isLeaf() {
 			data = append(data, re.leaf.val...)
 		}
 		if sep != nil && sep.isLeaf() {
@@ -69,13 +69,13 @@ func (n *node[T]) traverse(url string, root bool) []T {
 	proceed := func(url string) {
 		firstCh := url[0]
 		if isSeparator(firstCh) && sep != nil {
-			data = append(data, sep.traverse(url, false)...)
+			data = append(data, sep.traverse(url)...)
 		}
 		if wild != nil {
-			data = append(data, wild.traverse(url, false)...)
+			data = append(data, wild.traverse(url)...)
 		}
 		if ch := n.getEdge(token(firstCh)); ch != nil {
-			data = append(data, ch.traverse(url, false)...)
+			data = append(data, ch.traverse(url)...)
 		}
 	}
 
@@ -89,7 +89,7 @@ func (n *node[T]) traverse(url string, root bool) []T {
 			return
 		}
 		if len(url) == 0 {
-			if n.isLeaf() && len(prefix) == 1 && (prefix[0] == tokenRootEnd || prefix[0] == tokenSeparator) {
+			if n.isLeaf() && len(prefix) == 1 && (prefix[0] == tokenStartEnd || prefix[0] == tokenSeparator) {
 				data = append(data, n.leaf.val...)
 			}
 			return
@@ -106,10 +106,6 @@ func (n *node[T]) traverse(url string, root bool) []T {
 				traversePrefix(prefix, url[1:]) // Separator may consume multiple subsequent "separator" characters
 			case false:
 				return
-			}
-		case tokenDomainRoot, tokenRootEnd:
-			if root {
-				traversePrefix(prefix[1:], url)
 			}
 		default:
 			if prefix[0] == token(url[0]) {
