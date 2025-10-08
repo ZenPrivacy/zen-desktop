@@ -14,7 +14,11 @@ type Tree[T Data] struct {
 }
 
 func New[T Data]() *Tree[T] {
-	return &Tree[T]{}
+	return &Tree[T]{
+		root:       &node[T]{},
+		domainRoot: &node[T]{},
+		startRoot:  &node[T]{},
+	}
 }
 
 func (t *Tree[T]) Insert(pattern string, v T) error {
@@ -28,11 +32,9 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 	tokens := tokenize(pattern)
 	switch tokens[0] {
 	case tokenDomainRoot:
-		n = t.domainRoot
-		tokens = tokens[1:]
+		n, tokens = t.domainRoot, tokens[1:]
 	case tokenStartEnd:
-		n = t.startRoot
-		tokens = tokens[1:]
+		n, tokens = t.startRoot, tokens[1:]
 	default:
 		n = t.root
 	}
