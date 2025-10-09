@@ -48,14 +48,13 @@ type App struct {
 	proxyOn            bool
 	systemProxyManager *sysproxy.Manager
 	// proxyMu ensures that proxy is only started or stopped once at a time.
-	proxyMu             sync.Mutex
-	certStore           *certstore.DiskCertStore
-	systrayMgr          *systray.Manager
-	filterListStore     *filterliststore.FilterListStore
-	whitelistSrv        *whitelistserver.Server
-	updateChecker       *selfupdate.SelfUpdater
-	updateCheckerCtx    context.Context
-	updateCheckerCancel func()
+	proxyMu           sync.Mutex
+	certStore         *certstore.DiskCertStore
+	systrayMgr        *systray.Manager
+	filterListStore   *filterliststore.FilterListStore
+	whitelistSrv      *whitelistserver.Server
+	selfUpdater       *selfupdate.SelfUpdater
+	selfUpdaterCancel func()
 }
 
 // NewApp initializes the app.
@@ -420,18 +419,18 @@ func (a *App) RestartApplication() error {
 }
 
 func (a *App) startUpdateChecks() {
-	a.updateCheckerCtx, a.updateCheckerCancel = context.WithCancel(context.Background())
-	updPolicy := a.config.GetUpdatePolicy()
+	selfUpdaterCtx, selfUpdaterCancel := context.WithCancel(context.Background())
+	a.selfUpdaterCancel = selfUpdaterCancel
 
 	var err error
-	a.updateChecker, err = selfupdate.NewSelfUpdater(&http.Client{Timeout: 20 * time.Second}, updPolicy)
+	a.selfUpdater, err = selfupdate.NewSelfUpdater(&http.Client{Timeout: 20 * time.Second}, a.config)
 	if err != nil {
 		log.Printf("error creating self updater: %v", err)
 		return
 	}
 
-	a.updateChecker.StartPeriodicChecks(
-		a.updateCheckerCtx,
+	a.selfUpdater.StartPeriodicChecks(
+		selfUpdaterCtx,
 		time.Hour,
 		func(checkType selfupdate.UpdateCheckType) {
 			if checkType == selfupdate.StartupCheck {
@@ -447,8 +446,8 @@ func (a *App) startUpdateChecks() {
 }
 
 func (a *App) stopUpdateChecks() {
-	if a.updateCheckerCancel != nil {
-		a.updateCheckerCancel()
+	if a.selfUpdaterCancel != nil {
+		a.selfUpdaterCancel()
 	}
 }
 

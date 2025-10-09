@@ -37,7 +37,7 @@ type httpClient interface {
 type SelfUpdater struct {
 	version      string
 	noSelfUpdate bool
-	policy       cfg.UpdatePolicyType
+	config       *cfg.Config
 	releaseTrack string
 	httpClient   httpClient
 
@@ -53,7 +53,7 @@ type release struct {
 	SHA256      string `json:"sha256"`
 }
 
-func NewSelfUpdater(httpClient httpClient, policy cfg.UpdatePolicyType) (*SelfUpdater, error) {
+func NewSelfUpdater(httpClient httpClient, config *cfg.Config) (*SelfUpdater, error) {
 	if httpClient == nil {
 		return nil, errors.New("httpClient is nil")
 	}
@@ -63,7 +63,7 @@ func NewSelfUpdater(httpClient httpClient, policy cfg.UpdatePolicyType) (*SelfUp
 
 	u := SelfUpdater{
 		version:      cfg.Version,
-		policy:       policy,
+		config:       config,
 		releaseTrack: releaseTrack,
 		httpClient:   httpClient,
 	}
@@ -82,11 +82,6 @@ func (su *SelfUpdater) checkForUpdates() (*release, error) {
 	log.Println("checking for updates")
 	if su.noSelfUpdate {
 		log.Println("noSelfUpdate=true, self-update disabled")
-		return nil, nil
-	}
-
-	if su.policy == cfg.UpdatePolicyDisabled {
-		log.Println("updatePolicy=disabled, self-update disabled")
 		return nil, nil
 	}
 
@@ -444,7 +439,8 @@ func (su *SelfUpdater) StartPeriodicChecks(
 		return
 	}
 
-	if su.policy != cfg.UpdatePolicyAutomatic {
+	policy := su.config.GetUpdatePolicy()
+	if policy != cfg.UpdatePolicyAutomatic {
 		log.Println("automatic updates disabled, skipping periodic update checks")
 		return
 	}
@@ -466,6 +462,11 @@ func (su *SelfUpdater) StartPeriodicChecks(
 				log.Println("stopping periodic update checks")
 				return
 			case <-ticker.C:
+				policy := su.config.GetUpdatePolicy()
+				if policy != cfg.UpdatePolicyAutomatic {
+					continue
+				}
+
 				updated, err := su.applyUpdate()
 				if err != nil {
 					log.Printf("failed to apply update: %v", err)
