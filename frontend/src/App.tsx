@@ -34,7 +34,7 @@ function App() {
           intent: 'primary',
           timeout: 0,
           action: {
-            text: 'Restart',
+            text: t('app.update.restart'),
             onClick: () => {
               try {
                 RestartApplication();

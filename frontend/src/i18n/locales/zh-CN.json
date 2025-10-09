@@ -9,6 +9,11 @@
       "home": "主页",
       "myRules": "我的规则",
       "settings": "设置"
+    },
+    "update": {
+      "restartFailed": "重新启动应用失败: {{error}}",
+      "updateAvailable": "Zen 有新版本可用。",
+      "restart": "重启"
     }
   },
   "autoStartSwitch": {

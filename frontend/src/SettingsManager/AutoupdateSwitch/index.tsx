@@ -10,7 +10,6 @@ import { AppToaster } from '../../common/toaster';
 export function AutoupdateSwitch() {
   const { t } = useTranslation();
   const [state, setState] = useState({
-    policy: '',
     enabled: false,
   });
 
@@ -18,7 +17,6 @@ export function AutoupdateSwitch() {
     (async () => {
       const policy = await GetUpdatePolicy();
       setState({
-        policy,
         enabled: policy === cfg.UpdatePolicyType.AUTOMATIC,
       });
     })();
@@ -32,7 +30,7 @@ export function AutoupdateSwitch() {
         await OnUpdatePolicyChanged();
       } catch (err) {
         AppToaster.show({
-          message: t('updates.disableError', { error: err }),
+          message: t('settings.updates.disableError', { error: err }),
           intent: 'danger',
         });
         setState((state) => ({ ...state, loading: false }));

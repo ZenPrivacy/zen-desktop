@@ -12,7 +12,8 @@
     },
     "update": {
       "restartFailed": "Failed to restart app: {{error}}",
-      "updateAvailable": "A new version of Zen is available."
+      "updateAvailable": "A new version of Zen is available.",
+      "restart": "Restart"
     }
   },
   "autoStartSwitch": {

@@ -9,6 +9,11 @@
       "home": "Басты бет",
       "myRules": "Менің ережелерім",
       "settings": "Баптаулар"
+    },
+    "update": {
+      "restartFailed": "Қолданбаны қайта бастау сәтсіз аяқталды: {{error}}",
+      "updateAvailable": "Zen-нің жаңа нұсқасы бар.",
+      "restart": "Қайта бастау"
     }
   },
   "autoStartSwitch": {

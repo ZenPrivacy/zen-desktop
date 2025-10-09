@@ -9,6 +9,11 @@
       "home": "Главная",
       "myRules": "Мои правила",
       "settings": "Настройки"
+    },
+    "update": {
+      "restartFailed": "Не удалось перезапустить приложение: {{error}}",
+      "updateAvailable": "Доступна новая версия Zen.",
+      "restart": "Перезапустить"
     }
   },
   "autoStartSwitch": {

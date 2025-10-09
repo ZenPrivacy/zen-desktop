@@ -9,6 +9,11 @@
       "home": "Home",
       "myRules": "Le mie regole",
       "settings": "Impostazioni"
+    },
+    "update": {
+      "restartFailed": "Impossibile riavviare l'app: {{error}}",
+      "updateAvailable": "È disponibile una nuova versione di Zen.",
+      "restart": "Riavvia"
     }
   },
   "autoStartSwitch": {
