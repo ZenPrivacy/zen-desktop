@@ -14,7 +14,7 @@
   "introOverlay": {
     "welcome": "Добро пожаловать в Zen!",
     "screen1": {
-      "description": "Пожалуйста, выберите ваш язык:"
+      "description": "Выберите ваш язык:"
     },
     "screen2": {
       "title": "Списки фильтров",

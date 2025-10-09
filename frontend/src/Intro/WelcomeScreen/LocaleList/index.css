@@ -1,4 +1,4 @@
-.language-list {
+.locale-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -6,12 +6,12 @@
   margin: 20px auto;
 }
 
-.language-content {
+.locale-content {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.language-content .language-radio {
+.locale-content .locale-radio {
   margin: 0;
 }

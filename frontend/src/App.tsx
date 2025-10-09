@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import './App.css';
 
+import { GetFirstLaunch } from '../wailsjs/go/cfg/Config';
+
 import { ThemeType, useTheme } from './common/ThemeManager';
 import { AppHeader } from './components/AppHeader';
 import { useProxyState } from './context/ProxyStateContext';
@@ -25,13 +27,14 @@ function App() {
 
   const { proxyState } = useProxyState();
   const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'myRules' | 'settings'>('home');
-  const [showIntro, setShowIntro] = useState(() => {
-    return !localStorage.getItem('zen-intro-completed');
-  });
+  const [showIntro, setShowIntro] = useState(false);
+
+  useEffect(() => {
+    GetFirstLaunch().then(setShowIntro);
+  }, []);
 
   const handleIntroComplete = () => {
     setShowIntro(false);
-    localStorage.setItem('zen-intro-completed', 'true');
   };
 
   useProxyHotkey(showIntro);

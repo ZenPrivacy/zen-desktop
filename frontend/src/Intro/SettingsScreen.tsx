@@ -1,9 +1,9 @@
 import { Callout, Card, Divider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
-import { IsNoSelfUpdate } from '../../../wailsjs/go/app/App';
-import { AutostartSwitch } from '../../SettingsManager/AutostartSwitch';
-import { UpdatePolicyRadioGroup } from '../../SettingsManager/UpdatePolicyRadioGroup';
+import { IsNoSelfUpdate } from '../../wailsjs/go/app/App';
+import { AutostartSwitch } from '../SettingsManager/AutostartSwitch';
+import { UpdatePolicyRadioGroup } from '../SettingsManager/UpdatePolicyRadioGroup';
 
 export function SettingsScreen() {
   const { t } = useTranslation();

@@ -14,11 +14,11 @@
   "introOverlay": {
     "welcome": "Welcome to Zen!",
     "screen1": {
-      "description": "Please select your language:"
+      "description": "Select your language:"
     },
     "screen2": {
       "title": "Filter Lists",
-      "description": "To enable its ad-blocking and privacy protecting functionality, Zen uses filter lists, containing rules about how to block and modify malicious requests. Following this introduction, you can check them in the app under \"Filter lists\".",
+      "description": "To enable ad-blocking and privacy protection, Zen uses <strong>filter lists</strong>. You can also set them up later in the app.",
       "recommendation": "Based on your locale we recommend you to enable the following filter list(s):"
     },
     "screen3": {

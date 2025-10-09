@@ -8,7 +8,10 @@ import { AppHeader } from '../components/AppHeader';
 import { useProxyState } from '../context/ProxyStateContext';
 import { StartStopButton } from '../StartStopButton';
 
-import { ConnectScreen, FilterListsScreen, SettingsScreen, WelcomeScreen } from './screens';
+import { ConnectScreen } from './ConnectScreen';
+import { FilterListsScreen } from './FilterListsScreen';
+import { SettingsScreen } from './SettingsScreen';
+import { WelcomeScreen } from './WelcomeScreen';
 
 interface IntroOverlayProps {
   isOpen: boolean;
@@ -29,14 +32,9 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
     if (isOpen) setCurrentScreen(1);
   }, [isOpen]);
 
-  const completeIntro = () => {
-    localStorage.setItem('zen-intro-completed', 'true');
-    onClose();
-  };
-
   useEffect(() => {
     if (currentScreen === TOTAL_SCREENS && proxyState === 'on') {
-      completeIntro();
+      onClose();
     }
   }, [proxyState, currentScreen]);
 
@@ -60,11 +58,21 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
       <div className="intro-footer">
         {currentScreen < TOTAL_SCREENS ? (
           <ButtonGroup fill size="large">
-            <Button fill variant="outlined" onClick={completeIntro} className="skip-button">
+            <Button fill variant="outlined" onClick={onClose} className="skip-button">
               {t('introOverlay.buttons.skip')}
             </Button>
             <Button fill intent="primary" onClick={handleNextScreen} endIcon="arrow-right">
               {t('introOverlay.buttons.next')}
+            </Button>
+            <Button
+              fill
+              intent="primary"
+              onClick={() => {
+                setCurrentScreen(currentScreen - 1);
+              }}
+              endIcon="arrow-right"
+            >
+              Back
             </Button>
           </ButtonGroup>
         ) : (

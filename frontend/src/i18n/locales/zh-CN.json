@@ -14,7 +14,7 @@
   "introOverlay": {
     "welcome": "欢迎使用 Zen!",
     "screen1": {
-      "description": "请选择您的语言："
+      "description": "选择您的语言："
     },
     "screen2": {
       "title": "过滤器列表",

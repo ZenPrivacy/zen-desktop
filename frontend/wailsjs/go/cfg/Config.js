@@ -22,6 +22,10 @@ export function GetFilterLists() {
   return window['go']['cfg']['Config']['GetFilterLists']();
 }
 
+export function GetFirstLaunch() {
+  return window['go']['cfg']['Config']['GetFirstLaunch']();
+}
+
 export function GetIgnoredHosts() {
   return window['go']['cfg']['Config']['GetIgnoredHosts']();
 }

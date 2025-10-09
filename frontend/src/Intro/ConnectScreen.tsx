@@ -1,13 +1,13 @@
 import { Button, Card, Divider, H5 } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
-import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
-import BlueSkyLogo from '../../assets/icons/bluesky.svg';
-import DiscordIcon from '../../assets/icons/discord.svg';
-import GithubIcon from '../../assets/icons/github.svg';
-import OpenCollectiveIcon from '../../assets/icons/opencollective.svg';
-import RedditIcon from '../../assets/icons/reddit.svg';
-import { SOCIAL_LINKS } from '../../constants/urls';
+import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
+import BlueSkyLogo from '../assets/icons/bluesky.svg';
+import DiscordIcon from '../assets/icons/discord.svg';
+import GithubIcon from '../assets/icons/github.svg';
+import OpenCollectiveIcon from '../assets/icons/opencollective.svg';
+import RedditIcon from '../assets/icons/reddit.svg';
+import { SOCIAL_LINKS } from '../constants/urls';
 
 export function ConnectScreen() {
   const { t } = useTranslation();

@@ -433,3 +433,10 @@ func (c *Config) SetLocale(l string) {
 		log.Printf("failed to save config: %v", err)
 	}
 }
+
+func (c *Config) GetFirstLaunch() bool {
+	c.Lock()
+	defer c.Unlock()
+
+	return true
+}
