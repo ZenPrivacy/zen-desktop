@@ -148,7 +148,7 @@ func unsetKDEProxy() error {
 	for _, command := range commands {
 		out, err := runCmdWithTimeout(command[0], command[1:]...)
 		if err != nil {
-			return fmt.Errorf("unset KDE proxy: %v (%q)", err, out) // #nosec G204
+			return fmt.Errorf("unset KDE proxy: %v (%q)", err, out)
 		}
 	}
 
