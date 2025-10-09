@@ -10,3 +10,5 @@ frontend/dist
 **/dist/*
 **/tmp/*
 .idea
+**/*.pprof
+**/*.out

@@ -11,6 +11,7 @@ export const SUPPORTED_LANGUAGES: LocaleItem[] = [
   { value: 'kk-KZ', label: 'Қазақша' },
   { value: 'ru-RU', label: 'Русский' },
   { value: 'zh-CN', label: '中文（简体)' },
+  { value: 'it-IT', label: 'Italiano' },
 ];
 
 export const DEFAULT_LOCALE: SupportedLocale = 'en-US';

@@ -18,11 +18,8 @@ import (
 )
 
 var (
-	// RuleRegex matches extended CSS rules.
-	RuleRegex = regexp.MustCompile(`.+?#@?\?#.+$`)
-
-	primaryRuleRegex   = regexp.MustCompile(`(.+?)#\?#(.+)`)
-	exceptionRuleRegex = regexp.MustCompile(`(.+?)#@\?#(.+)`)
+	primaryRuleRegex   = regexp.MustCompile(`(.+?)#\??#(.+)`)
+	exceptionRuleRegex = regexp.MustCompile(`(.+?)#@\??#(.+)`)
 
 	//go:embed bundle.js
 	defaultExtendedCSSBundle []byte
