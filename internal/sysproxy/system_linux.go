@@ -80,7 +80,7 @@ func setKDEProxy(pacURL string) error {
 	}
 
 	for _, command := range commands {
-		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
+		out, err := runCmdWithTimeout(command[0], command[1:]...)
 		if err != nil {
 			return fmt.Errorf("run KDE proxy command %q: %v (%q)", strings.Join(command, " "), err, out)
 		}
@@ -96,7 +96,7 @@ func setGnomeProxy(pacURL string) error {
 	}
 
 	for _, command := range commands {
-		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
+		out, err := runCmdWithTimeout(command[0], command[1:]...)
 		if err != nil {
 			return fmt.Errorf("run GNOME proxy command %q: %v (%q)", strings.Join(command, " "), err, out)
 		}
@@ -146,7 +146,7 @@ func unsetKDEProxy() error {
 	}
 
 	for _, command := range commands {
-		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
+		out, err := runCmdWithTimeout(command[0], command[1:]...)
 		if err != nil {
 			return fmt.Errorf("unset KDE proxy: %v (%q)", err, out) // #nosec G204
 		}
@@ -161,7 +161,7 @@ func unsetGnomeProxy() error {
 		{"gsettings", "set", "org.gnome.system.proxy", "mode", "none"},
 	}
 	for _, command := range commands {
-		out, err := runCmdWithTimeout(3*time.Second, command[0], command[1:]...)
+		out, err := runCmdWithTimeout(command[0], command[1:]...)
 		if err != nil {
 			return fmt.Errorf("unset GNOME proxy: %v (%q)", err, out)
 		}
@@ -170,8 +170,8 @@ func unsetGnomeProxy() error {
 	return nil
 }
 
-func runCmdWithTimeout(d time.Duration, name string, args ...string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), d)
+func runCmdWithTimeout(name string, args ...string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, name, args...) // #nosec G204
 	return cmd.CombinedOutput()
