@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -79,6 +80,7 @@ type FilterList struct {
 	URL     string         `json:"url"`
 	Enabled bool           `json:"enabled"`
 	Trusted bool           `json:"trusted"`
+	Locales []string       `json:"locales"`
 }
 
 type DebugData struct {
@@ -303,6 +305,49 @@ func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterLis
 	for _, filterList := range c.Filter.FilterLists {
 		if filterList.Type == targetType {
 			filterLists = append(filterLists, filterList)
+		}
+	}
+	return filterLists
+}
+
+func (c *Config) GetFilterListsByLocales(searchLocales []string) []FilterList {
+	c.RLock()
+	defer c.RUnlock()
+
+	if len(searchLocales) == 0 {
+		return nil
+	}
+
+	exactLocales := make(map[string]struct{}, len(searchLocales))
+	langLocales := make(map[string]struct{}, len(searchLocales))
+	for _, locale := range searchLocales {
+		locale = strings.TrimSpace(locale)
+		if locale == "" {
+			continue
+		}
+		exactLocales[locale] = struct{}{}
+		if dash := strings.IndexByte(locale, '-'); dash != -1 {
+			langLocales[locale[:dash]] = struct{}{}
+		} else {
+			langLocales[locale] = struct{}{}
+		}
+	}
+
+	var filterLists []FilterList
+outer:
+	for _, filterList := range c.Filter.FilterLists {
+		for _, locale := range filterList.Locales {
+			if strings.IndexByte(locale, '-') != -1 {
+				if _, ok := exactLocales[locale]; ok {
+					filterLists = append(filterLists, filterList)
+					continue outer
+				}
+			} else {
+				if _, ok := langLocales[locale]; ok {
+					filterLists = append(filterLists, filterList)
+					continue outer
+				}
+			}
 		}
 	}
 	return filterLists

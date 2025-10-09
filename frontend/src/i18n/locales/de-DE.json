@@ -17,9 +17,8 @@
       "description": "Wählen Sie Ihre Sprache:"
     },
     "screen2": {
-      "title": "Filterlisten",
-      "description": "Um die Werbeblocker- und Datenschutzfunktionen zu aktivieren, verwendet Zen Filterlisten mit Regeln zum Blockieren und Modifizieren schädlicher Anfragen. Nach dieser Einführung können Sie diese in der App unter \"Filterlisten\" überprüfen.",
-      "recommendation": "Basierend auf Ihrem Standort empfehlen wir Ihnen, die folgenden Filterliste(n) zu aktivieren:"
+      "description": "Um Werbeblockierung und Datenschutz zu aktivieren, verwendet Zen <strong>Filterlisten</strong>. Sie können diese auch später in der App einrichten.",
+      "recommendation": "Basierend auf Ihrer Region empfehlen wir, die folgenden Filterlisten zu aktivieren:"
     },
     "screen3": {
       "title": "Einstellungen",

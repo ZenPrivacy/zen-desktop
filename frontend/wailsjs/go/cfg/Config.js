@@ -22,6 +22,10 @@ export function GetFilterLists() {
   return window['go']['cfg']['Config']['GetFilterLists']();
 }
 
+export function GetFilterListsByLocales(arg1) {
+  return window['go']['cfg']['Config']['GetFilterListsByLocales'](arg1);
+}
+
 export function GetFirstLaunch() {
   return window['go']['cfg']['Config']['GetFirstLaunch']();
 }

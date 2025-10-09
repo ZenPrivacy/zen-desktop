@@ -33,10 +33,6 @@ function App() {
     GetFirstLaunch().then(setShowIntro);
   }, []);
 
-  const handleIntroComplete = () => {
-    setShowIntro(false);
-  };
-
   useProxyHotkey(showIntro);
 
   return (
@@ -76,7 +72,13 @@ function App() {
       </div>
       <StartStopButton />
 
-      <IntroOverlay isOpen={showIntro} onClose={handleIntroComplete} />
+      {showIntro && (
+        <IntroOverlay
+          onClose={() => {
+            setShowIntro(false);
+          }}
+        />
+      )}
     </div>
   );
 }

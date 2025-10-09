@@ -17,9 +17,8 @@
       "description": "Select your language:"
     },
     "screen2": {
-      "title": "Filter Lists",
       "description": "To enable ad-blocking and privacy protection, Zen uses <strong>filter lists</strong>. You can also set them up later in the app.",
-      "recommendation": "Based on your locale we recommend you to enable the following filter list(s):"
+      "recommendation": "Based on your locale, we recommend enabling the following filter lists:"
     },
     "screen3": {
       "title": "Settings",

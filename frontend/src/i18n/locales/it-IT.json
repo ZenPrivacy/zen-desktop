@@ -11,6 +11,31 @@
       "settings": "Impostazioni"
     }
   },
+  "introOverlay": {
+    "welcome": "Benvenuto in Zen!",
+    "screen1": {
+      "description": "Seleziona la tua lingua:"
+    },
+    "screen2": {
+      "description": "Per abilitare il blocco degli annunci e la protezione della privacy, Zen utilizza le <strong>liste di filtri</strong>. Puoi anche configurarle in seguito nell’app.",
+      "recommendation": "In base alla tua località, ti consigliamo di abilitare le seguenti liste di filtri:"
+    },
+    "screen3": {
+      "title": "Impostazioni",
+      "description": "Ti invitiamo anche a rivedere le seguenti impostazioni:",
+      "settingsNote": "Puoi modificare queste impostazioni in qualsiasi momento dal menu delle preferenze."
+    },
+    "screen4": {
+      "title": "Tutto pronto!",
+      "description": "È tutto pronto! Premi \"Avvia\" per attivare la protezione di rete completa ed efficiente di Zen.",
+      "socialText": "Se vuoi, dai un’occhiata ai nostri social:",
+      "donateText": "E considera una donazione su"
+    },
+    "buttons": {
+      "skip": "Salta introduzione",
+      "next": "Avanti"
+    }
+  },
   "autoStartSwitch": {
     "description": "Avvia Zen automaticamente al login",
     "disableError": "Impossibile disattivare l’avvio automatico: {{error}}",

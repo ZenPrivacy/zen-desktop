@@ -1,13 +1,13 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import { FilterLists } from '../FilterLists';
-import { FilterListType } from '../FilterLists/types';
+import { cfg } from '../../wailsjs/go/models';
+import { FilterListItem } from '../FilterLists';
 
-function RegionalFilterLists() {
-  return <FilterLists initialType={FilterListType.REGIONAL} showTypeSelector={false} showButtons={false} />;
+interface FilterListsScreen {
+  filterLists: cfg.FilterList[];
 }
 
-export function FilterListsScreen() {
+export function FilterListsScreen({ filterLists }: FilterListsScreen) {
   const { t } = useTranslation();
 
   return (
@@ -21,9 +21,11 @@ export function FilterListsScreen() {
           }}
         />
       </p>
-      <p>{t('introOverlay.screen2.recommendation')}</p>
+      <p className="bp5-running-text">{t('introOverlay.screen2.recommendation')}</p>
       <div className="filter-lists">
-        <RegionalFilterLists />
+        {filterLists.map((l) => (
+          <FilterListItem key={l.url} filterList={l} showDelete={false} showButtons={false} />
+        ))}
       </div>
     </div>
   );

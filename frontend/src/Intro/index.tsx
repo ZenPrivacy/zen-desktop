@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import './index.css';
+import { GetFilterListsByLocales } from '../../wailsjs/go/cfg/Config';
+import { cfg } from '../../wailsjs/go/models';
 import { ThemeType, useTheme } from '../common/ThemeManager';
 import { AppHeader } from '../components/AppHeader';
 import { useProxyState } from '../context/ProxyStateContext';
@@ -13,24 +15,26 @@ import { FilterListsScreen } from './FilterListsScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { WelcomeScreen } from './WelcomeScreen';
 
+const TOTAL_SCREENS = 4;
+
 interface IntroOverlayProps {
-  isOpen: boolean;
   onClose: () => void;
 }
 
-const TOTAL_SCREENS = 4;
-
-export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
+export function IntroOverlay({ onClose }: IntroOverlayProps) {
   const { t } = useTranslation();
 
   const [currentScreen, setCurrentScreen] = useState(1);
-  const { proxyState } = useProxyState();
-
-  const { effectiveTheme } = useTheme();
+  const [filterLists, setFilterLists] = useState<cfg.FilterList[]>([]);
 
   useEffect(() => {
-    if (isOpen) setCurrentScreen(1);
-  }, [isOpen]);
+    GetFilterListsByLocales(navigator.languages as string[]).then((filterLists) => {
+      if (filterLists) setFilterLists(filterLists);
+    });
+  }, []);
+
+  const { proxyState } = useProxyState();
+  const { effectiveTheme } = useTheme();
 
   useEffect(() => {
     if (currentScreen === TOTAL_SCREENS && proxyState === 'on') {
@@ -39,22 +43,29 @@ export function IntroOverlay({ isOpen, onClose }: IntroOverlayProps) {
   }, [proxyState, currentScreen]);
 
   const handleNextScreen = () => {
-    if (currentScreen < TOTAL_SCREENS) setCurrentScreen(currentScreen + 1);
+    if (currentScreen < TOTAL_SCREENS) {
+      if (currentScreen === 1 && filterLists.length === 0) {
+        setCurrentScreen(3);
+      } else {
+        setCurrentScreen(currentScreen + 1);
+      }
+    }
   };
-
-  const screens = [
-    <WelcomeScreen key="screen-1" />,
-    <FilterListsScreen key="screen-2" />,
-    <SettingsScreen key="screen-3" />,
-    <ConnectScreen key="screen-4" />,
-  ];
-
-  if (!isOpen) return null;
 
   return (
     <div className={`intro-fullscreen${effectiveTheme === ThemeType.DARK ? ' bp5-dark' : ''}`}>
       <AppHeader />
-      <div className="intro-main-content">{screens[currentScreen - 1]}</div>
+      <div className="intro-main-content">
+        {currentScreen === 1 ? (
+          <WelcomeScreen />
+        ) : currentScreen === 2 ? (
+          <FilterListsScreen filterLists={filterLists} />
+        ) : currentScreen === 3 ? (
+          <SettingsScreen />
+        ) : currentScreen === 4 ? (
+          <ConnectScreen />
+        ) : null}
+      </div>
       <div className="intro-footer">
         {currentScreen < TOTAL_SCREENS ? (
           <ButtonGroup fill size="large">
