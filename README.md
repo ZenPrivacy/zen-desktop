@@ -34,6 +34,14 @@ During the first run, Zen will prompt you to install a root certificate. This is
 
 Unsure which version to download? Click on 'Start' and type 'View processor info'. The 'System type' field under 'Device specifications' will tell you which one you need.
 
+#### Winget
+
+Zen is available via [Winget (Windows Package Manager)](https://github.com/microsoft/winget-pkgs/tree/master/manifests/z/ZenPrivacy). To install, run:
+
+```bash
+winget install ZenPrivacy.ZenDesktop
+```
+
 ### macOS
 
 - x64 (Intel): [💾 Installer](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen-amd64.dmg) | [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_darwin_amd64.tar.gz)

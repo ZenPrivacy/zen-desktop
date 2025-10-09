@@ -1,5 +1,94 @@
 # Changelog
 
+## v0.12.0
+
+### What's New
+
+- **Extended CSS**
+  Zen now supports extended (procedural) CSS, enabling more powerful and comprehensive visual content blocking.
+- **Block page**
+  When a web page request is blocked, Zen now displays a dedicated block page, making it easier to review and unblock rules if needed.
+- **CSP improvements**
+  Fixed issues with Content Security Policy (CSP) modification and added support for patching inline styles, improving site compatibility while keeping everything secure.
+- **macOS autostart fix**
+  Resolved an issue where Zen's filtering wouldn't start automatically on macOS when launched at login.
+- **Safer archive handling**
+  Zen now uses Go's built-in security features to handle ZIP and TAR files more safely during updates, reducing the risk of path traversal issues. Thanks to @donnykd!
+- Other bug fixes and small improvements.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.11.3...v0.12.0
+
+## v0.11.3
+
+### What's New
+
+- **Fixed "Phishing URL Blocklist" format**
+  Resolved an issue with the **Phishing URL Blocklist** that caused overly aggressive request blocking. Zen should now behave correctly when this list is enabled.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.11.2...v0.11.3
+
+## v0.11.2
+
+### What's New
+
+- **Reduced memory consumption**
+  Zen now uses about 10–15% less memory, thanks to work by @ilovelinabell.
+- **你好！**
+  Zen now speaks Chinese, thanks to @ccarstens! Want to contribute a new language or improve an existing one? Check out our contributing guidelines.
+- **Start/stop button hotkey**
+  You can now press **Space** to quickly start and stop the proxy. Thank you, @donnykd, for the contribution!
+- **Single instance locking**
+  Zen now keeps only a single instance of the application active, ensuring that it doesn't clutter your desktop. Thanks to @kasyap1234!
+- **Windows binary signing**
+  With the help of SignPath, Zen's Windows binaries are now signed with a certificate. Expect no more warnings during installation and fewer false antivirus flags.
+- **Filter list buttons**
+  You can now quickly copy and open filter lists in your browser. Thanks to @RustemMT for the contribution.
+- Bug fixes and other small improvements.
+
+### New Contributors
+
+- @ccarstens made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/373
+- @donnykd made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/372
+- @ilovelinabell made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/350
+- @kasyap1234 made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/381
+- @BUTTER-BEAR made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/389
+- @RustemMT made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/397
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.11.1...v0.11.2
+
+## v0.11.1
+
+### What's New
+
+- **CSP injection fix**
+  Fixed an issue with script injection on some websites using `unsafe-inline` in their Content Security Policy. Zen now correctly avoids using `nonce`-based injection when it's incompatible, restoring functionality on affected sites.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.11.0...v0.11.1
+
+## v0.11.0
+
+### What's New
+
+- **Clipboard sanitization**
+  Some websites add tracking parameters (like utm_source and si) to URLs copied via their "Share" buttons. Zen now strips these trackers for your privacy. No more sneaky tracking when sharing content with your friends.
+- **More reliable scriptlets injection**
+  Zen can now inject scriptlets on more sites — including those with strict Content Security Policies (CSP) — ensuring our protections stay active without compromising your security.
+- **Fixes to regional filter lists**
+  Fixed a broken link to RU AdList and replaced the discontinued Icelandic filter list with its maintained Brave version.
+- Bug fixes and other improvements.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.10.1...v0.11.0
+
 ## v0.10.1
 
 ### What's New
@@ -127,7 +216,7 @@ Happy 2025 and thank you for using Zen!
   - **Improved Linux Support**: The app now starts without errors on non-GNOME systems. You can now manually configure the HTTP proxy on a per-app basis if needed. Thanks to @AitakattaSora for this enhancement.
   - **Improved Windows Support**: The app now shuts down gracefully and resets the system proxy during system shutdown, preventing internet disruptions at startup.
   - Various stability improvements and bug fixes.
-  
+
 Warning: On macOS, the app will not function properly after the update. Please visit our homepage, [zenprivacy.net](https://zenprivacy.net), to manually download the latest version. Future updates will be delivered seamlessly.
 
 Thank you for using Zen!

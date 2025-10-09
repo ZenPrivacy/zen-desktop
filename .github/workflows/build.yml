@@ -126,7 +126,7 @@ jobs:
 
   build-windows:
     name: Build Windows (${{ matrix.arch }})
-    runs-on: windows-latest
+    runs-on: windows-2022
     strategy:
       matrix:
         arch: [amd64, arm64]

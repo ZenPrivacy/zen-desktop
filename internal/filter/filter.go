@@ -36,6 +36,7 @@ type networkRules interface {
 	CreateBlockResponse(req *http.Request) *http.Response
 	CreateRedirectResponse(req *http.Request, to string) *http.Response
 	CreateBlockPageResponse(req *http.Request, appliedRules []rule.Rule, whitelistPort int) (*http.Response, error)
+	Compact() int
 }
 
 // config provides filter configuration.
@@ -195,6 +196,11 @@ func (f *Filter) init() {
 	if len(myRules) > 0 {
 		log.Printf("filter initialization: added %d rules and %d exceptions from %q", ruleCount, exceptionCount, filterName)
 	}
+
+	reds := f.networkRules.Compact()
+	if reds > 0 {
+		log.Printf("filter initialization: reduced slice capacity by %d", reds)
+	}
 }
 
 // ParseAndAddRules parses the rules from the given reader and adds them to the filter.
@@ -225,20 +231,22 @@ func (f *Filter) ParseAndAddRules(reader io.Reader, filterListName *string, filt
 // AddRule adds a new rule to the filter. It returns true if the rule is an exception, false otherwise.
 func (f *Filter) AddRule(rule string, filterListName *string, filterListTrusted bool) (isException bool, err error) {
 	/*
-		The order of operations is crucial here.
-		jsRule.RuleRegex also matches scriptlet rules.
-		Therefore, we must first check for a scriptlet rule match before checking for a JS rule match.
+		The order of operations here is critical:
+			- jsRule.RuleRegex matches a superset of scriptlet.RuleRegex.
+			- extendedcss.IsRule matches a superset of cosmetic.IsRule.
+
+		The more specific rules must be checked first to avoid misclassification.
 	*/
 	switch {
 	case scriptlet.RuleRegex.MatchString(rule):
 		if err := f.scriptletsInjector.AddRule(rule, filterListTrusted); err != nil {
 			return false, fmt.Errorf("add scriptlet: %w", err)
 		}
-	case cosmetic.RuleRegex.MatchString(rule):
+	case cosmetic.IsRule(rule):
 		if err := f.cosmeticRulesInjector.AddRule(rule); err != nil {
 			return false, fmt.Errorf("add cosmetic rule: %w", err)
 		}
-	case extendedcss.RuleRegex.MatchString(rule):
+	case extendedcss.IsRule(rule):
 		if err := f.extendedCSSInjector.AddRule(rule); err != nil {
 			return false, fmt.Errorf("add extended css rule: %w", err)
 		}

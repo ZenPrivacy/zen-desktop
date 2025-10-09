@@ -94,22 +94,6 @@ describe('Engine', () => {
       expect(getVisibleElements('[data-ad]')).toHaveLength(0);
       expect(getVisibleElements('[data-content]')).toHaveLength(1);
     });
-
-    test('hides all elements with a universal selector', () => {
-      createTestDOM(`
-        <div>Should be hidden</div>
-        <span>Should also be hidden</span>
-        <h3>Should also be hidden></h3>
-        <p>
-          <span>Should also be hidden</span>
-          Should also be hidden
-        </p>
-      `);
-
-      startEngine('*');
-
-      expect(getVisibleElements('*')).toHaveLength(0);
-    });
   });
 
   describe(':has() pseudo-class functionality', () => {
@@ -247,6 +231,112 @@ describe('Engine', () => {
 
       expect(getVisibleElements('#complex1')).toHaveLength(0);
       expect(getVisibleElements('#complex2')).toHaveLength(1);
+    });
+
+    test('universal selector', () => {
+      createTestDOM(`
+        <div>Should be hidden</div>
+        <span>Should also be hidden</span>
+        <h3>Should also be hidden></h3>
+        <p>
+          <span>Should also be hidden</span>
+          Should also be hidden
+        </p>
+      `);
+
+      startEngine('*');
+
+      expect(getVisibleElements('*')).toHaveLength(0);
+    });
+
+    test('pseudo-class followed by a combinator followed by a raw selector', () => {
+      createTestDOM(`
+        <div>Text</div>
+        <span class="should-be-hidden"></span>
+        <div>Text</div>
+        <span class="should-be-hidden"></span>
+        <span>Should not be hidden</span>
+      `);
+
+      startEngine('div:min-text-length(2) + span');
+
+      expect(getVisibleElements('div')).toHaveLength(2);
+      expect(getVisibleElements('.should-be-hidden')).toHaveLength(0);
+      expect(getVisibleElements('span:not(.should-be-hidden)')).toHaveLength(1);
+    });
+
+    test('descendant elements with descendant combinator and universal selector', () => {
+      createTestDOM(`
+        <div id="parent">
+          <span>Should be hidden (direct child)</span>
+          <p>
+            <a href="#">Should be hidden (nested)</a>
+            <em>Should be hidden (nested)</em>
+          </p>
+          <ul>
+            <li>Should be hidden (nested)</li>
+          </ul>
+        </div>
+        <span>Should remain visible (not in div)</span>
+      `);
+
+      startEngine('#parent:min-text-length(2) *');
+
+      expect(getVisibleElements('#parent')).toHaveLength(1);
+      expect(getVisibleElements('#parent *')).toHaveLength(0);
+      expect(getVisibleElements('span:not(#parent *)')).toHaveLength(1);
+    });
+
+    test('hides subsequent siblings with general sibling combinator and universal selector', () => {
+      createTestDOM(`
+        <span id="first">Should remain visible (before div)</span>
+        <div id="reference">Reference div</div>
+        <p>Should be hidden (after div)</p>
+        <span>Should be hidden (after div)</span>
+        <div id="another">
+          Another Reference
+          <span>Should remain visible (child of another div)</span>
+        </div>
+        <ul>Should be hidden (after div)</ul>
+      `);
+
+      startEngine('div:contains(Reference) ~ *');
+
+      expect(getVisibleElements('#reference')).toHaveLength(1);
+      expect(getVisibleElements('#first')).toHaveLength(1);
+      expect(getVisibleElements('div ~ *')).toHaveLength(0);
+      expect(getVisibleElements('#another span')).toHaveLength(1);
+    });
+
+    test('handles complex multi-step selector', () => {
+      createTestDOM(`
+        <section>
+          <p>Text with more than 2 chars</p>
+          <div id="parent-div">
+            <div class="cls">Target parent</div>
+            <span id="target1">Should be hidden</span>
+            <span>Not adjacent, should remain visible</span>
+          </div>
+          <div>
+            <div class="cls">Another target parent</div>
+            <span id="target2">Should also be hidden</span>
+          </div>
+          <span>Not in the pattern, should remain visible</span>
+          <p>s</p>
+          <div>
+            <div class="cls">Not after text with min-length, should remain visible</div>
+            <span id="not-target">Should remain visible</span>
+          </div>
+        </section>
+      `);
+
+      startEngine(':min-text-length(2) + div > div:is(.cls) + span');
+
+      expect(getVisibleElements('#target1')).toHaveLength(0);
+      expect(getVisibleElements('#target2')).toHaveLength(0);
+      expect(getVisibleElements('#not-target')).toHaveLength(1);
+      expect(getVisibleElements('span:not(#target1):not(#target2)')).toHaveLength(3);
+      expect(getVisibleElements('.cls')).toHaveLength(document.querySelectorAll('.cls').length);
     });
 
     test('"unhides" elements after they no longer match the selector', async () => {
