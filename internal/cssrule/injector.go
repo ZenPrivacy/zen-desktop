@@ -66,11 +66,14 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	nonce := csp.PatchHeaders(res.Header, csp.InlineStyle)
+	nonce, err := csp.PatchHeaders(res, csp.InlineStyle)
+	if err != nil {
+		return fmt.Errorf("patch CSP headers: %w", err)
+	}
 	stylesheet := strings.Join(cssRules, "")
 
 	var injection bytes.Buffer
-	err := injectionTmpl.Execute(&injection, struct {
+	err = injectionTmpl.Execute(&injection, struct {
 		Nonce string
 		Rules template.CSS
 	}{

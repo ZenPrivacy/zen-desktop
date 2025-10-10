@@ -2,6 +2,7 @@ package csp
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -13,13 +14,16 @@ func TestPatchHeaders(t *testing.T) {
 	t.Run("don't modify header and return empty nonce if there is no CSP header", func(t *testing.T) {
 		t.Parallel()
 
-		h := http.Header{}
-		nonce := PatchHeaders(h, InlineScript)
+		res := &http.Response{Header: http.Header{}, Body: http.NoBody}
+		nonce, err := PatchHeaders(res, InlineScript)
+		if err != nil {
+			t.Fatalf("patch headers: %v", err)
+		}
 
 		if nonce != "" {
 			t.Fatalf("expected empty nonce when no CSP present, got %q", nonce)
 		}
-		if got := h.Values("Content-Security-Policy"); len(got) != 0 {
+		if got := res.Header.Values("Content-Security-Policy"); len(got) != 0 {
 			t.Fatalf("headers should be unchanged, got %v", got)
 		}
 	})
@@ -27,16 +31,19 @@ func TestPatchHeaders(t *testing.T) {
 	t.Run("replace 'none' in most specific", func(t *testing.T) {
 		t.Parallel()
 
-		h := http.Header{}
-		h.Add("Content-Security-Policy", "script-src-elem 'none'")
+		res := &http.Response{Header: http.Header{}, Body: http.NoBody}
+		res.Header.Add("Content-Security-Policy", "script-src-elem 'none'")
 
-		nonce := PatchHeaders(h, InlineScript)
+		nonce, err := PatchHeaders(res, InlineScript)
+		if err != nil {
+			t.Fatalf("patch headers: %v", err)
+		}
 		if nonce == "" {
 			t.Fatalf("expected nonce to be returned")
 		}
 		token := "'nonce-" + nonce + "'"
 
-		got := strings.Join(h.Values("Content-Security-Policy"), ", ")
+		got := strings.Join(res.Header.Values("Content-Security-Policy"), ", ")
 		expected := fmt.Sprintf("script-src-elem %s", token)
 		if got != expected {
 			t.Fatalf("expected header value %q, got %q", expected, got)
@@ -82,10 +89,13 @@ func TestPatchHeaders_NoncePriority_Script(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			h := http.Header{}
-			h.Add("Content-Security-Policy", tc.cspLine)
+			res := &http.Response{Header: http.Header{}, Body: http.NoBody}
+			res.Header.Add("Content-Security-Policy", tc.cspLine)
 
-			nonce := PatchHeaders(h, InlineScript)
+			nonce, err := PatchHeaders(res, InlineScript)
+			if err != nil {
+				t.Fatalf("patch headers: %v", err)
+			}
 			if tc.wantNonce && nonce == "" {
 				t.Fatalf("expected nonce, got empty")
 			}
@@ -93,9 +103,9 @@ func TestPatchHeaders_NoncePriority_Script(t *testing.T) {
 				t.Fatalf("did not expect nonce, got %q", nonce)
 			}
 			if tc.wantNonce {
-				if !dirHasNonce(h, tc.wantDirective, nonce) {
+				if !dirHasNonce(res.Header, tc.wantDirective, nonce) {
 					t.Fatalf("nonce not placed in %s\nheader: %s",
-						tc.wantDirective, h.Get("Content-Security-Policy"))
+						tc.wantDirective, res.Header.Get("Content-Security-Policy"))
 				}
 			}
 		})
@@ -137,10 +147,13 @@ func TestPatchHeaders_NoncePriority_Style(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		h := http.Header{}
-		h.Add("Content-Security-Policy", tc.cspLine)
+		res := &http.Response{Header: http.Header{}, Body: http.NoBody}
+		res.Header.Add("Content-Security-Policy", tc.cspLine)
 
-		nonce := PatchHeaders(h, InlineStyle)
+		nonce, err := PatchHeaders(res, InlineStyle)
+		if err != nil {
+			t.Fatalf("patch headers: %v", err)
+		}
 
 		if tc.wantNonce && nonce == "" {
 			t.Errorf("%s: expected nonce, got empty", tc.name)
@@ -156,16 +169,89 @@ func TestPatchHeaders_NoncePriority_Style(t *testing.T) {
 
 		token := "'nonce-" + nonce + "'"
 		found := false
-		for _, line := range h.Values("Content-Security-Policy") {
+		for _, line := range res.Header.Values("Content-Security-Policy") {
 			if strings.Contains(strings.ToLower(line), tc.wantDirective) && strings.Contains(line, token) {
 				found = true
 				break
 			}
 		}
 		if !found {
-			t.Errorf("%s: nonce not placed in %s; header: %s", tc.name, tc.wantDirective, strings.Join(h.Values("Content-Security-Policy"), " | "))
+			t.Errorf("%s: nonce not placed in %s; header: %s", tc.name, tc.wantDirective, strings.Join(res.Header.Values("Content-Security-Policy"), " | "))
 		}
 	}
+}
+
+func TestPatchHeaders_Meta(t *testing.T) {
+	t.Parallel()
+
+	t.Run("meta only", func(t *testing.T) {
+		t.Parallel()
+
+		htmlBody := `<html><head><meta http-equiv="Content-Security-Policy" content="script-src 'none'"></head><body></body></html>`
+		res := &http.Response{
+			Header: http.Header{},
+			Body:   io.NopCloser(strings.NewReader(htmlBody)),
+		}
+		res.Header.Set("Content-Type", "text/html; charset=utf-8")
+
+		nonce, err := PatchHeaders(res, InlineScript)
+		if err != nil {
+			t.Fatalf("patch headers: %v", err)
+		}
+		if nonce == "" {
+			t.Fatalf("expected nonce to be returned")
+		}
+
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("read body: %v", err)
+		}
+		res.Body.Close()
+
+		token := "'nonce-" + nonce + "'"
+		escapedToken := strings.ReplaceAll(token, "'", "&#39;")
+		bodyStr := string(body)
+		if !strings.Contains(bodyStr, token) && !strings.Contains(bodyStr, escapedToken) {
+			t.Fatalf("expected meta CSP to contain %q (or %q), body: %s", token, escapedToken, bodyStr)
+		}
+	})
+
+	t.Run("header and meta", func(t *testing.T) {
+		t.Parallel()
+
+		htmlBody := `<html><head><meta http-equiv="Content-Security-Policy" content="script-src 'none'"></head><body></body></html>`
+		res := &http.Response{
+			Header: http.Header{},
+			Body:   io.NopCloser(strings.NewReader(htmlBody)),
+		}
+		res.Header.Set("Content-Type", "text/html; charset=utf-8")
+		res.Header.Add("Content-Security-Policy", "script-src 'none'")
+
+		nonce, err := PatchHeaders(res, InlineScript)
+		if err != nil {
+			t.Fatalf("patch headers: %v", err)
+		}
+		if nonce == "" {
+			t.Fatalf("expected nonce to be returned")
+		}
+
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Fatalf("read body: %v", err)
+		}
+		res.Body.Close()
+
+		token := "'nonce-" + nonce + "'"
+		escapedToken := strings.ReplaceAll(token, "'", "&#39;")
+		bodyStr := string(body)
+		if !strings.Contains(bodyStr, token) && !strings.Contains(bodyStr, escapedToken) {
+			t.Fatalf("expected meta CSP to contain %q (or %q), body: %s", token, escapedToken, bodyStr)
+		}
+
+		if !dirHasNonce(res.Header, "script-src", nonce) {
+			t.Fatalf("expected header to contain nonce; header: %s", res.Header.Get("Content-Security-Policy"))
+		}
+	})
 }
 
 func dirHasNonce(h http.Header, dir, nonce string) bool {

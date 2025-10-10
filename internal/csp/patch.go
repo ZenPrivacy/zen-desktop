@@ -3,8 +3,14 @@ package csp
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
+	"io"
+	"mime"
 	"net/http"
 	"strings"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/httprewrite"
+	"golang.org/x/net/html"
 )
 
 const (
@@ -19,24 +25,29 @@ const (
 	InlineStyle
 )
 
-// PatchHeaders mutates headers so an inline <script> or <style> element can run.
-// Returns the nonce to place on the inline tag. Returns "" if no patch was needed
-// (e.g., CSP already allowed inline) or no CSP headers were present.
-func PatchHeaders(h http.Header, kind inlineKind) (nonce string) {
-	// If there is no CSP at all, nothing to patch; return empty nonce.
-	if len(h.Values(cspHeader)) == 0 && len(h.Values(cspReportOnly)) == 0 {
-		return ""
-	}
-	n := newCSPNonce()
-
-	enforcedPatched := patchOneHeader(h, cspHeader, n, kind)
-	reportOnlyPatched := patchOneHeader(h, cspReportOnly, n, kind)
-
-	if !enforcedPatched && !reportOnlyPatched {
-		return ""
+// PatchHeaders mutates CSP headers and meta tags so an inline <script> or <style>
+// element can run. Returns the nonce to place on the inline tag. Returns "" if
+// neither headers required patching nor a CSP meta tag rewrite was scheduled.
+func PatchHeaders(res *http.Response, kind inlineKind) (string, error) {
+	if res == nil {
+		return "", nil
 	}
 
-	return n
+	nonce := newCSPNonce()
+
+	metaPatched, err := patchMetaCSPs(res, nonce, kind)
+	if err != nil {
+		return "", fmt.Errorf("patch meta CSP: %w", err)
+	}
+
+	enforcedPatched := patchOneHeader(res.Header, cspHeader, nonce, kind)
+	reportOnlyPatched := patchOneHeader(res.Header, cspReportOnly, nonce, kind)
+
+	if !metaPatched && !enforcedPatched && !reportOnlyPatched {
+		return "", nil
+	}
+
+	return nonce, nil
 }
 
 func patchOneHeader(h http.Header, key, nonce string, kind inlineKind) (patched bool) {
@@ -45,16 +56,28 @@ func patchOneHeader(h http.Header, key, nonce string, kind inlineKind) (patched 
 		return
 	}
 
-	nonceToken := "'nonce-" + nonce + "'"
-	var changed bool
+	patchedLines, changed := patchPolicies(lines, nonce, kind)
+	if changed {
+		h.Del(key)
+		for _, v := range patchedLines {
+			h.Add(key, strings.TrimSpace(strings.Trim(v, " ;")))
+		}
+	}
 
-	// In case of multiple lines/policies, the browsers will select the most restrictive one.
-	// For this reason, we modify each independently so they all allow the inline tag.
-	// See more: https://content-security-policy.com/examples/multiple-csp-headers/.
-	for i, line := range lines {
+	return changed
+}
+
+func patchPolicies(policies []string, nonce string, kind inlineKind) ([]string, bool) {
+	if len(policies) == 0 {
+		return policies, false
+	}
+
+	nonceToken := "'nonce-" + nonce + "'"
+	changed := false
+
+	for i, line := range policies {
 		rawDirs := strings.Split(line, ";")
 
-		// Find the most specific directive governing this kind on this line/policy.
 		bestIdx, bestName, bestPrio, bestValue := -1, "", 0, ""
 		for j, raw := range rawDirs {
 			d := strings.TrimSpace(raw)
@@ -67,36 +90,106 @@ func patchOneHeader(h http.Header, key, nonce string, kind inlineKind) (patched 
 			}
 		}
 
-		// No relevant directive on this line; leave it as-is.
 		if bestIdx == -1 {
 			continue
 		}
 
-		// If this directive already allows inline for this kind, do nothing.
 		if allowsInline(kind, bestValue) {
 			continue
 		}
 
 		var newValue string
-		if bestValue == "'none'" {
+		switch bestValue {
+		case "", "'none'":
 			newValue = nonceToken
-		} else {
+		default:
 			newValue = bestValue + " " + nonceToken
 		}
 
 		rawDirs[bestIdx] = bestName + " " + newValue
-		lines[i] = strings.Join(rawDirs, ";")
+		policies[i] = strings.Join(rawDirs, ";")
 		changed = true
 	}
 
 	if changed {
-		h.Del(key)
-		for _, v := range lines {
-			h.Add(key, strings.TrimSpace(strings.Trim(v, " ;")))
+		for i, policy := range policies {
+			policies[i] = strings.TrimSpace(strings.Trim(policy, " ;"))
 		}
 	}
 
-	return changed
+	return policies, changed
+}
+
+func patchMetaCSPs(res *http.Response, nonce string, kind inlineKind) (bool, error) {
+	if res.Body == nil || res.Body == http.NoBody {
+		return false, nil
+	}
+
+	contentType := res.Header.Get("Content-Type")
+	if contentType == "" {
+		return false, nil
+	}
+
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	if err != nil || !strings.EqualFold(mediaType, "text/html") {
+		return false, nil
+	}
+
+	err = httprewrite.StreamRewrite(res, func(src io.ReadCloser, dst *io.PipeWriter) {
+		defer src.Close()
+
+		z := html.NewTokenizer(src)
+		for {
+			switch z.Next() {
+			case html.ErrorToken:
+				dst.CloseWithError(z.Err())
+				return
+			case html.StartTagToken, html.SelfClosingTagToken:
+				raw := append([]byte(nil), z.Raw()...)
+				tok := z.Token()
+
+				if strings.EqualFold(tok.Data, "meta") {
+					httpEquiv := ""
+					contentIdx := -1
+					for i, attr := range tok.Attr {
+						switch strings.ToLower(attr.Key) {
+						case "http-equiv":
+							httpEquiv = attr.Val
+						case "content":
+							contentIdx = i
+						}
+					}
+
+					if strings.EqualFold(httpEquiv, "content-security-policy") && contentIdx >= 0 {
+						patchedPolicies, changed := patchPolicies([]string{tok.Attr[contentIdx].Val}, nonce, kind)
+						if changed {
+							tok.Attr[contentIdx].Val = patchedPolicies[0]
+							if _, err := dst.Write([]byte(tok.String())); err != nil {
+								dst.CloseWithError(err)
+								return
+							}
+							continue
+						}
+					}
+				}
+
+				if _, err := dst.Write(raw); err != nil {
+					dst.CloseWithError(err)
+					return
+				}
+			default:
+				if _, err := dst.Write(z.Raw()); err != nil {
+					dst.CloseWithError(err)
+					return
+				}
+			}
+		}
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // cutDirective splits "name [value...]" -> (lowercased name, value without leading and trailing whitespace).
