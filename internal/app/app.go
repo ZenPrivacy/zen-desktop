@@ -48,13 +48,11 @@ type App struct {
 	proxyOn            bool
 	systemProxyManager *sysproxy.Manager
 	// proxyMu ensures that proxy is only started or stopped once at a time.
-	proxyMu           sync.Mutex
-	certStore         *certstore.DiskCertStore
-	systrayMgr        *systray.Manager
-	filterListStore   *filterliststore.FilterListStore
-	whitelistSrv      *whitelistserver.Server
-	selfUpdater       *selfupdate.SelfUpdater
-	selfUpdaterCancel func()
+	proxyMu         sync.Mutex
+	certStore       *certstore.DiskCertStore
+	systrayMgr      *systray.Manager
+	filterListStore *filterliststore.FilterListStore
+	whitelistSrv    *whitelistserver.Server
 }
 
 // NewApp initializes the app.
@@ -105,7 +103,18 @@ func (a *App) commonStartup(ctx context.Context) {
 	a.eventsHandler = newEventsHandler(ctx)
 	a.config.RunMigrations()
 	a.systrayMgr.Init(ctx)
-	a.startUpdateChecks()
+
+	go func() {
+		su, err := selfupdate.NewSelfUpdater(&http.Client{
+			Timeout: 20 * time.Second,
+		}, a.config, a.eventsHandler)
+		if err != nil {
+			log.Printf("error creating self updater: %v", err)
+			return
+		}
+
+		su.StartPeriodicChecks(ctx, time.Hour)
+	}()
 
 	time.AfterFunc(time.Second, func() {
 		// This is a workaround for the issue where not all React components are mounted in time.
@@ -416,46 +425,4 @@ func (a *App) RestartApplication() error {
 	}
 	runtime.Quit(a.ctx)
 	return nil
-}
-
-func (a *App) startUpdateChecks() {
-	selfUpdaterCtx, selfUpdaterCancel := context.WithCancel(context.Background())
-	a.selfUpdaterCancel = selfUpdaterCancel
-
-	var err error
-	a.selfUpdater, err = selfupdate.NewSelfUpdater(&http.Client{Timeout: 20 * time.Second}, a.config)
-	if err != nil {
-		log.Printf("error creating self updater: %v", err)
-		return
-	}
-
-	a.selfUpdater.StartPeriodicChecks(
-		selfUpdaterCtx,
-		time.Hour,
-		func(checkType selfupdate.UpdateCheckType) {
-			if checkType == selfupdate.StartupCheck {
-				if err := a.RestartApplication(); err != nil {
-					log.Printf("app restart failed: %v", err)
-					a.eventsHandler.OnUpdateAvailable()
-				}
-			} else {
-				a.eventsHandler.OnUpdateAvailable()
-			}
-		},
-	)
-}
-
-func (a *App) stopUpdateChecks() {
-	if a.selfUpdaterCancel != nil {
-		a.selfUpdaterCancel()
-	}
-}
-
-func (a *App) OnUpdatePolicyChanged() {
-	log.Printf("update policy changed, restarting update checks")
-
-	a.stopUpdateChecks()
-	time.AfterFunc(100*time.Millisecond, func() {
-		a.startUpdateChecks()
-	})
 }

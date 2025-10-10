@@ -20,6 +20,10 @@ import (
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 )
 
+type selfupdateEventsEmitter interface {
+	OnUpdateAvailable()
+}
+
 // NoSelfUpdate is set to "true" for builds distributed to package managers to prevent auto-updating. It is typed as a string because the linker allows only setting string variables at compile time (see https://pkg.go.dev/cmd/link).
 // Set at compile time using ldflags (see the prod-noupdate task in the /tasks/build directory).
 var NoSelfUpdate = "false"
@@ -35,11 +39,13 @@ type httpClient interface {
 }
 
 type SelfUpdater struct {
-	version      string
-	noSelfUpdate bool
-	config       *cfg.Config
-	releaseTrack string
-	httpClient   httpClient
+	version            string
+	noSelfUpdate       bool
+	config             *cfg.Config
+	releaseTrack       string
+	httpClient         httpClient
+	eventsEmitter      selfupdateEventsEmitter
+	restartApplication func() error
 
 	mu            sync.Mutex
 	updateApplied bool
@@ -53,9 +59,12 @@ type release struct {
 	SHA256      string `json:"sha256"`
 }
 
-func NewSelfUpdater(httpClient httpClient, config *cfg.Config) (*SelfUpdater, error) {
+func NewSelfUpdater(httpClient httpClient, config *cfg.Config, eventsEmitter selfupdateEventsEmitter) (*SelfUpdater, error) {
 	if httpClient == nil {
 		return nil, errors.New("httpClient is nil")
+	}
+	if eventsEmitter == nil {
+		return nil, errors.New("eventsEmitter is nil")
 	}
 	if cfg.Version == "" {
 		return nil, errors.New("cfg.Version is empty")
@@ -432,24 +441,21 @@ const (
 func (su *SelfUpdater) StartPeriodicChecks(
 	ctx context.Context,
 	interval time.Duration,
-	onUpdate func(checkType UpdateCheckType),
 ) {
 	if su.noSelfUpdate {
 		log.Println("self-update disabled, skipping periodic update checks")
 		return
 	}
 
+	// initial check
 	policy := su.config.GetUpdatePolicy()
-	if policy != cfg.UpdatePolicyAutomatic {
-		log.Println("automatic updates disabled, skipping periodic update checks")
-		return
-	}
-
-	if updated, err := su.applyUpdate(); err != nil {
-		log.Printf("failed to apply update: %v", err)
-	} else if updated {
-		onUpdate(StartupCheck)
-		return // Stop if update found during startup
+	if policy == cfg.UpdatePolicyAutomatic {
+		if updated, err := su.applyUpdate(); err != nil {
+			log.Printf("failed to apply update: %v", err)
+		} else if updated {
+			su.restartApplication()
+			return
+		}
 	}
 
 	go func() {
@@ -459,7 +465,6 @@ func (su *SelfUpdater) StartPeriodicChecks(
 		for {
 			select {
 			case <-ctx.Done():
-				log.Println("stopping periodic update checks")
 				return
 			case <-ticker.C:
 				policy := su.config.GetUpdatePolicy()
@@ -473,7 +478,7 @@ func (su *SelfUpdater) StartPeriodicChecks(
 					continue
 				}
 				if updated {
-					onUpdate(BackgroundCheck)
+					su.eventsEmitter.OnUpdateAvailable()
 					return // Stop further checks
 				}
 			}

@@ -2,7 +2,6 @@ import { FormGroup, Switch } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { OnUpdatePolicyChanged } from '../../../wailsjs/go/app/App';
 import { GetUpdatePolicy, SetUpdatePolicy } from '../../../wailsjs/go/cfg/Config';
 import { cfg } from '../../../wailsjs/go/models';
 import { AppToaster } from '../../common/toaster';
@@ -27,7 +26,6 @@ export function AutoupdateSwitch() {
       setState((state) => ({ ...state, loading: true }));
       try {
         await SetUpdatePolicy(cfg.UpdatePolicyType.DISABLED);
-        await OnUpdatePolicyChanged();
       } catch (err) {
         AppToaster.show({
           message: t('settings.updates.disableError', { error: err }),
@@ -44,7 +42,6 @@ export function AutoupdateSwitch() {
       setState((state) => ({ ...state, loading: true }));
       try {
         await SetUpdatePolicy(cfg.UpdatePolicyType.AUTOMATIC);
-        await OnUpdatePolicyChanged();
       } catch (err) {
         AppToaster.show({
           message: t('updates.enableError', { error: err }),

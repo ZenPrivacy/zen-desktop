@@ -18,10 +18,6 @@ export function OnSecondInstanceLaunch(arg1) {
   return window['go']['app']['App']['OnSecondInstanceLaunch'](arg1);
 }
 
-export function OnUpdatePolicyChanged() {
-  return window['go']['app']['App']['OnUpdatePolicyChanged']();
-}
-
 export function OpenLogsDirectory() {
   return window['go']['app']['App']['OpenLogsDirectory']();
 }
