@@ -11,6 +11,7 @@ import { BrowserLink } from '../common/BrowserLink';
 import { useProxyState } from '../context/ProxyStateContext';
 
 import { AutostartSwitch } from './AutostartSwitch';
+import { AutoupdateSwitch } from './AutoupdateSwitch';
 import { ExportDebugDataButton } from './ExportDebugDataButton';
 import { ExportLogsButton } from './ExportLogsButton';
 import { IgnoredHostsInput } from './IgnoredHostsInput';
@@ -18,7 +19,6 @@ import { LocaleSelector } from './LocaleSelector';
 import { PortInput } from './PortInput';
 import { ThemeSelector } from './ThemeSelector';
 import { UninstallCADialog } from './UninstallCADialog';
-import { UpdatePolicyRadioGroup } from './UpdatePolicyRadioGroup';
 
 const GITHUB_URL = 'https://github.com/ZenPrivacy/zen-desktop';
 const CHANGELOG_URL = `${GITHUB_URL}/blob/master/CHANGELOG.md`;
@@ -54,7 +54,7 @@ export function SettingsManager() {
         <div className="settings-manager__section-body">
           <LocaleSelector />
           <AutostartSwitch />
-          {state.showUpdateRadio && <UpdatePolicyRadioGroup />}
+          {state.showUpdateRadio && <AutoupdateSwitch />}
           <ThemeSelector />
           <div className="settings-manager__section--links">
             <ExportLogsButton />
