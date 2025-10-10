@@ -12,56 +12,60 @@ func TestTokenize(t *testing.T) {
 		tokens []token
 	}{
 		{
-			s:      "abc123",
-			tokens: []token{'a', 'b', 'c', '1', '2', '3'},
+			"abc123",
+			[]token{'a', 'b', 'c', '1', '2', '3'},
 		},
 		{
-			s:      "*",
-			tokens: []token{tokenWildcard},
+			"*",
+			[]token{tokenWildcard},
 		},
 		{
-			s:      "a*b",
-			tokens: []token{'a', tokenWildcard, 'b'},
+			"a*b",
+			[]token{'a', tokenWildcard, 'b'},
 		},
 		{
-			s:      "*a*",
-			tokens: []token{tokenWildcard, 'a', tokenWildcard},
+			"*a*",
+			[]token{tokenWildcard, 'a', tokenWildcard},
 		},
 		{
-			s:      "||",
-			tokens: []token{tokenDomainRoot},
+			"||",
+			[]token{tokenDomainRoot},
 		},
 		{
-			s:      "|||||",
-			tokens: []token{tokenDomainRoot, tokenDomainRoot, tokenStartEnd},
+			"|||||",
+			[]token{tokenDomainRoot, tokenDomainRoot, tokenStartEnd},
 		},
 		{
-			s:      "||example.com",
-			tokens: []token{tokenDomainRoot, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm'},
+			"||example.com",
+			[]token{tokenDomainRoot, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm'},
 		},
 		{
-			s:      "|",
-			tokens: []token{tokenStartEnd},
+			"|",
+			[]token{tokenStartEnd},
 		},
 		{
-			s:      "example|",
-			tokens: []token{'e', 'x', 'a', 'm', 'p', 'l', 'e', tokenStartEnd},
+			"example|",
+			[]token{'e', 'x', 'a', 'm', 'p', 'l', 'e', tokenStartEnd},
 		},
 		{
-			s:      "^",
-			tokens: []token{tokenSeparator},
+			"^",
+			[]token{tokenSeparator},
 		},
 		{
-			s:      "a^b",
-			tokens: []token{'a', tokenSeparator, 'b'},
+			"a^b",
+			[]token{'a', tokenSeparator, 'b'},
 		},
 		{
-			s:      "*||^|",
-			tokens: []token{tokenWildcard, tokenDomainRoot, tokenSeparator, tokenStartEnd},
+			"*||^|",
+			[]token{tokenWildcard, tokenDomainRoot, tokenSeparator, tokenStartEnd},
 		},
 		{
-			s:      "a*b||c^d|e",
-			tokens: []token{'a', tokenWildcard, 'b', tokenDomainRoot, 'c', tokenSeparator, 'd', tokenStartEnd, 'e'},
+			"a*b||c^d|e",
+			[]token{'a', tokenWildcard, 'b', tokenDomainRoot, 'c', tokenSeparator, 'd', tokenStartEnd, 'e'},
+		},
+		{
+			"||example.com/ads/*",
+			[]token{tokenDomainRoot, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm', '/', 'a', 'd', 's', '/', tokenWildcard},
 		},
 	}
 

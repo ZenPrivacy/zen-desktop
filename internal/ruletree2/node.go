@@ -66,30 +66,28 @@ func (n *node[T]) traverse(url string) []T {
 
 	wild := n.getEdge(tokenWildcard)
 
-	proceed := func(url string) {
-		firstCh := url[0]
-		if isSeparator(firstCh) && sep != nil {
-			data = append(data, sep.traverse(url)...)
-		}
-		if wild != nil {
-			data = append(data, wild.traverse(url)...)
-		}
-		if ch := n.getEdge(token(firstCh)); ch != nil {
-			data = append(data, ch.traverse(url)...)
-		}
-	}
-
 	var traversePrefix func(prefix []token, url string)
 	traversePrefix = func(prefix []token, url string) {
 		if len(prefix) == 0 {
 			if n.isLeaf() {
 				data = append(data, n.leaf.val...)
 			}
-			proceed(url)
+			if url != "" {
+				firstCh := url[0]
+				if isSeparator(firstCh) && sep != nil {
+					data = append(data, sep.traverse(url)...)
+				}
+				if wild != nil {
+					data = append(data, wild.traverse(url)...)
+				}
+				if ch := n.getEdge(token(firstCh)); ch != nil {
+					data = append(data, ch.traverse(url)...)
+				}
+			}
 			return
 		}
 		if len(url) == 0 {
-			if n.isLeaf() && len(prefix) == 1 && (prefix[0] == tokenStartEnd || prefix[0] == tokenSeparator) {
+			if n.isLeaf() && len(prefix) == 1 && (prefix[0] == tokenStartEnd || prefix[0] == tokenSeparator || prefix[0] == tokenWildcard) {
 				data = append(data, n.leaf.val...)
 			}
 			return
