@@ -24,6 +24,7 @@
 .tabs {
   padding: 0 12px;
   height: 36px;
+  flex-shrink: 0;
 }
 
 .content {
