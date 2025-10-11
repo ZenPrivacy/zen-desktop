@@ -96,7 +96,7 @@ export function FilterLists() {
             key={filterList.url}
             filterList={filterList}
             showDelete={type === FilterListType.CUSTOM}
-            onChange={fetchLists}
+            onRemoved={fetchLists}
           />
         ))}
 
@@ -108,17 +108,18 @@ export function FilterLists() {
 export function FilterListItem({
   filterList,
   showDelete,
-  onChange,
   showButtons = true,
+  onRemoved,
 }: {
   filterList: cfg.FilterList;
   showDelete?: boolean;
-  onChange?: () => void;
   showButtons?: boolean;
+  onRemoved?: () => void;
 }) {
   const { t } = useTranslation();
   const { isProxyRunning } = useProxyState();
   const [switchLoading, setSwitchLoading] = useState(false);
+  const [switchChecked, setSwitchChecked] = useState(filterList.enabled);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -128,19 +129,23 @@ export function FilterListItem({
         <h3 className="filter-lists__list-name">{filterList.name}</h3>
         <Tooltip content={t('common.stopProxyToToggleFilter') as string} disabled={!isProxyRunning} placement="left">
           <Switch
-            checked={filterList.enabled}
+            checked={switchChecked}
             disabled={switchLoading || isProxyRunning}
             onChange={async (e) => {
               setSwitchLoading(true);
-              const err = await ToggleFilterList(filterList.url, e.currentTarget.checked);
+              const initial = switchChecked;
+              const { checked } = e.currentTarget;
+              setSwitchChecked(checked);
+              const err = await ToggleFilterList(filterList.url, checked);
               if (err) {
+                setSwitchChecked(initial);
+                setSwitchLoading(false);
                 AppToaster.show({
                   message: t('filterLists.toggleError', { error: err }),
                   intent: 'danger',
                 });
               }
               setSwitchLoading(false);
-              onChange?.();
             }}
             size="large"
             className="filter-lists__list-switch"
@@ -213,7 +218,7 @@ export function FilterListItem({
                 });
               }
               setDeleteLoading(false);
-              onChange?.();
+              onRemoved?.();
             }}
           >
             {t('filterLists.delete')}
