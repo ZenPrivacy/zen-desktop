@@ -1,8 +1,7 @@
 import i18next from 'i18next';
 import { useEffect, useState } from 'react';
 
-import { SUPPORTED_LANGUAGES } from '../../constants/languages';
-import { changeLocale, getCurrentLocale } from '../../i18n';
+import { LOCALE_LABELS, changeLocale, getCurrentLocale } from '../../i18n';
 
 import { LocaleList } from './LocaleList';
 
@@ -23,7 +22,7 @@ export function WelcomeScreen() {
   const [descriptionText, setDescriptionText] = useState('');
 
   useEffect(() => {
-    setLocale((SUPPORTED_LANGUAGES.find((item) => item.value === getCurrentLocale()) || SUPPORTED_LANGUAGES[0]).value);
+    setLocale((LOCALE_LABELS.find((item) => item.value === getCurrentLocale()) || LOCALE_LABELS[0]).value);
   }, []);
 
   useEffect(() => {

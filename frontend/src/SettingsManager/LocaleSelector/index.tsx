@@ -2,8 +2,7 @@ import { Button, FormGroup, MenuItem } from '@blueprintjs/core';
 import { ItemRenderer, Select } from '@blueprintjs/select';
 import { useTranslation } from 'react-i18next';
 
-import { SUPPORTED_LANGUAGES, LocaleItem } from '../../constants/languages';
-import { changeLocale, getCurrentLocale } from '../../i18n';
+import { changeLocale, getCurrentLocale, LOCALE_LABELS, LocaleItem } from '../../i18n';
 
 interface LocaleSelectorProps {
   showLabel?: boolean;
@@ -30,11 +29,11 @@ export function LocaleSelector({ showLabel = true, showHelper = true }: LocaleSe
     );
   };
 
-  const currentLocale = SUPPORTED_LANGUAGES.find((item) => item.value === getCurrentLocale()) || SUPPORTED_LANGUAGES[0];
+  const currentLocale = LOCALE_LABELS.find((item) => item.value === getCurrentLocale()) || LOCALE_LABELS[0];
 
   const selectComponent = (
     <Select<LocaleItem>
-      items={SUPPORTED_LANGUAGES}
+      items={LOCALE_LABELS}
       activeItem={currentLocale}
       onItemSelect={handleLocaleChange}
       itemRenderer={renderItem}

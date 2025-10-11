@@ -1,7 +1,6 @@
 import { Card, Radio } from '@blueprintjs/core';
 
-import { SUPPORTED_LANGUAGES } from '../../../constants/languages';
-import { SupportedLocale } from '../../../i18n';
+import { LOCALE_LABELS, SupportedLocale } from '../../../i18n';
 
 import './index.css';
 
@@ -13,7 +12,7 @@ interface LocaleListProps {
 export function LocaleList({ selectedLocale, onSelect }: LocaleListProps) {
   return (
     <div className="locale-list">
-      {SUPPORTED_LANGUAGES.map((locale) => (
+      {LOCALE_LABELS.map((locale) => (
         <Card
           key={locale.value}
           className={`locale-option ${selectedLocale === locale.value ? 'selected' : ''}`}
