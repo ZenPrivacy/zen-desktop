@@ -3,11 +3,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import { cfg } from '../../../wailsjs/go/models';
 import { FilterListItem } from '../../FilterLists';
 
-interface FilterListsScreen {
+interface FilterListsScreenProps {
   filterLists: cfg.FilterList[];
 }
 
-export function FilterListsScreen({ filterLists }: FilterListsScreen) {
+export function FilterListsScreen({ filterLists }: FilterListsScreenProps) {
   const { t } = useTranslation();
 
   return (
