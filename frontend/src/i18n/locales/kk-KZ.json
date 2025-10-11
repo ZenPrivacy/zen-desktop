@@ -11,7 +11,7 @@
       "settings": "Баптаулар"
     }
   },
-  "introOverlay": {
+  "intro": {
     "welcome": {
       "title": "Zen-ге қош келдіңіз!",
       "description": "Тіліңізді таңдаңыз:"

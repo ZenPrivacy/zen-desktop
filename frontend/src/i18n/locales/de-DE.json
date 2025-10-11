@@ -11,7 +11,7 @@
       "settings": "Einstellungen"
     }
   },
-  "introOverlay": {
+  "intro": {
     "welcome": {
       "title": "Willkommen bei Zen!",
       "description": "Wählen Sie Ihre Sprache:"

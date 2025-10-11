@@ -10,7 +10,7 @@ import { ThemeType, useTheme } from './common/ThemeManager';
 import { AppHeader } from './components/AppHeader';
 import { useProxyState } from './context/ProxyStateContext';
 import { FilterLists } from './FilterLists';
-import { IntroOverlay } from './IntroOverlay';
+import { Intro } from './Intro';
 import { MyRules } from './MyRules';
 import { useProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';
@@ -38,46 +38,49 @@ function App() {
   return (
     <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp5-dark' : ''}>
       <AppHeader />
-      <ButtonGroup fill variant="minimal" className="tabs">
-        <Button icon="circle" active={activeTab === 'home'} onClick={() => setActiveTab('home')}>
-          {t('app.tabs.home')}
-        </Button>
-        <Button icon="filter" active={activeTab === 'filterLists'} onClick={() => setActiveTab('filterLists')}>
-          {t('app.tabs.filterLists')}
-        </Button>
-        <Button icon="code" active={activeTab === 'myRules'} onClick={() => setActiveTab('myRules')}>
-          {t('app.tabs.myRules')}
-        </Button>
-        <Button icon="settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
-          {t('app.tabs.settings')}
-        </Button>
-      </ButtonGroup>
 
-      <div className="content">
-        <div style={{ display: activeTab === 'home' ? 'block' : 'none' }}>
-          {proxyState === 'off' ? (
-            <NonIdealState
-              icon="lightning"
-              title={t('app.proxy.inactive')}
-              description={t('app.proxy.description') as string}
-              className="request-log__non-ideal-state"
-            />
-          ) : (
-            <RequestLog />
-          )}
-        </div>
-        {activeTab === 'filterLists' && <FilterLists />}
-        {activeTab === 'myRules' && <MyRules />}
-        {activeTab === 'settings' && <SettingsManager />}
-      </div>
-      <StartStopButton />
-
-      {showIntro && (
-        <IntroOverlay
+      {showIntro ? (
+        <Intro
           onClose={() => {
             setShowIntro(false);
           }}
         />
+      ) : (
+        <>
+          <ButtonGroup fill variant="minimal" className="tabs">
+            <Button icon="circle" active={activeTab === 'home'} onClick={() => setActiveTab('home')}>
+              {t('app.tabs.home')}
+            </Button>
+            <Button icon="filter" active={activeTab === 'filterLists'} onClick={() => setActiveTab('filterLists')}>
+              {t('app.tabs.filterLists')}
+            </Button>
+            <Button icon="code" active={activeTab === 'myRules'} onClick={() => setActiveTab('myRules')}>
+              {t('app.tabs.myRules')}
+            </Button>
+            <Button icon="settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
+              {t('app.tabs.settings')}
+            </Button>
+          </ButtonGroup>
+
+          <div className="content">
+            <div style={{ display: activeTab === 'home' ? 'block' : 'none' }}>
+              {proxyState === 'off' ? (
+                <NonIdealState
+                  icon="lightning"
+                  title={t('app.proxy.inactive')}
+                  description={t('app.proxy.description') as string}
+                  className="request-log__non-ideal-state"
+                />
+              ) : (
+                <RequestLog />
+              )}
+            </div>
+            {activeTab === 'filterLists' && <FilterLists />}
+            {activeTab === 'myRules' && <MyRules />}
+            {activeTab === 'settings' && <SettingsManager />}
+          </div>
+          <StartStopButton />
+        </>
       )}
     </div>
   );

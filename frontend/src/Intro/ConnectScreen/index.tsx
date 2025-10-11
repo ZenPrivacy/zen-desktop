@@ -16,11 +16,11 @@ export function ConnectScreen() {
 
   return (
     <div className="intro-screen">
-      <h3 className="bp5-heading intro-heading">{t('introOverlay.connect.title')}</h3>
-      <p className="intro-description bp5-running-text">{t('introOverlay.connect.description')}</p>
+      <h3 className="bp5-heading intro-heading">{t('intro.connect.title')}</h3>
+      <p className="intro-description bp5-running-text">{t('intro.connect.description')}</p>
       <p className="intro-description bp5-running-text">
         <Trans
-          i18nKey="introOverlay.connect.caNote"
+          i18nKey="intro.connect.caNote"
           components={{
             strong: <strong />,
             br: <br />,
@@ -29,7 +29,9 @@ export function ConnectScreen() {
       </p>
 
       <Card elevation={1} className="connect-card">
-        <h6 className="bp5-heading">{t('introOverlay.connect.socialText')}</h6>
+        <p className="bp5-heading">
+          <strong>{t('intro.connect.socialText')}</strong>
+        </p>
 
         <div className="social-links-grid">
           <div className="social-row">
@@ -59,7 +61,7 @@ export function ConnectScreen() {
 
         <Divider className="section-divider" />
 
-        <p>{t('introOverlay.connect.donateText')}</p>
+        <p>{t('intro.connect.donateText')}</p>
         <Button
           icon={<img src={OpenCollectiveIcon} className="social-icon" alt="Open Collective" />}
           onClick={() => BrowserOpenURL(SOCIAL_LINKS.OPEN_COLLECTIVE)}

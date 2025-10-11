@@ -5,8 +5,6 @@ import { useTranslation } from 'react-i18next';
 import './index.css';
 import { GetFilterListsByLocales } from '../../wailsjs/go/cfg/Config';
 import { cfg } from '../../wailsjs/go/models';
-import { ThemeType, useTheme } from '../common/ThemeManager';
-import { AppHeader } from '../components/AppHeader';
 import { useProxyState } from '../context/ProxyStateContext';
 import { StartStopButton } from '../StartStopButton';
 
@@ -15,11 +13,11 @@ import { FilterListsScreen } from './FilterListsScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { WelcomeScreen } from './WelcomeScreen';
 
-interface IntroOverlayProps {
+interface IntroProps {
   onClose: () => void;
 }
 
-export function IntroOverlay({ onClose }: IntroOverlayProps) {
+export function Intro({ onClose }: IntroProps) {
   const { t } = useTranslation();
 
   const [currentScreen, setCurrentScreen] = useState(1);
@@ -32,7 +30,6 @@ export function IntroOverlay({ onClose }: IntroOverlayProps) {
   }, []);
 
   const { proxyState } = useProxyState();
-  const { effectiveTheme } = useTheme();
 
   const totalScreens = filterLists.length > 0 ? 4 : 3;
 
@@ -71,10 +68,9 @@ export function IntroOverlay({ onClose }: IntroOverlayProps) {
   };
 
   return (
-    <div className={`intro-fullscreen${effectiveTheme === ThemeType.DARK ? ' bp5-dark' : ''}`}>
-      <AppHeader />
-      <div className="intro-main-content">{renderCurrentScreen()}</div>
-      <div className="intro-footer">
+    <>
+      <div className="content">{renderCurrentScreen()}</div>
+      <div className="footer">
         {currentScreen < totalScreens ? (
           <>
             <ProgressBar
@@ -87,7 +83,7 @@ export function IntroOverlay({ onClose }: IntroOverlayProps) {
 
             <ButtonGroup fill size="large">
               <Button fill variant="outlined" onClick={onClose} className="skip-button">
-                {t('introOverlay.buttons.skip')}
+                {t('intro.buttons.skip')}
               </Button>
               <Button
                 fill
@@ -97,7 +93,7 @@ export function IntroOverlay({ onClose }: IntroOverlayProps) {
                 }}
                 endIcon="arrow-right"
               >
-                {t('introOverlay.buttons.next')}
+                {t('intro.buttons.next')}
               </Button>
             </ButtonGroup>
           </>
@@ -105,6 +101,6 @@ export function IntroOverlay({ onClose }: IntroOverlayProps) {
           <StartStopButton />
         )}
       </div>
-    </div>
+    </>
   );
 }

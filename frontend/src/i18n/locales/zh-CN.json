@@ -11,7 +11,7 @@
       "settings": "设置"
     }
   },
-  "introOverlay": {
+  "intro": {
     "welcome": {
       "title": "欢迎使用 Zen！",
       "description": "选择您的语言："

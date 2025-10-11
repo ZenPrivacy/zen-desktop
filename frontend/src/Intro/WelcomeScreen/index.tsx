@@ -11,8 +11,8 @@ import './index.css';
 const getTranslationsFor = (languageCode: string) => {
   const tfixed = i18next.getFixedT(languageCode);
   return {
-    welcome: tfixed('introOverlay.welcome.title'),
-    description: tfixed('introOverlay.welcome.description'),
+    welcome: tfixed('intro.welcome.title'),
+    description: tfixed('intro.welcome.description'),
   };
 };
 

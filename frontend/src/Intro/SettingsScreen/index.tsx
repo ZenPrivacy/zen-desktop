@@ -21,8 +21,8 @@ export function SettingsScreen() {
 
   return (
     <div className="intro-screen">
-      <h3 className="bp5-heading intro-heading">{t('introOverlay.settings.title')}</h3>
-      <p className="intro-description">{t('introOverlay.settings.description')}</p>
+      <h3 className="bp5-heading intro-heading">{t('intro.settings.title')}</h3>
+      <p className="intro-description">{t('intro.settings.description')}</p>
 
       <Card elevation={1} className="settings-card">
         <AutostartSwitch />
@@ -36,7 +36,7 @@ export function SettingsScreen() {
       </Card>
 
       <Callout icon="info-sign" intent="primary" className="settings-note">
-        {t('introOverlay.settings.settingsNote')}
+        {t('intro.settings.settingsNote')}
       </Callout>
     </div>
   );
