@@ -480,8 +480,8 @@ func (c *Config) SetLocale(l string) {
 }
 
 func (c *Config) GetFirstLaunch() bool {
-	c.Lock()
-	defer c.Unlock()
+	c.RLock()
+	defer c.RUnlock()
 
-	return true
+	return c.firstLaunch
 }
