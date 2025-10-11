@@ -37,7 +37,7 @@ export function Intro({ onClose }: IntroProps) {
     if (currentScreen === totalScreens && proxyState === 'on') {
       onClose();
     }
-  }, [proxyState, currentScreen]);
+  }, [proxyState, currentScreen, totalScreens, onClose]);
 
   const renderCurrentScreen = () => {
     if (filterLists.length > 0) {
