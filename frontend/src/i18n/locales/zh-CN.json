@@ -12,24 +12,26 @@
     }
   },
   "introOverlay": {
-    "welcome": "欢迎使用 Zen!",
-    "screen1": {
+    "welcome": {
+      "title": "欢迎使用 Zen！",
       "description": "选择您的语言："
     },
-    "screen2": {
-      "description": "为启用广告拦截和隐私保护，Zen 使用<strong>过滤列表</strong>。您也可以稍后在应用中进行设置。",
+    "filterLists": {
+      "title": "过滤列表",
+      "description": "为了启用广告拦截和隐私保护，Zen 使用了<strong>过滤列表</strong>。您也可以稍后在应用中进行设置。",
       "recommendation": "根据您的地区，我们建议启用以下过滤列表："
     },
-    "screen3": {
+    "settings": {
       "title": "设置",
-      "description": "请同时查看以下设置：",
-      "settingsNote": "您可以随时在首选项菜单中更改这些设置。"
+      "description": "请查看以下设置：",
+      "settingsNote": "您也可以随时在应用中更改这些设置。"
     },
-    "screen4": {
-      "title": "准备就绪！",
-      "description": "一切就绪！按\"开始\"以启用 Zen 全面而高效的网络保护。",
-      "socialText": "如果您愿意，请查看我们的社交媒体：",
-      "donateText": "并考虑在以下平台上捐赠"
+    "connect": {
+      "title": "一切就绪！",
+      "description": "您已准备就绪。点击“开始”以启用 Zen 的全面网络保护。",
+      "caNote": "首次启动时，Zen 可能会提示您安装本地根 CA 证书。这将启用 HTTPS 过滤，使 Zen 能够在所有网站上拦截广告和跟踪器。所有操作均在本地进行——《strong>您的数据永不会离开您的设备</strong》。<br />详细技术信息请查看我们的 GitHub。",
+      "socialText": "如果您愿意，可以关注我们的社交媒体：",
+      "donateText": "并考虑在以下平台捐赠："
     },
     "buttons": {
       "skip": "跳过介绍",
