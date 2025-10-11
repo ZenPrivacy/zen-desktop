@@ -5,8 +5,8 @@ import { LOCALE_LABELS, SupportedLocale } from '../../../i18n';
 import './index.css';
 
 interface LocaleListProps {
-  selectedLocale: string;
-  onSelect: (lang: SupportedLocale) => void;
+  selectedLocale: SupportedLocale;
+  onSelect: (locale: SupportedLocale) => void;
 }
 
 export function LocaleList({ selectedLocale, onSelect }: LocaleListProps) {
@@ -21,12 +21,7 @@ export function LocaleList({ selectedLocale, onSelect }: LocaleListProps) {
           onClick={() => onSelect(locale.value)}
         >
           <div className="locale-content">
-            <Radio
-              checked={selectedLocale === locale.value}
-              onChange={() => onSelect(locale.value)}
-              className="locale-radio"
-              label={locale.label}
-            />
+            <Radio checked={selectedLocale === locale.value} className="locale-radio" label={locale.label} />
           </div>
         </Card>
       ))}

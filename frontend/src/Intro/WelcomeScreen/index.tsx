@@ -1,7 +1,7 @@
 import i18next from 'i18next';
 import { useEffect, useState } from 'react';
 
-import { LOCALE_LABELS, changeLocale, getCurrentLocale } from '../../i18n';
+import { changeLocale, getCurrentLocale } from '../../i18n';
 
 import { LocaleList } from './LocaleList';
 
@@ -17,13 +17,9 @@ const getTranslationsFor = (languageCode: string) => {
 
 export function WelcomeScreen() {
   const [transition, setTransition] = useState(false);
-  const [locale, setLocale] = useState<string | null>(null);
+  const [locale, setLocale] = useState(getCurrentLocale);
   const [welcomeText, setWelcomeText] = useState('');
   const [descriptionText, setDescriptionText] = useState('');
-
-  useEffect(() => {
-    setLocale((LOCALE_LABELS.find((item) => item.value === getCurrentLocale()) || LOCALE_LABELS[0]).value);
-  }, []);
 
   useEffect(() => {
     if (!locale) return;
@@ -61,7 +57,7 @@ export function WelcomeScreen() {
             setTransition(false);
           }, 300);
         }}
-        selectedLocale={locale ?? ''}
+        selectedLocale={locale}
       />
     </div>
   );
