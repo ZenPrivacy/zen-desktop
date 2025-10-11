@@ -10,7 +10,7 @@ import { ThemeType, useTheme } from './common/ThemeManager';
 import { AppHeader } from './components/AppHeader';
 import { useProxyState } from './context/ProxyStateContext';
 import { FilterLists } from './FilterLists';
-import { IntroOverlay } from './Intro';
+import { IntroOverlay } from './IntroOverlay';
 import { MyRules } from './MyRules';
 import { useProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';

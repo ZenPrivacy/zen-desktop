@@ -1,24 +1,35 @@
-import { Button, Card, Divider, H5 } from '@blueprintjs/core';
-import { useTranslation } from 'react-i18next';
+import { Button, Card, Divider } from '@blueprintjs/core';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
-import BlueSkyLogo from '../assets/icons/bluesky.svg';
-import DiscordIcon from '../assets/icons/discord.svg';
-import GithubIcon from '../assets/icons/github.svg';
-import OpenCollectiveIcon from '../assets/icons/opencollective.svg';
-import RedditIcon from '../assets/icons/reddit.svg';
-import { SOCIAL_LINKS } from '../constants/urls';
+import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
+import BlueSkyLogo from '../../assets/icons/bluesky.svg';
+import DiscordIcon from '../../assets/icons/discord.svg';
+import GithubIcon from '../../assets/icons/github.svg';
+import OpenCollectiveIcon from '../../assets/icons/osc.svg';
+import RedditIcon from '../../assets/icons/reddit.svg';
+import { SOCIAL_LINKS } from '../../constants/urls';
+
+import './index.css';
 
 export function ConnectScreen() {
   const { t } = useTranslation();
 
   return (
     <div className="intro-screen">
-      <h2 className="intro-heading">{t('introOverlay.screen4.title')}</h2>
-      <p>{t('introOverlay.screen4.description')}</p>
+      <h3 className="bp5-heading intro-heading">{t('introOverlay.connect.title')}</h3>
+      <p className="intro-description bp5-running-text">{t('introOverlay.connect.description')}</p>
+      <p className="intro-description bp5-running-text">
+        <Trans
+          i18nKey="introOverlay.connect.caNote"
+          components={{
+            strong: <strong />,
+            br: <br />,
+          }}
+        />
+      </p>
 
       <Card elevation={1} className="connect-card">
-        <H5>{t('introOverlay.screen4.socialText')}</H5>
+        <h6 className="bp5-heading">{t('introOverlay.connect.socialText')}</h6>
 
         <div className="social-links-grid">
           <div className="social-row">
@@ -48,7 +59,7 @@ export function ConnectScreen() {
 
         <Divider className="section-divider" />
 
-        <p>{t('introOverlay.screen4.donateText')}</p>
+        <p>{t('introOverlay.connect.donateText')}</p>
         <Button
           icon={<img src={OpenCollectiveIcon} className="social-icon" alt="Open Collective" />}
           onClick={() => BrowserOpenURL(SOCIAL_LINKS.OPEN_COLLECTIVE)}

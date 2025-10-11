@@ -11,8 +11,8 @@ import './index.css';
 const getTranslationsFor = (languageCode: string) => {
   const tfixed = i18next.getFixedT(languageCode);
   return {
-    welcome: tfixed('introOverlay.welcome'),
-    description: tfixed('introOverlay.screen1.description'),
+    welcome: tfixed('introOverlay.welcome.title'),
+    description: tfixed('introOverlay.welcome.description'),
   };
 };
 
@@ -37,15 +37,17 @@ export function WelcomeScreen() {
 
   return (
     <div className="intro-screen">
-      <div className="text-animation-container">
+      <div>
         <h2
-          className={`animated-welcome bp5-heading ${transition ? 'welcome-fade-out' : 'welcome-fade-in'}`}
+          className={`animated-welcome bp5-heading intro-heading ${
+            transition ? 'welcome-fade-out' : 'welcome-fade-in'
+          }`}
           key={`welcome-${locale}`}
         >
           👋 {welcomeText}
         </h2>
         <p
-          className={`animated-description ${transition ? 'welcome-fade-out' : 'welcome-fade-in'}`}
+          className={`animated-description intro-description ${transition ? 'welcome-fade-out' : 'welcome-fade-in'}`}
           key={`desc-${locale}`}
         >
           {descriptionText}

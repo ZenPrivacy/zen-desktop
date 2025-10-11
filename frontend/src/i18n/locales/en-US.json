@@ -12,24 +12,26 @@
     }
   },
   "introOverlay": {
-    "welcome": "Welcome to Zen!",
-    "screen1": {
+    "welcome": {
+      "title": "Welcome to Zen!",
       "description": "Select your language:"
     },
-    "screen2": {
+    "filterLists": {
+      "title": "Filter lists",
       "description": "To enable ad-blocking and privacy protection, Zen uses <strong>filter lists</strong>. You can also set them up later in the app.",
       "recommendation": "Based on your locale, we recommend enabling the following filter lists:"
     },
-    "screen3": {
+    "settings": {
       "title": "Settings",
-      "description": "Please also review the following settings:",
-      "settingsNote": "You can change these settings anytime from the preferences menu."
+      "description": "Review the settings below:",
+      "settingsNote": "You can also change these at any time in the app."
     },
-    "screen4": {
-      "title": "You're All Set!",
-      "description": "You're good to go! Press \"Start\" to enable Zen's comprehensive and efficient network protection.",
+    "connect": {
+      "title": "All Set!",
+      "description": "You're ready to go. Press \"Start\" to enable Zen's comprehensive network protection.",
+      "caNote": "On first start, Zen may prompt you to install a local root CA certificate. This enables HTTPS filtering so Zen can block ads and trackers on all sites. Everything happens locally – <strong>no data ever leaves your device</strong>.<br />See our GitHub for full technical details.",
       "socialText": "If you'd like, check out our socials:",
-      "donateText": "And consider donating on"
+      "donateText": "And consider donating on:"
     },
     "buttons": {
       "skip": "Skip introduction",

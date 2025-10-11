@@ -4,9 +4,6 @@
     opacity 0.4s ease-out,
     transform 0.4s ease-out;
   min-height: 1.5em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .welcome-fade-out {
