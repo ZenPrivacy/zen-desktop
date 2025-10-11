@@ -14,7 +14,6 @@ export function SettingsScreen() {
 
   useEffect(() => {
     IsNoSelfUpdate().then((noSelfUpdate) => {
-      console.log(noSelfUpdate);
       setShowUpdatePolicy(!noSelfUpdate);
     });
   }, []);
