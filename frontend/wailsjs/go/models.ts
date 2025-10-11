@@ -11,6 +11,7 @@ export namespace cfg {
 	    url: string;
 	    enabled: boolean;
 	    trusted: boolean;
+	    locales: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new FilterList(source);
@@ -23,6 +24,7 @@ export namespace cfg {
 	        this.url = source["url"];
 	        this.enabled = source["enabled"];
 	        this.trusted = source["trusted"];
+	        this.locales = source["locales"];
 	    }
 	}
 

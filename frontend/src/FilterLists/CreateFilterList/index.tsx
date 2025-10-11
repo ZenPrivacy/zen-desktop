@@ -85,6 +85,7 @@ export function CreateFilterList({ onAdd }: { onAdd: () => void }) {
               type: FilterListType.CUSTOM,
               enabled: true,
               trusted,
+              locales: [], // FIX: this is a dirty fix, rewrite by making AddFilterList accept a custom struct.
             });
             if (err) {
               AppToaster.show({
