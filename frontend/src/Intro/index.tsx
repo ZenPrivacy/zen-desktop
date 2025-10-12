@@ -25,10 +25,15 @@ export function Intro({ onClose }: IntroProps) {
   const [filterListsLoading, setFilterListsLoading] = useState(true);
 
   useEffect(() => {
-    GetFilterListsByLocales(navigator.languages as string[]).then((filterLists) => {
-      if (filterLists) setFilterLists(filterLists);
-      setFilterListsLoading(false);
-    });
+    GetFilterListsByLocales(navigator.languages as string[])
+      .then((filterLists) => {
+        if (filterLists) setFilterLists(filterLists);
+        setFilterListsLoading(false);
+      })
+      .catch((ex) => {
+        console.error(ex);
+        setFilterListsLoading(false);
+      });
   }, []);
 
   const { proxyState } = useProxyState();
