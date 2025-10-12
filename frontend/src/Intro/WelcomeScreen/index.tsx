@@ -27,7 +27,6 @@ export function WelcomeScreen() {
     const texts = getTranslationsFor(locale);
     setWelcomeText(texts.welcome);
     setDescriptionText(texts.description);
-    setTransition(false);
   }, [locale]);
 
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -69,7 +68,7 @@ export function WelcomeScreen() {
           transitionTimeoutRef.current = window.setTimeout(() => {
             setTransition(false);
             transitionTimeoutRef.current = null;
-          }, 300);
+          }, 0);
         }}
         selectedLocale={locale}
       />
