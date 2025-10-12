@@ -16,7 +16,6 @@ const getTranslationsFor = (languageCode: string) => {
 };
 
 export function WelcomeScreen() {
-  const [transition, setTransition] = useState(false);
   const [locale, setLocale] = useState(getCurrentLocale);
   const [welcomeText, setWelcomeText] = useState('');
   const [descriptionText, setDescriptionText] = useState('');
@@ -29,46 +28,20 @@ export function WelcomeScreen() {
     setDescriptionText(texts.description);
   }, [locale]);
 
-  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-  }, []);
-
   return (
     <div className="intro-screen">
       <div>
-        <h2
-          className={`animated-welcome bp5-heading intro-heading ${
-            transition ? 'welcome-fade-out' : 'welcome-fade-in'
-          }`}
-          key={`welcome-${locale}`}
-        >
+        <h2 className="welcome-slide bp5-heading intro-heading" key={`welcome-${locale}`}>
           👋 {welcomeText}
         </h2>
-        <p
-          className={`animated-description intro-description ${transition ? 'welcome-fade-out' : 'welcome-fade-in'}`}
-          key={`desc-${locale}`}
-        >
+        <p className="welcome-slide intro-description" key={`desc-${locale}`}>
           {descriptionText}
         </p>
       </div>
       <LocaleList
         onSelect={(locale) => {
-          setTransition(true);
           setLocale(locale);
           changeLocale(locale);
-          if (transitionTimeoutRef.current) {
-            clearTimeout(transitionTimeoutRef.current);
-          }
-          transitionTimeoutRef.current = window.setTimeout(() => {
-            setTransition(false);
-            transitionTimeoutRef.current = null;
-          }, 0);
         }}
         selectedLocale={locale}
       />
