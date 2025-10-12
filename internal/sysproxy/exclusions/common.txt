@@ -1,6 +1,7 @@
 # This file contains hostnames that Zen will not MITM on all platforms.
 
 # Government websites
+gouv.fr
 egov.kz
 gov.kz
 gov.uk
@@ -14,6 +15,7 @@ e-estonia.com
 eesti.ee
 
 # Password managers
+pass.proton.me
 1password.com
 lastpass.com
 passwords.google.com
@@ -94,3 +96,6 @@ oaiusercontent.com
 account.booking.com
 # https://github.com/ZenPrivacy/zen-desktop/issues/407
 updates.ghub.logitechg.com
+
+# Sensitive
+proton.me
