@@ -22,10 +22,12 @@ export function Intro({ onClose }: IntroProps) {
 
   const [currentScreen, setCurrentScreen] = useState(1);
   const [filterLists, setFilterLists] = useState<cfg.FilterList[]>([]);
+  const [filterListsLoading, setFilterListsLoading] = useState(true);
 
   useEffect(() => {
     GetFilterListsByLocales(navigator.languages as string[]).then((filterLists) => {
       if (filterLists) setFilterLists(filterLists);
+      setFilterListsLoading(false);
     });
   }, []);
 
@@ -92,6 +94,7 @@ export function Intro({ onClose }: IntroProps) {
                   setCurrentScreen((currentScreen) => currentScreen + 1);
                 }}
                 endIcon="arrow-right"
+                loading={filterListsLoading}
               >
                 {t('intro.buttons.next')}
               </Button>
