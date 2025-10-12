@@ -37,7 +37,7 @@ export const LOCALE_LABELS: LocaleItem[] = [
   { value: 'de-DE', label: 'Deutsch' },
   { value: 'kk-KZ', label: 'Қазақша' },
   { value: 'ru-RU', label: 'Русский' },
-  { value: 'zh-CN', label: '中文（简体)' },
+  { value: 'zh-CN', label: '中文（简体）' },
   { value: 'it-IT', label: 'Italiano' },
 ];
 
