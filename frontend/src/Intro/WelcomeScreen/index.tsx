@@ -1,5 +1,5 @@
 import i18next from 'i18next';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { changeLocale, getCurrentLocale } from '../../i18n';
 
@@ -30,6 +30,16 @@ export function WelcomeScreen() {
     setTransition(false);
   }, [locale]);
 
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="intro-screen">
       <div>
@@ -53,8 +63,12 @@ export function WelcomeScreen() {
           setTransition(true);
           setLocale(locale);
           changeLocale(locale);
-          setTimeout(() => {
+          if (transitionTimeoutRef.current) {
+            clearTimeout(transitionTimeoutRef.current);
+          }
+          transitionTimeoutRef.current = window.setTimeout(() => {
             setTransition(false);
+            transitionTimeoutRef.current = null;
           }, 300);
         }}
         selectedLocale={locale}
