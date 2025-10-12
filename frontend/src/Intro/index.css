@@ -4,6 +4,12 @@
   animation: reveal 0.3s ease-in;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .intro-screen {
+    animation: none;
+  }
+}
+
 .intro-heading,
 .intro-description {
   text-align: center;
@@ -17,7 +23,6 @@
   border-radius: 0 !important;
 }
 
-/* Animations */
 @keyframes reveal {
   from {
     opacity: 0;
