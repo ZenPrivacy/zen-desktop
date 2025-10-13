@@ -1,6 +1,8 @@
 package ruletree2
 
 import (
+	"bufio"
+	"os"
 	"testing"
 )
 
@@ -38,7 +40,7 @@ func TestInsert(t *testing.T) {
 	})
 }
 
-func TestGet(t *testing.T) {
+func TestPatternMatching(t *testing.T) {
 	t.Parallel()
 
 	t.Run("wildcard matching", func(t *testing.T) {
@@ -457,6 +459,100 @@ func TestGet(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("testdata", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("adsdelivery", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("https://example.com/adsdelivery/test")
+			want := []string{"/adsdelivery/*"} // easylist.txt#L218
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("geodator", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("https://geodator.com/geo.php?ip=localhost")
+			want := []string{
+				"/geo.php?",       // easyprivacy.txt#L1044
+				"||geodator.com^", // easylist.txt#L14474
+			}
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("doubleclick", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("https://g.doubleclick.com/statscounter/script.js?id=GTM-123&pagegroup=test&url=zenprivacy.net")
+			want := []string{
+				"||doubleclick.com^", // easylist.txt#L39723
+				"/statscounter/*",    // easyprivacy.txt#L2235
+				"&pagegroup=*&url=",  // easyprivacy.txt#L2937
+				".js?id=GTM-",        // easyprivacy.txt#L2950
+			}
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("gtm", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("http://gtm.example.net/t/id.js?st=321")
+			want := []string{"://gtm.*.js?st="} // easyprivacy.txt#L2957
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+}
+
+func buildTestTree(t *testing.T) *Tree[string] {
+	t.Helper()
+
+	filterLists := []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"}
+
+	tr := New[string]()
+
+	for _, list := range filterLists {
+		f, err := os.Open(list)
+		if err != nil {
+			t.Fatalf("open %q: %v", list, err)
+		}
+
+		scanner := bufio.NewScanner(f)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			if line == "" {
+				continue
+			}
+
+			if err := tr.Insert(line, line); err != nil {
+				t.Fatalf("add rule %q: %v", line, err)
+			}
+		}
+
+		if err := scanner.Err(); err != nil {
+			t.Fatalf("scan: %v", err)
+		}
+	}
+
+	return tr
 }
 
 func asSet(xs []string) map[string]struct{} {

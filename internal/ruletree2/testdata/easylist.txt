@@ -48534,11 +48534,9 @@ testpages.eyeo.com*js/test-script.js
 ||zzup.com/ad.php
 /^https?:\/\/.*\.(club|news|live|online|store|tech|guru|cloud|bid|xyz|site|pro|info|online|icu|monster|buzz|fun|website|photos|re|casa|top|today|space|network|live|work|systems|ml|world|life)\/.*/
 /^https?:\/\/.*\/.*sw[0-9._].*/
-/^https?:\/\/.*\/[a-z0-9A-Z_]{2,15}\.(php|jx|jsx|1ph|jsf|jz|jsm|j
 ||thegay.com^
 ||thegay.com^
 .com./
-|http*://*?
 ||boyfriendtv.com/out/bg-
 ||chaturbate.com^
 ||clicknplay.to/api/
