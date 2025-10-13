@@ -29,8 +29,9 @@ package ruletree2_test
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"math/rand"
-	"net/http"
+	"net/url"
 	"os"
 	"testing"
 
@@ -58,7 +59,7 @@ func BenchmarkLoadTree(b *testing.B) {
 	b.SetBytes(totalBytes)
 
 	for b.Loop() {
-		tree := ruletree2.New[*spyData]()
+		tree := ruletree2.New[string]()
 		for _, data := range rawLists {
 			scanner := bufio.NewScanner(bytes.NewReader(data))
 
@@ -68,9 +69,7 @@ func BenchmarkLoadTree(b *testing.B) {
 					continue
 				}
 
-				if err := tree.Insert(line, &spyData{}); err != nil {
-					b.Fatalf("add rule %q: %v", line, err)
-				}
+				tree.Insert(line, line)
 			}
 
 			if err := scanner.Err(); err != nil {
@@ -82,14 +81,114 @@ func BenchmarkLoadTree(b *testing.B) {
 	b.ReportAllocs()
 }
 
-type spyData struct {
-	modifiers string
+func BenchmarkMatch(b *testing.B) {
+	tree, err := loadTree()
+	if err != nil {
+		b.Fatalf("load tree: %v", err)
+	}
+
+	urls, avgBytes, err := loadURLs()
+	if err != nil {
+		b.Fatalf("load urls: %v", err)
+	}
+	b.SetBytes(int64(avgBytes))
+
+	var i int
+	for b.Loop() {
+		u := urls[i%len(urls)]
+		tree.Get(u)
+		i++
+	}
+
+	b.ReportAllocs()
 }
 
-func (s *spyData) ShouldMatchRes(*http.Response) bool { return true }
-func (s *spyData) ShouldMatchReq(*http.Request) bool  { return true }
+func BenchmarkMatchParallel(b *testing.B) {
+	tree, err := loadTree()
+	if err != nil {
+		b.Fatalf("load tree: %v", err)
+	}
 
-func (s *spyData) ParseModifiers(modifiers string) error {
-	s.modifiers = modifiers
-	return nil
+	urls, avgBytes, err := loadURLs()
+	if err != nil {
+		b.Fatalf("load urls: %v", err)
+	}
+	b.SetBytes(int64(avgBytes))
+
+	b.ResetTimer()
+
+	b.RunParallel(func(pb *testing.PB) {
+		var i int
+		for pb.Next() {
+			u := urls[i%len(urls)]
+			tree.Get(u)
+			i++
+		}
+	})
+
+	b.ReportAllocs()
+}
+
+func loadTree() (*ruletree2.Tree[string], error) {
+	tree := ruletree2.New[string]()
+
+	for _, filename := range filterLists {
+		data, err := os.ReadFile(filename)
+		if err != nil {
+			return nil, fmt.Errorf("read %s: %v", filename, err)
+		}
+
+		scanner := bufio.NewScanner(bytes.NewReader(data))
+		for scanner.Scan() {
+			line := scanner.Text()
+			if line == "" {
+				continue
+			}
+
+			tree.Insert(line, line)
+		}
+
+		if err := scanner.Err(); err != nil {
+			return nil, fmt.Errorf("scan %s: %v", filename, err)
+		}
+	}
+	return tree, nil
+}
+
+func loadURLs() ([]string, int, error) {
+	const filename = "testdata/urls.txt"
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, 0, fmt.Errorf("read %s: %v", filename, err)
+	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+
+	var urls []string
+	var totalURLBytes int
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			continue
+		}
+		if _, err := url.Parse(line); err != nil {
+			return nil, 0, fmt.Errorf("invalid url %q: %v", line, err)
+		}
+
+		urls = append(urls, line)
+		totalURLBytes += len(line)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, 0, fmt.Errorf("scan %s: %v", filename, err)
+	}
+
+	avg := totalURLBytes / len(urls)
+
+	rnd.Shuffle(len(urls), func(i, j int) {
+		urls[i], urls[j] = urls[j], urls[i]
+	})
+
+	return urls, avg, nil
 }
