@@ -4,6 +4,15 @@ import (
 	"sort"
 )
 
+type leaf[T Data] struct {
+	val []T
+}
+
+type edge[T Data] struct {
+	label token
+	node  *node[T]
+}
+
 type node[T Data] struct {
 	// leaf stores a possible leaf.
 	leaf *leaf[T]
@@ -11,7 +20,7 @@ type node[T Data] struct {
 	// prefix is the common prefix.
 	prefix []token
 
-	edges edges[T]
+	edges []edge[T]
 }
 
 func (n *node[T]) isLeaf() bool {
@@ -116,33 +125,16 @@ func (n *node[T]) traverse(url string) []T {
 	return data
 }
 
-type leaf[T Data] struct {
-	val []T
-}
+var separators []bool
 
-type edge[T Data] struct {
-	label token
-	node  *node[T]
-}
+func init() {
+	separators = make([]bool, 256)
 
-type edges[T Data] []edge[T]
-
-func (e edges[T]) Len() int {
-	return len(e)
-}
-
-func (e edges[T]) Less(i, j int) bool {
-	return e[i].label < e[j].label
-}
-
-func (e edges[T]) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
-}
-
-func (e edges[T]) Sort() {
-	sort.Sort(e)
+	for _, ch := range "~:/?#[]@!$&'()*+,;=" {
+		separators[int(ch)] = true
+	}
 }
 
 func isSeparator(char byte) bool {
-	return !((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') || char == '_' || char == '-' || char == '.' || char == '%')
+	return separators[int(char)]
 }
