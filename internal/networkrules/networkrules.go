@@ -20,6 +20,7 @@ var (
 type ruleStore[T any] interface {
 	Insert(string, T)
 	Get(string) []T
+	Compact()
 }
 
 type NetworkRules struct {
@@ -33,14 +34,6 @@ func New() *NetworkRules {
 		exceptionStore: ruletree2.New[*exceptionrule.ExceptionRule](),
 	}
 }
-
-// Compact shrinks internal slice capacities in both rule trees to reduce memory usage.
-// It returns the total capacity reductions (sum of cap - len deltas) across both trees.
-// func (nr *NetworkRules) Compact() int {
-// 	regularReductions := nr.regularRuleTree.Compact()
-// 	exceptionReductions := nr.exceptionRuleTree.Compact()
-// 	return regularReductions + exceptionReductions
-// }
 
 func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isException bool, err error) {
 	if matches := reHosts.FindStringSubmatch(rawRule); matches != nil {
@@ -77,6 +70,11 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 		}
 
 		pattern, modifiers, found := strings.Cut(rawRule[2:], "$")
+		if pattern != "" && pattern[0] == '/' && pattern[len(pattern)-1] == '/' {
+			// This is a regexp rule.
+			// TODO: implement proper support for regexp rules.
+			return true, nil
+		}
 		if found {
 			if err := r.ParseModifiers(modifiers); err != nil {
 				return false, fmt.Errorf("parse modifiers: %v", err)
@@ -93,6 +91,11 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 	}
 
 	pattern, modifiers, found := strings.Cut(rawRule, "$")
+	if pattern != "" && pattern[0] == '/' && pattern[len(pattern)-1] == '/' {
+		// This is a regexp rule.
+		// TODO: implement proper support for regexp rules.
+		return false, nil
+	}
 	if found {
 		if err := r.ParseModifiers(modifiers); err != nil {
 			return false, fmt.Errorf("parse modifiers: %v", err)
@@ -178,6 +181,11 @@ outer:
 	}
 
 	return appliedRules, nil
+}
+
+func (nr *NetworkRules) Compact() {
+	nr.primaryStore.Compact()
+	nr.exceptionStore.Compact()
 }
 
 // filter returns a new slice containing only the elements of arr
