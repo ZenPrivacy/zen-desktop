@@ -24,7 +24,7 @@ pprof tips:
   - list <func>: show annotated source for the given function
   - web: generate an SVG call graph and open in browser
 */
-package ruletree2_test
+package ruletree_test
 
 import (
 	"bufio"
@@ -35,7 +35,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ZenPrivacy/zen-desktop/internal/ruletree2"
+	"github.com/ZenPrivacy/zen-desktop/internal/ruletree"
 )
 
 const baseSeed = 42
@@ -59,7 +59,7 @@ func BenchmarkLoadTree(b *testing.B) {
 	b.SetBytes(totalBytes)
 
 	for b.Loop() {
-		tree := ruletree2.New[string]()
+		tree := ruletree.New[string]()
 		for _, data := range rawLists {
 			scanner := bufio.NewScanner(bytes.NewReader(data))
 
@@ -129,8 +129,8 @@ func BenchmarkMatchParallel(b *testing.B) {
 	b.ReportAllocs()
 }
 
-func loadTree() (*ruletree2.Tree[string], error) {
-	tree := ruletree2.New[string]()
+func loadTree() (*ruletree.Tree[string], error) {
+	tree := ruletree.New[string]()
 
 	for _, filename := range filterLists {
 		data, err := os.ReadFile(filename)

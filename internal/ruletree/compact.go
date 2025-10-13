@@ -1,4 +1,4 @@
-package ruletree2
+package ruletree
 
 // Compact shrinks internal slice capacities to reduce memory usage.
 func (t *Tree[T]) Compact() {

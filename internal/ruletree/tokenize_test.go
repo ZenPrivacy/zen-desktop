@@ -9,17 +9,64 @@ func TestTokenize(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		s      string
-		tokens []string
+		tokens []token
 	}{
-		{"", []string{}},
-		{"http://example.com", []string{"http", "://", "example", ".", "com"}},
-		{"http://example.com/", []string{"http", "://", "example", ".", "com", "/"}},
-		{"http://example.com/?q=example", []string{"http", "://", "example", ".", "com", "/", "?", "q", "=", "example"}},
-		{"https://example.com/subdir/doc?foo1=bar1&foo2=bar2", []string{"https", "://", "example", ".", "com", "/", "subdir", "/", "doc", "?", "foo1", "=", "bar1", "&", "foo2", "=", "bar2"}},
-		{"-banner-ad-", []string{"-", "banner", "-", "ad", "-"}},
-		{"banner", []string{"banner"}},
-		{"/banner/img", []string{"/", "banner", "/", "img"}},
-		{"example.com", []string{"example", ".", "com"}},
+		{
+			"abc123",
+			[]token{'a', 'b', 'c', '1', '2', '3'},
+		},
+		{
+			"*",
+			[]token{tokenWildcard},
+		},
+		{
+			"a*b",
+			[]token{'a', tokenWildcard, 'b'},
+		},
+		{
+			"*a*",
+			[]token{tokenWildcard, 'a', tokenWildcard},
+		},
+		{
+			"||",
+			[]token{tokenDomainBoundary},
+		},
+		{
+			"|||||",
+			[]token{tokenDomainBoundary, tokenDomainBoundary, tokenAnchor},
+		},
+		{
+			"||example.com",
+			[]token{tokenDomainBoundary, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm'},
+		},
+		{
+			"|",
+			[]token{tokenAnchor},
+		},
+		{
+			"example|",
+			[]token{'e', 'x', 'a', 'm', 'p', 'l', 'e', tokenAnchor},
+		},
+		{
+			"^",
+			[]token{tokenSeparator},
+		},
+		{
+			"a^b",
+			[]token{'a', tokenSeparator, 'b'},
+		},
+		{
+			"*||^|",
+			[]token{tokenWildcard, tokenDomainBoundary, tokenSeparator, tokenAnchor},
+		},
+		{
+			"a*b||c^d|e",
+			[]token{'a', tokenWildcard, 'b', tokenDomainBoundary, 'c', tokenSeparator, 'd', tokenAnchor, 'e'},
+		},
+		{
+			"||example.com/ads/*",
+			[]token{tokenDomainBoundary, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm', '/', 'a', 'd', 's', '/', tokenWildcard},
+		},
 	}
 
 	for _, test := range tests {

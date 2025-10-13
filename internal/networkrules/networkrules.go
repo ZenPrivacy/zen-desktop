@@ -9,7 +9,7 @@ import (
 
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/exceptionrule"
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
-	"github.com/ZenPrivacy/zen-desktop/internal/ruletree2"
+	"github.com/ZenPrivacy/zen-desktop/internal/ruletree"
 )
 
 var (
@@ -30,8 +30,8 @@ type NetworkRules struct {
 
 func New() *NetworkRules {
 	return &NetworkRules{
-		primaryStore:   ruletree2.New[*rule.Rule](),
-		exceptionStore: ruletree2.New[*exceptionrule.ExceptionRule](),
+		primaryStore:   ruletree.New[*rule.Rule](),
+		exceptionStore: ruletree.New[*exceptionrule.ExceptionRule](),
 	}
 }
 
