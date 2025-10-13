@@ -18,7 +18,7 @@ var (
 )
 
 type ruleStore[T any] interface {
-	Insert(string, T) error
+	Insert(string, T)
 	Get(string) []T
 }
 
@@ -60,13 +60,11 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 				continue
 			}
 
-			r := fmt.Sprintf("||%s^$document", host)
-			if err := nr.primaryStore.Insert(r, &rule.Rule{
-				RawRule:    r,
+			pattern := fmt.Sprintf("||%s^$document", host)
+			nr.primaryStore.Insert(pattern, &rule.Rule{
+				RawRule:    pattern,
 				FilterName: filterName,
-			}); err != nil {
-				return false, fmt.Errorf("add host rule: %w", err)
-			}
+			})
 		}
 
 		return false, nil
@@ -84,9 +82,7 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 				return false, fmt.Errorf("parse modifiers: %v", err)
 			}
 		}
-		if err := nr.exceptionStore.Insert(pattern, r); err != nil {
-			return false, fmt.Errorf("insert into exception store: %v", err)
-		}
+		nr.exceptionStore.Insert(pattern, r)
 
 		return true, nil
 	}
@@ -102,9 +98,7 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 			return false, fmt.Errorf("parse modifiers: %v", err)
 		}
 	}
-	if err := nr.primaryStore.Insert(pattern, r); err != nil {
-		return false, fmt.Errorf("insert into primary store: %v", err)
-	}
+	nr.primaryStore.Insert(pattern, r)
 
 	return false, nil
 }
