@@ -74,11 +74,12 @@ func NewSelfUpdater(httpClient httpClient, config *cfg.Config, eventsEmitter sel
 	}
 
 	u := SelfUpdater{
-		version:      cfg.Version,
-		config:       config,
-		releaseTrack: releaseTrack,
-		httpClient:   httpClient,
-		restartApp:   restartApp,
+		version:       cfg.Version,
+		config:        config,
+		releaseTrack:  releaseTrack,
+		httpClient:    httpClient,
+		eventsEmitter: eventsEmitter,
+		restartApp:    restartApp,
 	}
 	switch NoSelfUpdate {
 	case "true":
