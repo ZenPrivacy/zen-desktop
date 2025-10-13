@@ -1,7 +1,7 @@
 {
   "app": {
     "proxy": {
-      "description": "Le proxy n'est pas actif. Cliquez sur le bouton ci-dessous pour l'activer.",
+      "description": "Proxy inactif. Cliquez sur le bouton ci-dessous pour l'activer.",
       "inactive": "Activez le proxy pour voir les requêtes bloquées."
     },
     "tabs": {
@@ -45,7 +45,7 @@
     "more": "Plus",
     "removeError": "Échec de la suppression de la liste : {{error}}",
     "toggleError": "Échec du changement d'état de la liste : {{error}}",
-    "trusted": "Fiable",
+    "trusted": "Liste de confiance",
     "copy": "Copier le lien",
     "copied": "Copié",
     "goTo": "Ouvrir dans le navigateur"
