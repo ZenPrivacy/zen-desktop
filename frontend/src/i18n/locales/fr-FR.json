@@ -61,7 +61,7 @@
   "ignoredHostsInput": {
     "description": "Domaines à exclure du proxy. Utilisez ceci pour les services avec un ancrage de certificat ou ceux perturbés par le proxy.",
     "helper": "Entrez un domaine par ligne.",
-    "label": "Domaines à ignorés"
+    "label": "Domaines à ignorer"
   },
   "importFilterList": {
     "errorMessage": "Échec de l'importation des listes de filtres : {{error}}",
