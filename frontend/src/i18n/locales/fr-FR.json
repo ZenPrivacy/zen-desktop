@@ -1,0 +1,146 @@
+{
+  "app": {
+    "proxy": {
+      "description": "Le proxy n'est pas actif. Cliquez sur le bouton ci-dessous pour l'activer.",
+      "inactive": "Activez le proxy pour voir les requêtes bloquées."
+    },
+    "tabs": {
+      "filterLists": "Listes de filtres",
+      "home": "Accueil",
+      "myRules": "Règles personnalisées",
+      "settings": "Paramètres"
+    }
+  },
+  "autoStartSwitch": {
+    "description": "Démarrer Zen automatiquement lors de la connexion",
+    "disableError": "Échec de la désactivation du démarrage automatique : {{error}}",
+    "enableError": "Échec de l'activation du démarrage automatique : {{error}}",
+    "label": "Démarrage automatique"
+  },
+  "createFilterList": {
+    "addError": "Échec de l'ajout de la liste de filtres : {{error}}",
+    "addList": "Ajouter une liste de filtres",
+    "example": "Exemple de liste de filtres",
+    "trustedListsWarning": "Les listes de confiance peuvent utiliser des capacités de blocage puissantes, telles que les scriptlets <code>trusted-</code> et les règles JavaScript, mais <strong>peuvent perturber la confidentialité et la sécurité</strong> si elles sont détournées par un acteur malveillant. N'activez cette option que pour les listes provenant de sources auxquelles vous faites confiance."
+  },
+  "donate": "Faire un don",
+  "exportFilterList": {
+    "errorMessage": "Échec de l'exportation des listes de filtres : {{error}}",
+    "export": "Exporter",
+    "successMessage": "Listes de filtres personnalisées exportées avec succès"
+  },
+  "exportLogsButton": {
+    "label": "Exporter les logs",
+    "openError": "Échec de l'ouverture du répertoire des logs : {{error}}",
+    "tooltip": "Ouvrir le répertoire des logs"
+  },
+  "exportDebugDataButton": {
+    "label": "Exporter les données de débogage",
+    "tooltip": "Copier les informations de débogage dans le presse-papiers",
+    "success": "Données de débogage copiées dans le presse-papiers",
+    "error": "Échec de l'exportation des données de débogage : {{error}}"
+  },
+  "filterLists": {
+    "delete": "Supprimer",
+    "more": "Plus",
+    "removeError": "Échec de la suppression de la liste : {{error}}",
+    "toggleError": "Échec du changement d'état de la liste : {{error}}",
+    "trusted": "Fiable",
+    "copy": "Copier le lien",
+    "copied": "Copié",
+    "goTo": "Ouvrir dans le navigateur"
+  },
+  "filterTypes": {
+    "ads": "Publicité",
+    "custom": "Personnalisé",
+    "general": "Général",
+    "malware": "Malware",
+    "privacy": "Confidentialité",
+    "regional": "Régional"
+  },
+  "ignoredHostsInput": {
+    "description": "Domaines à exclure du proxy. Utilisez ceci pour les services avec un ancrage de certificat ou ceux perturbés par le proxy.",
+    "helper": "Entrez un domaine par ligne.",
+    "label": "Domaines à ignorés"
+  },
+  "importFilterList": {
+    "errorMessage": "Échec de l'importation des listes de filtres : {{error}}",
+    "import": "Importer",
+    "successMessage": "Listes de filtres personnalisées importées avec succès"
+  },
+  "myRules": {
+    "help": "Aide",
+    "placeholder": "Ajoutez vos règles personnalisées ici..."
+  },
+  "portInput": {
+    "description": "Port sur lequel le serveur proxy écoutera (0 pour aléatoire).",
+    "helper": "Utiliser un port inférieur à 1024 peut nécessiter des privilèges élevés.",
+    "label": "Port"
+  },
+  "requestLog": {
+    "emptyState": "Commencez à naviguer pour voir des requêtes bloquées.",
+    "filterName": "Nom du filtre",
+    "method": "Méthode",
+    "redirectedTo": "Redirigé vers",
+    "referer": "Source",
+    "rule": "Règle",
+    "url": "URL"
+  },
+  "settings": {
+    "about": {
+      "changelog": "Notes de version",
+      "tagline": "Votre Bloqueur de Publicité et Gardien de votre Vie Privée",
+      "version": "Version"
+    },
+    "ca": {
+      "confirmTitle": "Êtes-vous sûr de vouloir désinstaller l'Autorité de certification?",
+      "errorMessage": "Échec de la désinstallation de l'Autorité de certification : {{error}}",
+      "reasons": {
+        "malfunctioning": "Vous soupçonnez que l'installation de l'Autorité de certification ne fonctionne pas correctement. Sachez que ce problème peut se manifester par une erreur du navigateur lors de la visite de sites Web HTTPS, ou si d'autres applications ne parviennent pas à se connecter à Internet.",
+        "uninstall": "Vous souhaitez désinstaller Zen complètement."
+      },
+      "reinstallInfo": "Si vous redémarrez Zen, une nouvelle Autorité de certification sera installée.",
+      "stopProxyTooltip": "Arrêtez le proxy pour désinstaller l'Autorité de certification",
+      "successMessage": "Autorité de certification désinstallée avec succès",
+      "uninstallButton": "Désinstaller l'Autorité de certification",
+      "uninstallConfirm": "Désinstaller",
+      "usefulIf": "Cela peut être utile si :"
+    },
+    "language": {
+      "helper": "Sélectionnez votre langue préférée",
+      "label": "Langue"
+    },
+    "sections": {
+      "advanced": "Avancé",
+      "app": "Application"
+    },
+    "theme": {
+      "chooseTheme": "Choisissez un thème",
+      "dark": "Sombre",
+      "light": "Clair",
+      "system": "Identique au thème du système"
+    },
+    "updates": {
+      "automatic": "Mises à jour automatiques",
+      "choosePolicy": "Choisissez comment les mises à jour sont installées",
+      "description": "Si \"Mises à jour automatiques\" est sélectionné, l'application vérifiera et installera automatiquement les mises à jour au démarrage.",
+      "disabled": "Désactiver les mises à jour",
+      "prompt": "Demander avant de mettre à jour",
+      "title": "Mises à jour"
+    }
+  },
+  "startStopButton": {
+    "start": "Démarrer",
+    "startError": "Échec du démarrage du proxy : {{error}}",
+    "stop": "Arrêter",
+    "stopError": "Échec de l'arrêt du proxy : {{error}}",
+    "unsupportedDEGuide": "La configuration automatique du proxy système n'est actuellement prise en charge que sur GNOME.<br />Veuillez suivre <guide-link>ce guide</guide-link> pour définir le proxy par application."
+  },
+  "common": {
+    "stopProxyToModify": "Arrêter le proxy pour modifier ce paramètre",
+    "stopProxyToAddFilter": "Arrêter le proxy pour ajouter une nouvelle liste de filtres",
+    "stopProxyToDeleteFilter": "Arrêter le proxy pour supprimer cette liste",
+    "stopProxyToToggleFilter": "Arrêter le proxy pour activer/désactiver cette liste",
+    "stopProxyToEditRules": "Arrêter le proxy pour modifier les règles personnalisées"
+  }
+}
