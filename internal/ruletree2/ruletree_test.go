@@ -9,25 +9,13 @@ import (
 func TestInsert(t *testing.T) {
 	t.Parallel()
 
-	t.Run("empty pattern error", func(t *testing.T) {
-		t.Parallel()
-
-		tr := New[string]()
-		if err := tr.Insert("", "X"); err == nil {
-			t.Fatal("expected error on empty pattern, got nil")
-		}
-	})
-
 	t.Run("duplicate values", func(t *testing.T) {
 		t.Parallel()
 
 		tr := New[string]()
-		if err := tr.Insert("||example.com/ads/*", "R1a"); err != nil {
-			t.Fatal(err)
-		}
-		if err := tr.Insert("||example.com/ads/*", "R1b"); err != nil {
-			t.Fatal(err)
-		}
+		tr.Insert("||example.com/ads/*", "R1a")
+
+		tr.Insert("||example.com/ads/*", "R1b")
 
 		got := tr.Get("http://example.com/ads/x")
 		set := asSet(got)
@@ -50,9 +38,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("ab*cd", "ab*cd"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("ab*cd", "ab*cd")
 
 			got := tr.Get("abcd")
 			want := []string{"ab*cd"}
@@ -65,9 +51,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("a*c", "a*c"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("a*c", "a*c")
 
 			got := tr.Get("abbbbbc")
 			want := []string{"a*c"}
@@ -83,9 +67,7 @@ func TestPatternMatching(t *testing.T) {
 				t.Parallel()
 
 				tr := New[string]()
-				if err := tr.Insert("example.com/api/v*", "example.com/api/v*"); err != nil {
-					t.Fatal(err)
-				}
+				tr.Insert("example.com/api/v*", "example.com/api/v*")
 
 				got := tr.Get("https://example.com/api/v1")
 				want := []string{"example.com/api/v*"}
@@ -98,12 +80,9 @@ func TestPatternMatching(t *testing.T) {
 				t.Parallel()
 
 				tr := New[string]()
-				if err := tr.Insert("example.com/api/v*", "example.com/api/v*"); err != nil {
-					t.Fatal(err)
-				}
-				if err := tr.Insert("example.com/api/v*/endpoint", "example.com/api/v*/endpoint"); err != nil {
-					t.Fatal(err)
-				}
+				tr.Insert("example.com/api/v*", "example.com/api/v*")
+
+				tr.Insert("example.com/api/v*/endpoint", "example.com/api/v*/endpoint")
 
 				got := tr.Get("https://example.com/api/v2/endpoint")
 				want := []string{"example.com/api/v*", "example.com/api/v*/endpoint"}
@@ -116,9 +95,7 @@ func TestPatternMatching(t *testing.T) {
 				t.Parallel()
 
 				tr := New[string]()
-				if err := tr.Insert("example.com/api/v*/endpoint", "example.com/api/v*/endpoint"); err != nil {
-					t.Fatal(err)
-				}
+				tr.Insert("example.com/api/v*/endpoint", "example.com/api/v*/endpoint")
 
 				got := tr.Get("https://example.com/api/v2/test")
 				want := []string{}
@@ -136,9 +113,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("ads^", "ads^"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("ads^", "ads^")
 
 			got := tr.Get("http://example.com/ads?x=1")
 			want := []string{"ads^"}
@@ -151,9 +126,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("ads^", "ads^"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("ads^", "ads^")
 
 			got := tr.Get("http://example.com/ads/?x=1")
 			want := []string{"ads^"}
@@ -166,9 +139,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("ads^", "ads^"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("ads^", "ads^")
 
 			got := tr.Get("http://example.com/ads")
 			want := []string{"ads^"}
@@ -181,9 +152,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("ads^", "ads^"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("ads^", "ads^")
 
 			got := tr.Get("http://example.com/adsx")
 			want := []string{}
@@ -200,9 +169,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("|http://example.org", "|http://example.org"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("|http://example.org", "|http://example.org")
 
 			got := tr.Get("http://example.org/page")
 			want := []string{"|http://example.org"}
@@ -215,9 +182,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("|http://example.org", "|http://example.org"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("|http://example.org", "|http://example.org")
 
 			got := tr.Get("http://domain.com/?url=http://example.org")
 			want := []string{}
@@ -230,9 +195,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert(".com/b.js|", ".com/b.js|"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert(".com/b.js|", ".com/b.js|")
 
 			got := tr.Get("http://example.com/b.js")
 			want := []string{".com/b.js|"}
@@ -245,9 +208,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("/ads/targeted|", "/ads/targeted|"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("/ads/targeted|", "/ads/targeted|")
 
 			got := tr.Get("http://example.com/ads/targeted/extra")
 			want := []string{}
@@ -264,9 +225,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com/ads", "||example.com/ads"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com/ads", "||example.com/ads")
 
 			got := tr.Get("http://example.com/ads")
 			want := []string{"||example.com/ads"}
@@ -279,9 +238,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com/ads", "||example.com/ads"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com/ads", "||example.com/ads")
 
 			got := tr.Get("http://notexample.com/ads")
 			want := []string{}
@@ -294,9 +251,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com/ads", "||example.com/ads"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com/ads", "||example.com/ads")
 
 			got := tr.Get("https://sub.example.com/ads")
 			want := []string{"||example.com/ads"}
@@ -309,9 +264,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com/ads", "||example.com/ads"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com/ads", "||example.com/ads")
 
 			got := tr.Get("https://sub.bexample.com/ads")
 			want := []string{}
@@ -324,9 +277,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com/ads", "||example.com/ads"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com/ads", "||example.com/ads")
 
 			got := tr.Get("wss://example.com/ads")
 			want := []string{"||example.com/ads"}
@@ -343,9 +294,7 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com^", "||example.com^"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com^", "||example.com^")
 
 			got := tr.Get("https://sub.example.com")
 			want := []string{"||example.com^"}
@@ -358,9 +307,8 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com^", "||example.com^"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com^", "||example.com^")
+
 			got := tr.Get("https://sub.example.com/path")
 			want := []string{"||example.com^"}
 
@@ -373,12 +321,43 @@ func TestPatternMatching(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
-			if err := tr.Insert("||example.com^", "||example.com^"); err != nil {
-				t.Fatal(err)
-			}
+			tr.Insert("||example.com^", "||example.com^")
 
 			got := tr.Get("https://badexample.com/")
 			want := []string{}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+
+	t.Run("generic matching", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("singular", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("", "")
+
+			got := tr.Get("https://example.com")
+			want := []string{""}
+
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("", "")
+			tr.Insert("|https://example.com", "|https://example.com")
+			tr.Insert("||example.com", "||example.com")
+
+			got := tr.Get("https://example.com")
+			want := []string{"", "|https://example.com", "||example.com"}
 			if !equalSets(got, want) {
 				t.Fatalf("got=%v, want=%v", got, want)
 			}
@@ -405,9 +384,7 @@ func TestPatternMatching(t *testing.T) {
 			}
 
 			for _, rule := range rules {
-				if err := tr.Insert(rule, rule); err != nil {
-					t.Fatal(err)
-				}
+				tr.Insert(rule, rule)
 			}
 
 			got := tr.Get("http://sub.example.com/ads/top?x=1")
@@ -441,9 +418,7 @@ func TestPatternMatching(t *testing.T) {
 			}
 
 			for _, rule := range rules {
-				if err := tr.Insert(rule, rule); err != nil {
-					t.Fatal(err)
-				}
+				tr.Insert(rule, rule)
 			}
 
 			got := tr.Get("https://sub.example.com/strict")
@@ -542,9 +517,7 @@ func buildTestTree(t *testing.T) *Tree[string] {
 				continue
 			}
 
-			if err := tr.Insert(line, line); err != nil {
-				t.Fatalf("add rule %q: %v", line, err)
-			}
+			tr.Insert(line, line)
 		}
 
 		if err := scanner.Err(); err != nil {

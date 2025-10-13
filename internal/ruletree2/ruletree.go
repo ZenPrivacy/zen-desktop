@@ -1,7 +1,6 @@
 package ruletree2
 
 import (
-	"errors"
 	"strings"
 	"sync"
 )
@@ -9,24 +8,31 @@ import (
 type Data comparable
 
 type Tree[T Data] struct {
+	// insertMu protects the tree during inserts.
 	insertMu sync.Mutex
 
-	root       *node[T]
-	domainRoot *node[T]
-	startRoot  *node[T]
+	root *node[T]
+	// domainBoundaryRoot stores patterns beginning with tokenDomainBoundary (||).
+	domainBoundaryRoot *node[T]
+	// anchorRoot stores pattern beginning with tokenAnchor (|).
+	anchorRoot *node[T]
+	// generic is data without an associated pattern. It is returned for every Get call.
+	generic []T
 }
 
 func New[T Data]() *Tree[T] {
 	return &Tree[T]{
-		root:       &node[T]{},
-		domainRoot: &node[T]{},
-		startRoot:  &node[T]{},
+		root:               &node[T]{},
+		domainBoundaryRoot: &node[T]{},
+		anchorRoot:         &node[T]{},
+		generic:            make([]T, 0),
 	}
 }
 
-func (t *Tree[T]) Insert(pattern string, v T) error {
+func (t *Tree[T]) Insert(pattern string, v T) {
 	if pattern == "" {
-		return errors.New("empty pattern")
+		t.generic = append(t.generic, v)
+		return
 	}
 
 	var parent *node[T]
@@ -39,9 +45,9 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 
 	switch tokens[0] {
 	case tokenDomainBoundary:
-		n, tokens = t.domainRoot, tokens[1:]
+		n, tokens = t.domainBoundaryRoot, tokens[1:]
 	case tokenAnchor:
-		n, tokens = t.startRoot, tokens[1:]
+		n, tokens = t.anchorRoot, tokens[1:]
 	default:
 		n = t.root
 	}
@@ -55,7 +61,7 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 					val: []T{v},
 				}
 			}
-			return nil
+			return
 		}
 
 		parent = n
@@ -72,7 +78,7 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 				label: tokens[0],
 				node:  n,
 			})
-			return nil
+			return
 		}
 
 		commonPrefix := longestPrefix(tokens, n.prefix)
@@ -107,7 +113,7 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 				node:  n,
 			})
 		}
-		return nil
+		return
 	}
 }
 
@@ -123,7 +129,7 @@ func (t *Tree[T]) Get(url string) []T {
 	}
 
 	addUnique(t.root.traverse(url))
-	addUnique(t.startRoot.traverse(url))
+	addUnique(t.anchorRoot.traverse(url))
 
 	inScheme := true
 	inHost := false
@@ -132,7 +138,7 @@ func (t *Tree[T]) Get(url string) []T {
 
 		if inHost {
 			if c == '.' {
-				addUnique(t.domainRoot.traverse(url[i+1:]))
+				addUnique(t.domainBoundaryRoot.traverse(url[i+1:]))
 			}
 
 			if c == '/' {
@@ -142,16 +148,19 @@ func (t *Tree[T]) Get(url string) []T {
 
 		if inScheme {
 			if strings.HasSuffix(url[:i+1], "://") {
-				addUnique(t.domainRoot.traverse(url[i+1:]))
+				addUnique(t.domainBoundaryRoot.traverse(url[i+1:]))
 				inScheme = false
 				inHost = true
 			}
 		}
 	}
 
-	result := make([]T, 0, len(data))
+	result := make([]T, len(t.generic)+len(data))
+	copy(result, t.generic)
+	var i int
 	for d := range data {
-		result = append(result, d)
+		result[len(t.generic)+i] = d
+		i++
 	}
 	return result
 }
