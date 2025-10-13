@@ -102,9 +102,29 @@ func (n *node[T]) traverse(url string) []T {
 
 		switch prefix[0] {
 		case tokenWildcard:
-			traversePrefix(prefix[1:], url)     // Wildcard can match zero chars,
-			traversePrefix(prefix[1:], url[1:]) // one,
-			traversePrefix(prefix, url[1:])     // or many.
+			if len(prefix) == 1 {
+				for i := range len(url) {
+					traversePrefix(nil, url[i:])
+				}
+			} else {
+				nextTok := prefix[1]
+				if nextTok == tokenAnchor {
+					traversePrefix(prefix[1:], "")
+					return
+				}
+				for i := range len(url) {
+					switch nextTok {
+					case tokenSeparator:
+						if isSeparator(url[i]) {
+							traversePrefix(prefix[1:], url[i:])
+						}
+					default:
+						if url[i] == byte(nextTok) {
+							traversePrefix(prefix[1:], url[i:])
+						}
+					}
+				}
+			}
 		case tokenSeparator:
 			switch isSeparator(url[0]) {
 			case true:
