@@ -166,14 +166,14 @@ func (t *Tree[T]) Get(url string) []T {
 }
 
 func longestPrefix(a, b []token) int {
-	max := len(a)
-	if l := len(b); l < max {
-		max = l
+	maxLen := len(a)
+	if l := len(b); l < maxLen {
+		maxLen = l
 	}
-	for i := range max {
+	for i := range maxLen {
 		if a[i] != b[i] {
 			return i
 		}
 	}
-	return max
+	return maxLen
 }
