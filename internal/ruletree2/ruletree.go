@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-type Data any
+type Data comparable
 
 type Tree[T Data] struct {
 	insertMu sync.Mutex
@@ -112,18 +112,27 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 }
 
 func (t *Tree[T]) Get(url string) []T {
-	var data []T
-	data = append(data, t.root.traverse(url)...)
-	data = append(data, t.startRoot.traverse(url)...)
+	data := make(map[T]struct{})
+
+	addUnique := func(items []T) {
+		for _, item := range items {
+			if _, exists := data[item]; !exists {
+				data[item] = struct{}{}
+			}
+		}
+	}
+
+	addUnique(t.root.traverse(url))
+	addUnique(t.startRoot.traverse(url))
 
 	inScheme := true
 	inHost := false
 	for i, c := range url {
-		data = append(data, t.root.traverse(url[i:])...)
+		addUnique(t.root.traverse(url[i:]))
 
 		if inHost {
 			if c == '.' {
-				data = append(data, t.domainRoot.traverse(url[i+1:])...)
+				addUnique(t.domainRoot.traverse(url[i+1:]))
 			}
 
 			if c == '/' {
@@ -133,14 +142,18 @@ func (t *Tree[T]) Get(url string) []T {
 
 		if inScheme {
 			if strings.HasSuffix(url[:i+1], "://") {
-				data = append(data, t.domainRoot.traverse(url[i+1:])...)
+				addUnique(t.domainRoot.traverse(url[i+1:]))
 				inScheme = false
 				inHost = true
 			}
 		}
 	}
 
-	return data
+	result := make([]T, 0, len(data))
+	for d := range data {
+		result = append(result, d)
+	}
+	return result
 }
 
 func longestPrefix(a, b []token) int {
