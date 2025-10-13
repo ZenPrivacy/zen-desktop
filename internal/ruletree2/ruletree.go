@@ -3,11 +3,14 @@ package ruletree2
 import (
 	"errors"
 	"strings"
+	"sync"
 )
 
 type Data any
 
 type Tree[T Data] struct {
+	insertMu sync.Mutex
+
 	root       *node[T]
 	domainRoot *node[T]
 	startRoot  *node[T]
@@ -30,6 +33,10 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 	var n *node[T]
 
 	tokens := tokenize(pattern)
+
+	t.insertMu.Lock()
+	defer t.insertMu.Unlock()
+
 	switch tokens[0] {
 	case tokenDomainBoundary:
 		n, tokens = t.domainRoot, tokens[1:]
