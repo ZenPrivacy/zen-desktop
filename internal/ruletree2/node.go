@@ -34,9 +34,7 @@ func (n *node[T]) updateEdge(label token, node *node[T]) {
 	})
 	if idx < len(n.edges) && n.edges[idx].label == label {
 		n.edges[idx].node = node
-		return
 	}
-	panic("updating missing edge")
 }
 
 func (n *node[T]) getEdge(label token) *node[T] {
