@@ -1,6 +1,6 @@
 # This file contains hostnames that Zen will not MITM on all platforms.
 
-# Proton Foundation is a suite of encrypted services such as a BTC wallet, encrypted mailbox, etc.
+# Sensitive
 proton.me
 
 # Login
