@@ -180,7 +180,7 @@ func (a *App) StartProxy() (err error) {
 		}
 	}()
 
-	networkRules := networkrules.NewNetworkRules()
+	networkRules := networkrules.New()
 	scriptletInjector, err := scriptlet.NewInjectorWithDefaults()
 	if err != nil {
 		return fmt.Errorf("create scriptlets injector: %v", err)
