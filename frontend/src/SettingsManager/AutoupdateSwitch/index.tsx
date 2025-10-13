@@ -44,7 +44,7 @@ export function AutoupdateSwitch() {
         await SetUpdatePolicy(cfg.UpdatePolicyType.AUTOMATIC);
       } catch (err) {
         AppToaster.show({
-          message: t('updates.enableError', { error: err }),
+          message: t('settings.updates.enableError', { error: err }),
           intent: 'danger',
         });
         setState((state) => ({ ...state, loading: false }));

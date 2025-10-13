@@ -107,7 +107,7 @@ func (a *App) commonStartup(ctx context.Context) {
 	go func() {
 		su, err := selfupdate.NewSelfUpdater(&http.Client{
 			Timeout: 20 * time.Second,
-		}, a.config, a.eventsHandler)
+		}, a.config, a.eventsHandler, a.RestartApplication)
 		if err != nil {
 			log.Printf("error creating self updater: %v", err)
 			return

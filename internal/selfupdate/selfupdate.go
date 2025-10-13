@@ -39,13 +39,13 @@ type httpClient interface {
 }
 
 type SelfUpdater struct {
-	version            string
-	noSelfUpdate       bool
-	config             *cfg.Config
-	releaseTrack       string
-	httpClient         httpClient
-	eventsEmitter      selfupdateEventsEmitter
-	restartApplication func() error
+	version       string
+	noSelfUpdate  bool
+	config        *cfg.Config
+	releaseTrack  string
+	httpClient    httpClient
+	eventsEmitter selfupdateEventsEmitter
+	restartApp    func() error
 
 	mu            sync.Mutex
 	updateApplied bool
@@ -59,7 +59,7 @@ type release struct {
 	SHA256      string `json:"sha256"`
 }
 
-func NewSelfUpdater(httpClient httpClient, config *cfg.Config, eventsEmitter selfupdateEventsEmitter) (*SelfUpdater, error) {
+func NewSelfUpdater(httpClient httpClient, config *cfg.Config, eventsEmitter selfupdateEventsEmitter, restartApp func() error) (*SelfUpdater, error) {
 	if httpClient == nil {
 		return nil, errors.New("httpClient is nil")
 	}
@@ -69,12 +69,16 @@ func NewSelfUpdater(httpClient httpClient, config *cfg.Config, eventsEmitter sel
 	if cfg.Version == "" {
 		return nil, errors.New("cfg.Version is empty")
 	}
+	if restartApp == nil {
+		return nil, errors.New("restartApp is nil")
+	}
 
 	u := SelfUpdater{
 		version:      cfg.Version,
 		config:       config,
 		releaseTrack: releaseTrack,
 		httpClient:   httpClient,
+		restartApp:   restartApp,
 	}
 	switch NoSelfUpdate {
 	case "true":
@@ -453,7 +457,9 @@ func (su *SelfUpdater) StartPeriodicChecks(
 		if updated, err := su.applyUpdate(); err != nil {
 			log.Printf("failed to apply update: %v", err)
 		} else if updated {
-			su.restartApplication()
+			if err := su.restartApp(); err != nil {
+				log.Printf("failed to restart application: %v", err)
+			}
 			return
 		}
 	}
