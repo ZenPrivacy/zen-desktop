@@ -55,7 +55,7 @@ func (n *node[T]) traverse(url string) []T {
 	sep := n.getEdge(tokenSeparator)
 
 	if len(url) == 0 {
-		if re := n.getEdge(tokenStartEnd); re != nil && re.isLeaf() {
+		if re := n.getEdge(tokenAnchor); re != nil && re.isLeaf() {
 			data = append(data, re.leaf.val...)
 		}
 		if sep != nil && sep.isLeaf() {
@@ -87,7 +87,7 @@ func (n *node[T]) traverse(url string) []T {
 			return
 		}
 		if len(url) == 0 {
-			if n.isLeaf() && len(prefix) == 1 && (prefix[0] == tokenStartEnd || prefix[0] == tokenSeparator || prefix[0] == tokenWildcard) {
+			if n.isLeaf() && len(prefix) == 1 && (prefix[0] == tokenAnchor || prefix[0] == tokenSeparator || prefix[0] == tokenWildcard) {
 				data = append(data, n.leaf.val...)
 			}
 			return

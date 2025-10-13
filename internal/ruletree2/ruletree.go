@@ -31,9 +31,9 @@ func (t *Tree[T]) Insert(pattern string, v T) error {
 
 	tokens := tokenize(pattern)
 	switch tokens[0] {
-	case tokenDomainRoot:
+	case tokenDomainBoundary:
 		n, tokens = t.domainRoot, tokens[1:]
-	case tokenStartEnd:
+	case tokenAnchor:
 		n, tokens = t.startRoot, tokens[1:]
 	default:
 		n = t.root

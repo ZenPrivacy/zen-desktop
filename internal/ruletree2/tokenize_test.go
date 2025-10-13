@@ -29,23 +29,23 @@ func TestTokenize(t *testing.T) {
 		},
 		{
 			"||",
-			[]token{tokenDomainRoot},
+			[]token{tokenDomainBoundary},
 		},
 		{
 			"|||||",
-			[]token{tokenDomainRoot, tokenDomainRoot, tokenStartEnd},
+			[]token{tokenDomainBoundary, tokenDomainBoundary, tokenAnchor},
 		},
 		{
 			"||example.com",
-			[]token{tokenDomainRoot, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm'},
+			[]token{tokenDomainBoundary, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm'},
 		},
 		{
 			"|",
-			[]token{tokenStartEnd},
+			[]token{tokenAnchor},
 		},
 		{
 			"example|",
-			[]token{'e', 'x', 'a', 'm', 'p', 'l', 'e', tokenStartEnd},
+			[]token{'e', 'x', 'a', 'm', 'p', 'l', 'e', tokenAnchor},
 		},
 		{
 			"^",
@@ -57,15 +57,15 @@ func TestTokenize(t *testing.T) {
 		},
 		{
 			"*||^|",
-			[]token{tokenWildcard, tokenDomainRoot, tokenSeparator, tokenStartEnd},
+			[]token{tokenWildcard, tokenDomainBoundary, tokenSeparator, tokenAnchor},
 		},
 		{
 			"a*b||c^d|e",
-			[]token{'a', tokenWildcard, 'b', tokenDomainRoot, 'c', tokenSeparator, 'd', tokenStartEnd, 'e'},
+			[]token{'a', tokenWildcard, 'b', tokenDomainBoundary, 'c', tokenSeparator, 'd', tokenAnchor, 'e'},
 		},
 		{
 			"||example.com/ads/*",
-			[]token{tokenDomainRoot, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm', '/', 'a', 'd', 's', '/', tokenWildcard},
+			[]token{tokenDomainBoundary, 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm', '/', 'a', 'd', 's', '/', tokenWildcard},
 		},
 	}
 
