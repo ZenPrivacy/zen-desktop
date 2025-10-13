@@ -358,32 +358,32 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 	defer os.RemoveAll(tempDir)
 
 	if err := unarchive(tmpFile, tempDir); err != nil {
-		return fmt.Errorf("unarchive file: %w", err)
+		return fmt.Errorf("unzip file: %w", err)
 	}
 
-	installPath, err := getExecPath()
+	currentExecPath, err := getExecPath()
 	if err != nil {
 		return fmt.Errorf("get exec path: %w", err)
 	}
 
-	oldExecPath := generateBackupName(installPath)
-	if err := copyFile(installPath, oldExecPath); err != nil {
-		return fmt.Errorf("backup current executable: %w", err)
+	oldExecPath := generateBackupName(currentExecPath)
+	if err := os.Rename(currentExecPath, oldExecPath); err != nil {
+		return fmt.Errorf("rename current executable to backup: %w", err)
 	}
 
 	rollback := false
 	defer func() {
 		if rollback {
-			log.Printf("restoring original executable from: %s", oldExecPath)
-			if err := os.Rename(oldExecPath, installPath); err != nil {
-				log.Printf("failed to restore original executable: %v", err)
+			log.Printf("Restoring original executable from: %s", oldExecPath)
+			if err := os.Rename(oldExecPath, currentExecPath); err != nil {
+				log.Printf("Failed to restore original executable: %v", err)
 			}
 		} else {
-			log.Printf("removing backup executable: %s", oldExecPath)
+			log.Printf("Removing backup executable: %s", oldExecPath)
 			if err := os.Remove(oldExecPath); err != nil {
-				log.Printf("failed to remove backup executable: %v", err)
+				log.Printf("Failed to remove backup executable: %v", err)
 
-				log.Printf("attempting to hide file: %s", oldExecPath)
+				log.Printf("Attempting to hide file: %s", oldExecPath)
 				err = hideFile(oldExecPath)
 				if err != nil {
 					log.Printf("Failed to hide backup executable: %v", err)
@@ -392,7 +392,7 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 		}
 	}()
 
-	if err := replaceExecutable(tempDir, installPath); err != nil {
+	if err := replaceExecutable(tempDir); err != nil {
 		rollback = true
 		return fmt.Errorf("replace executable: %w", err)
 	}
