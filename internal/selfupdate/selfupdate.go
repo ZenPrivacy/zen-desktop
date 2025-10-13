@@ -459,6 +459,8 @@ func (su *SelfUpdater) StartPeriodicChecks(
 		} else if updated {
 			if err := su.restartApp(); err != nil {
 				log.Printf("failed to restart application: %v", err)
+			} else {
+				su.eventsEmitter.OnUpdateAvailable()
 			}
 			return
 		}
