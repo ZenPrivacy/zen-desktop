@@ -27,7 +27,6 @@ e-estonia.com
 eesti.ee
 
 # Password managers
-pass.proton.me
 1password.com
 lastpass.com
 passwords.google.com
