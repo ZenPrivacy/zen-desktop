@@ -9,6 +9,11 @@
       "home": "Home",
       "myRules": "My rules",
       "settings": "Settings"
+    },
+    "update": {
+      "restartFailed": "Failed to restart app: {{error}}",
+      "updateAvailable": "A new version of Zen is available.",
+      "restart": "Restart"
     }
   },
   "intro": {
@@ -148,12 +153,10 @@
       "system": "Follow system theme"
     },
     "updates": {
-      "automatic": "Automatic updates",
-      "choosePolicy": "Choose how updates are installed",
-      "description": "If \"Automatic updates\" is selected, the app will automatically check for and apply updates on launch.",
-      "disabled": "Disable updates",
-      "prompt": "Ask before updating",
-      "title": "Updates"
+      "automaticUpdates": "Automatically download updates",
+      "description": "When enabled, Zen will automatically check for updates",
+      "disableError": "Failed to disable automatic updates: {{error}}",
+      "enableError": "Failed to enable automatic updates: {{error}}"
     }
   },
   "startStopButton": {

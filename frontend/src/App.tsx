@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import './App.css';
 
+import { RestartApplication } from '../wailsjs/go/app/App';
 import { GetFirstLaunch } from '../wailsjs/go/cfg/Config';
+import { EventsOn } from '../wailsjs/runtime/runtime';
 
 import { ThemeType, useTheme } from './common/ThemeManager';
+import { AppToaster } from './common/toaster';
 import { AppHeader } from './components/AppHeader';
 import { useProxyState } from './context/ProxyStateContext';
 import { FilterLists } from './FilterLists';
@@ -23,6 +26,33 @@ function App() {
 
   useEffect(() => {
     FocusStyleManager.onlyShowFocusOnTabs();
+  }, []);
+
+  useEffect(() => {
+    const cancel = EventsOn('app:update', (action: any) => {
+      if (action.kind === 'updateAvailable') {
+        AppToaster.show({
+          message: t('app.update.updateAvailable'),
+          intent: 'primary',
+          timeout: 0,
+          action: {
+            text: t('app.update.restart'),
+            onClick: () => {
+              try {
+                RestartApplication();
+              } catch (error) {
+                AppToaster.show({
+                  message: t('app.update.restartFailed', { err: error }),
+                  intent: 'danger',
+                });
+              }
+            },
+          },
+        });
+      }
+    });
+
+    return cancel;
   }, []);
 
   const { proxyState } = useProxyState();

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { IsNoSelfUpdate } from '../../../wailsjs/go/app/App';
 import { AutostartSwitch } from '../../SettingsManager/AutostartSwitch';
-import { UpdatePolicyRadioGroup } from '../../SettingsManager/UpdatePolicyRadioGroup';
+import { AutoupdateSwitch } from '../../SettingsManager/AutoupdateSwitch';
 
 import './index.css';
 
@@ -29,7 +29,7 @@ export function SettingsScreen() {
         {showUpdatePolicy && (
           <>
             <Divider className="settings-divider" />
-            <UpdatePolicyRadioGroup />
+            <AutoupdateSwitch />
           </>
         )}
       </Card>

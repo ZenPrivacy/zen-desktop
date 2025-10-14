@@ -9,6 +9,11 @@
       "home": "Home",
       "myRules": "Le mie regole",
       "settings": "Impostazioni"
+    },
+    "update": {
+      "restartFailed": "Impossibile riavviare l'app: {{error}}",
+      "updateAvailable": "È disponibile una nuova versione di Zen.",
+      "restart": "Riavvia"
     }
   },
   "intro": {
@@ -148,12 +153,10 @@
       "system": "Segui il tema di sistema"
     },
     "updates": {
-      "automatic": "Aggiornamenti automatici",
-      "choosePolicy": "Scegli come installare gli aggiornamenti",
-      "description": "Se \"Aggiornamenti automatici\" è selezionato, l’app controllerà e applicherà automaticamente gli aggiornamenti all’avvio.",
-      "disabled": "Disattiva aggiornamenti",
-      "prompt": "Chiedi prima di aggiornare",
-      "title": "Aggiornamenti"
+      "automaticUpdates": "Scarica aggiornamenti automaticamente",
+      "description": "Se abilitato, Zen controllerà automaticamente gli aggiornamenti.",
+      "disableError": "Impossibile disabilitare gli aggiornamenti automatici: {{error}}",
+      "enableError": "Impossibile abilitare gli aggiornamenti automatici: {{error}}"
     }
   },
   "startStopButton": {
