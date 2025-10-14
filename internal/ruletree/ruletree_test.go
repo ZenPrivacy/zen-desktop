@@ -508,6 +508,7 @@ func buildTestTree(t *testing.T) *Tree[string] {
 		if err != nil {
 			t.Fatalf("open %q: %v", list, err)
 		}
+		defer f.Close()
 
 		scanner := bufio.NewScanner(f)
 
