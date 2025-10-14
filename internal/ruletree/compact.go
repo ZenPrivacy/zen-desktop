@@ -5,6 +5,8 @@ func (t *Tree[T]) Compact() {
 	t.insertMu.Lock()
 	defer t.insertMu.Unlock()
 
+	t.generic = trimSlice(t.generic)
+
 	stack := []*node[T]{
 		t.anchorRoot,
 		t.domainBoundaryRoot,
