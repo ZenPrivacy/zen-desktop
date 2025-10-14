@@ -5,12 +5,11 @@ import { GetLocale, SetLocale } from '../../wailsjs/go/cfg/Config';
 
 import deDE from './locales/de-DE.json';
 import enUS from './locales/en-US.json';
+import frFR from './locales/fr-FR.json';
 import itIT from './locales/it-IT.json';
 import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
 import zhCN from './locales/zh-CN.json';
-import frFR from './locales/fr-FR.json';
-
 
 export const SUPPORTED_LOCALES = [
   'en',
