@@ -34,12 +34,21 @@
     "openError": "開啟記錄檔目錄失敗：{{error}}",
     "tooltip": "開啟記錄檔目錄"
   },
+  "exportDebugDataButton": {
+    "label": "匯出除錯資料",
+    "tooltip": "複製除錯資訊到剪貼簿",
+    "success": "除錯資料已複製到剪貼簿",
+    "error": "匯出除錯資料失敗：{{error}}"
+  },
   "filterLists": {
     "delete": "刪除",
     "more": "更多",
     "removeError": "移除過濾清單失敗：{{error}}",
     "toggleError": "切換過濾清單失敗：{{error}}",
-    "trusted": "信任"
+    "trusted": "信任",
+    "copy": "複製連結",
+    "copied": "已複製",
+    "goTo": "在瀏覽器中開啟"
   },
   "filterTypes": {
     "ads": "廣告",
