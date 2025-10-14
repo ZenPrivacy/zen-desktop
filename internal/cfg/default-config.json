@@ -329,5 +329,5 @@
   "proxy": {
     "port": 0
   },
-  "updatePolicy": "prompt"
+  "updatePolicy": "automatic"
 }
