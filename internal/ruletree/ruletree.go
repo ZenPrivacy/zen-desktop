@@ -123,6 +123,8 @@ func (t *Tree[T]) Insert(pattern string, v T) {
 }
 
 // Get retrieves data matching the given URL.
+//
+// The URL is expected to be a valid URL with scheme and host.
 func (t *Tree[T]) Get(url string) []T {
 	data := make(map[T]struct{})
 
