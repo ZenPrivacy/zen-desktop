@@ -42,7 +42,7 @@ function App() {
                 RestartApplication();
               } catch (error) {
                 AppToaster.show({
-                  message: t('app.update.restartFailed', { err: error }),
+                  message: t('app.update.restartFailed', { error }),
                   intent: 'danger',
                 });
               }
