@@ -47,9 +47,8 @@ type SelfUpdater struct {
 	eventsEmitter selfupdateEventsEmitter
 	restartApp    func() error
 
-	mu            sync.Mutex
-	updateApplied bool
-	inProgress    bool
+	// applyUpdateMu ensures that only one applyUpdate runs at a time.
+	applyUpdateMu sync.Mutex
 }
 
 type release struct {
@@ -158,27 +157,8 @@ func (su *SelfUpdater) isNewer(version string) (bool, error) {
 }
 
 func (su *SelfUpdater) applyUpdate() (bool, error) {
-	su.mu.Lock()
-	if su.updateApplied || su.inProgress {
-		if su.updateApplied {
-			log.Println("update already applied, skipping further checks")
-		}
-		su.mu.Unlock()
-		return false, nil
-	}
-	su.inProgress = true
-	su.mu.Unlock()
-
-	success := false
-	defer func() {
-		su.mu.Lock()
-		if success {
-			su.updateApplied = true
-		}
-
-		su.inProgress = false
-		su.mu.Unlock()
-	}()
+	su.applyUpdateMu.Lock()
+	defer su.applyUpdateMu.Unlock()
 
 	rel, err := su.checkForUpdates()
 	if err != nil {
@@ -216,7 +196,7 @@ func (su *SelfUpdater) applyUpdate() (bool, error) {
 	}
 
 	log.Println("update installed successfully")
-	success = true
+
 	return true, nil
 }
 
@@ -445,7 +425,7 @@ func (su *SelfUpdater) StartPeriodicChecks(
 		return
 	}
 
-	// initial check
+	// Initial check
 	policy := su.config.GetUpdatePolicy()
 	if policy == cfg.UpdatePolicyAutomatic {
 		if updated, err := su.applyUpdate(); err != nil {
