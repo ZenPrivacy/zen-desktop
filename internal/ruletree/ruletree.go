@@ -7,6 +7,10 @@ import (
 
 type Data comparable
 
+// Tree is a prefix tree for storing and retrieving data
+// associated with adblock-style patterns.
+//
+// Insert and Compact must not run concurrently with Get.
 type Tree[T Data] struct {
 	// insertMu protects the tree during inserts.
 	insertMu sync.Mutex
@@ -29,6 +33,7 @@ func New[T Data]() *Tree[T] {
 	}
 }
 
+// Insert adds a pattern with associated data to the tree.
 func (t *Tree[T]) Insert(pattern string, v T) {
 	if pattern == "" {
 		t.generic = append(t.generic, v)
@@ -117,6 +122,7 @@ func (t *Tree[T]) Insert(pattern string, v T) {
 	}
 }
 
+// Get retrieves data matching the given URL.
 func (t *Tree[T]) Get(url string) []T {
 	data := make(map[T]struct{})
 
