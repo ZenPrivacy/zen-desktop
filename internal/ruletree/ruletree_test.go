@@ -348,7 +348,7 @@ func TestPatternMatching(t *testing.T) {
 			}
 		})
 
-		t.Run("", func(t *testing.T) {
+		t.Run("multiple", func(t *testing.T) {
 			t.Parallel()
 
 			tr := New[string]()
