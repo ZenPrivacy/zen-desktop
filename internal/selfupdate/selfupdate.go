@@ -436,13 +436,6 @@ func generateBackupName(originalName string) string {
 	return fmt.Sprintf("%s.backup-%d", originalName, timestamp)
 }
 
-type UpdateCheckType int
-
-const (
-	StartupCheck UpdateCheckType = iota
-	BackgroundCheck
-)
-
 func (su *SelfUpdater) StartPeriodicChecks(
 	ctx context.Context,
 	interval time.Duration,
