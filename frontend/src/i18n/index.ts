@@ -9,6 +9,7 @@ import itIT from './locales/it-IT.json';
 import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
 import zhCN from './locales/zh-CN.json';
+import zhTW from './locales/zh-TW.json';
 
 export const SUPPORTED_LOCALES = [
   'en',
@@ -23,6 +24,7 @@ export const SUPPORTED_LOCALES = [
   'ru-RU',
   'zh',
   'zh-CN',
+  'zh-TW',
 ] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const FALLBACK_LOCALE: SupportedLocale = 'en-US';
@@ -64,6 +66,7 @@ export async function initI18n() {
       'ru-RU': { translation: ruRU },
       zh: { translation: zhCN },
       'zh-CN': { translation: zhCN },
+      'zh-TW': { translation: zhTW },
       it: { translation: itIT },
       'it-IT': { translation: itIT },
     },
