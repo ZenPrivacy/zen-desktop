@@ -1,251 +1,187 @@
 package ruletree
 
 import (
-	"errors"
-	"fmt"
-	"net/http"
-	"net/url"
-	"regexp"
+	"strings"
+	"sync"
 )
 
-type Data interface {
-	ShouldMatchRes(res *http.Response) bool
-	ShouldMatchReq(req *http.Request) bool
-	ParseModifiers(modifiers string) error
-}
+type Data comparable
 
-// RuleTree is a trie-based matcher that is capable of parsing
-// Adblock-style and hosts rules and matching URLs against them.
+// Tree is a prefix tree for storing and retrieving data
+// associated with adblock-style patterns.
 //
-// It is safe for concurrent use.
-type RuleTree[T Data] struct {
-	// root is the root node of the trie that stores the rules.
-	root     node[T]
-	interner *TokenInterner
+// Insert and Compact must not run concurrently with Get.
+type Tree[T Data] struct {
+	// insertMu protects the tree during inserts.
+	insertMu sync.Mutex
+
+	root *node[T]
+	// domainBoundaryRoot stores patterns beginning with tokenDomainBoundary (||).
+	domainBoundaryRoot *node[T]
+	// anchorRoot stores pattern beginning with tokenAnchor (|).
+	anchorRoot *node[T]
+	// generic is data without an associated pattern. It is returned for every Get call.
+	generic []T
 }
 
-var (
-	// matchingPartCG matches the part of a rule that is used to match URLs.
-	// Note: the '$' character is excluded due to its use as the separator between the matching part and modifiers.
-	// This means that rules containing '$' in the matching part will get disregarded, but I can't think of any other
-	// way to reliably distinguish between the matching part and modifiers.
-	matchingPartCG = `([^$]+)`
-	// modifiersCG matches the modifiers part of a rule.
-	modifiersCG    = `(?:\$(.+))`
-	reDomainName   = regexp.MustCompile(fmt.Sprintf(`^\|\|%s%s?$`, matchingPartCG, modifiersCG))
-	reExactAddress = regexp.MustCompile(fmt.Sprintf(`^\|%s%s?$`, matchingPartCG, modifiersCG))
-	reAddressParts = regexp.MustCompile(fmt.Sprintf(`^%s%s?$`, matchingPartCG, modifiersCG))
-	// reGeneric matches rules without a matching part, e.g. `$removeparam=utm_referrer`.
-	reGeneric = regexp.MustCompile(fmt.Sprintf(`^%s+$`, modifiersCG))
-)
-
-func NewRuleTree[T Data]() *RuleTree[T] {
-	return &RuleTree[T]{
-		root:     node[T]{},
-		interner: NewTokenInterner(),
+func New[T Data]() *Tree[T] {
+	return &Tree[T]{
+		root:               &node[T]{},
+		domainBoundaryRoot: &node[T]{},
+		anchorRoot:         &node[T]{},
+		generic:            make([]T, 0),
 	}
 }
 
-func (rt *RuleTree[T]) Add(urlPattern string, data T) error {
-	var rawTokens []string
-	var modifiers string
-	var rootKeyKind nodeKind
-	if match := reDomainName.FindStringSubmatch(urlPattern); match != nil {
-		rootKeyKind = nodeKindDomain
-		rawTokens = tokenize(match[1])
-		modifiers = match[2]
-	} else if match := reExactAddress.FindStringSubmatch(urlPattern); match != nil {
-		rootKeyKind = nodeKindAddressRoot
-		rawTokens = tokenize(match[1])
-		modifiers = match[2]
-	} else if match := reAddressParts.FindStringSubmatch(urlPattern); match != nil {
-		rootKeyKind = nodeKindExactMatch
-		rawTokens = tokenize(match[1])
-		modifiers = match[2]
-	} else if match := reGeneric.FindStringSubmatch(urlPattern); match != nil {
-		rootKeyKind = nodeKindGeneric
-		rawTokens = []string{}
-		modifiers = match[1]
-	} else {
-		return errors.New("unknown rule format")
+// Insert adds a pattern with associated data to the tree.
+func (t *Tree[T]) Insert(pattern string, v T) {
+	if pattern == "" {
+		t.generic = append(t.generic, v)
+		return
 	}
 
-	if modifiers != "" {
-		if err := data.ParseModifiers(modifiers); err != nil {
-			// log.Printf("failed to parse modifiers for rule %q: %v", rule, err)
-			return fmt.Errorf("parse modifiers: %w", err)
-		}
+	var parent *node[T]
+	var n *node[T]
+
+	tokens := tokenize(pattern)
+
+	t.insertMu.Lock()
+	defer t.insertMu.Unlock()
+
+	switch tokens[0] {
+	case tokenDomainBoundary:
+		n, tokens = t.domainBoundaryRoot, tokens[1:]
+	case tokenAnchor:
+		n, tokens = t.anchorRoot, tokens[1:]
+	default:
+		n = t.root
 	}
 
-	var node *node[T]
-	if rootKeyKind == nodeKindExactMatch {
-		node = &rt.root
-	} else {
-		node = rt.root.findOrAddChild(newNodeKey(rootKeyKind, 0))
-	}
-
-	tokenIDs := make([]uint32, 0, len(rawTokens))
-	for _, tok := range rawTokens {
-		tokenIDs = append(tokenIDs, rt.interner.Intern(tok))
-	}
-
-	for i, raw := range rawTokens {
-		switch raw {
-		case "^":
-			node = node.findOrAddChild(newNodeKey(nodeKindSeparator, 0))
-		case "*":
-			node = node.findOrAddChild(newNodeKey(nodeKindWildcard, 0))
-		default:
-			// exact‐match: use the interned ID
-			id := tokenIDs[i]
-			node = node.findOrAddChild(newNodeKey(nodeKindExactMatch, id))
-		}
-	}
-
-	node.mu.Lock()
-	node.data = append(node.data, data)
-	node.mu.Unlock()
-
-	return nil
-}
-
-// Compact walks through the entire tree and compacts the slices used to store child nodes and rules.
-// This can be used to reduce memory usage after all rules have been added.
-// Note that this is a no-op if the tree is being concurrently accessed.
-// Returns the number of capacity reductions made.
-func (rt *RuleTree[T]) Compact() int {
-	var reds int
-	var compactNode func(n *node[T], totalReductions *int)
-
-	compactNode = func(n *node[T], totalReductions *int) {
-		if n == nil {
+	for {
+		if len(tokens) == 0 {
+			if n.isLeaf() {
+				n.leaf.val = append(n.leaf.val, v)
+			} else {
+				n.leaf = &leaf[T]{
+					val: []T{v},
+				}
+			}
 			return
 		}
 
-		var r int
-		n.mu.Lock()
-		n.childrenArr, r = TrimSlice(n.childrenArr)
-		*totalReductions += r
-		n.data, r = TrimSlice(n.data)
-		*totalReductions += r
-		n.mu.Unlock()
+		parent = n
+		n = n.getEdge(tokens[0])
 
-		// XXX: Iterates maps without holding a lock. A global lock is needed to make this safe.
-		for _, child := range n.childrenArr {
-			compactNode(child.node, totalReductions)
+		if n == nil {
+			n := &node[T]{
+				prefix: tokens,
+				leaf: &leaf[T]{
+					val: []T{v},
+				},
+			}
+			parent.addEdge(edge[T]{
+				label: tokens[0],
+				node:  n,
+			})
+			return
 		}
-		for _, child := range n.childrenMap {
-			compactNode(child, totalReductions)
+
+		commonPrefix := longestPrefix(tokens, n.prefix)
+		if commonPrefix == len(n.prefix) {
+			tokens = tokens[commonPrefix:]
+			continue
 		}
+
+		child := &node[T]{
+			prefix: tokens[:commonPrefix],
+		}
+		parent.updateEdge(tokens[0], child)
+
+		child.addEdge(edge[T]{
+			label: n.prefix[commonPrefix],
+			node:  n,
+		})
+		n.prefix = n.prefix[commonPrefix:]
+
+		l := &leaf[T]{
+			val: []T{v},
+		}
+		if commonPrefix == len(tokens) {
+			child.leaf = l
+		} else {
+			n := &node[T]{
+				leaf:   l,
+				prefix: tokens[commonPrefix:],
+			}
+			child.addEdge(edge[T]{
+				label: tokens[commonPrefix],
+				node:  n,
+			})
+		}
+		return
 	}
-
-	compactNode(&rt.root, &reds)
-	return reds
 }
 
-// FindMatchingRulesReq finds all rules that match the given request.
-func (rt *RuleTree[T]) FindMatchingRulesReq(req *http.Request) (data []T) {
-	host := req.URL.Hostname()
-	urlWithoutPort := url.URL{
-		Scheme:   req.URL.Scheme,
-		Host:     host,
-		Path:     req.URL.Path,
-		RawQuery: req.URL.RawQuery,
-	}
-	url := urlWithoutPort.String()
-	tokens := tokenize(url)
+// Get retrieves data matching the given URL.
+//
+// The URL is expected to be a valid URL with scheme and host.
+func (t *Tree[T]) Get(url string) []T {
+	data := make(map[T]struct{})
 
-	// generic rules -> address root -> hostname root -> domain -> etc.
-
-	// generic rules
-	if genericNode := rt.root.FindChild(newNodeKey(nodeKindGeneric, 0)); genericNode != nil {
-		data = append(data, genericNode.FindMatchingRulesReq(req)...)
-	}
-
-	// address root
-	data = append(data, rt.root.FindChild(newNodeKey(nodeKindAddressRoot, 0)).TraverseFindMatchingRulesReq(req, tokens, func(_ *node[T], t []string) bool {
-		// address root rules have to match the entire URL
-		// TODO: look into whether we can match the rule if the remaining tokens only contain the query
-		return len(t) == 0
-	}, rt.interner)...)
-
-	data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
-	tokens = tokens[1:]
-
-	// protocol separator
-	data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
-	tokens = tokens[1:]
-
-	// domain segments
-	for len(tokens) > 0 {
-		if tokens[0] == "/" {
-			break
+	addUnique := func(items []T) {
+		for _, item := range items {
+			if _, exists := data[item]; !exists {
+				data[item] = struct{}{}
+			}
 		}
-		if tokens[0] != "." {
-			data = append(data, rt.root.FindChild(newNodeKey(nodeKindDomain, 0)).TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
+	}
+
+	addUnique(t.root.traverse(url))
+	addUnique(t.anchorRoot.traverse(url))
+
+	inScheme := true
+	inHost := false
+	for i, c := range url {
+		addUnique(t.root.traverse(url[i:]))
+
+		if inHost {
+			if c == '.' {
+				addUnique(t.domainBoundaryRoot.traverse(url[i+1:]))
+			}
+
+			if c == '/' {
+				inHost = false
+			}
 		}
-		data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
-		tokens = tokens[1:]
+
+		if inScheme {
+			if strings.HasSuffix(url[:i+1], "://") {
+				addUnique(t.domainBoundaryRoot.traverse(url[i+1:]))
+				inScheme = false
+				inHost = true
+			}
+		}
 	}
 
-	// rest of the URL
-	// TODO: handle query parameters
-	for len(tokens) > 0 {
-		data = append(data, rt.root.TraverseFindMatchingRulesReq(req, tokens, nil, rt.interner)...)
-		tokens = tokens[1:]
+	result := make([]T, len(t.generic)+len(data))
+	copy(result, t.generic)
+	var i int
+	for d := range data {
+		result[len(t.generic)+i] = d
+		i++
 	}
-
-	return data
+	return result
 }
 
-// FindMatchingRulesRes finds all rules that match the given response.
-// It assumes that the request that generated the response has already been matched by FindMatchingRulesReq.
-func (rt *RuleTree[T]) FindMatchingRulesRes(req *http.Request, res *http.Response) (rules []T) {
-	urlWithoutPort := url.URL{
-		Scheme:   req.URL.Scheme,
-		Host:     req.URL.Hostname(),
-		Path:     req.URL.Path,
-		RawQuery: req.URL.RawQuery,
+func longestPrefix(a, b []token) int {
+	maxLen := len(a)
+	if l := len(b); l < maxLen {
+		maxLen = l
 	}
-	url := urlWithoutPort.String()
-	tokens := tokenize(url)
-
-	// generic rules -> address root -> hostname root -> domain -> etc.
-
-	// generic rules
-	if genericNode := rt.root.FindChild(newNodeKey(nodeKindGeneric, 0)); genericNode != nil {
-		rules = append(rules, genericNode.FindMatchingRulesRes(res)...)
-	}
-
-	// address root
-	rules = append(rules, rt.root.FindChild(newNodeKey(nodeKindAddressRoot, 0)).TraverseFindMatchingRulesRes(res, tokens, func(_ *node[T], t []string) bool {
-		return len(t) == 0
-	}, rt.interner)...)
-
-	rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
-	tokens = tokens[1:]
-
-	// protocol separator
-	rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
-	tokens = tokens[1:]
-
-	// domain segments
-	for len(tokens) > 0 {
-		if tokens[0] == "/" {
-			break
+	for i := range maxLen {
+		if a[i] != b[i] {
+			return i
 		}
-		if tokens[0] != "." {
-			rules = append(rules, rt.root.FindChild(newNodeKey(nodeKindDomain, 0)).TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
-		}
-		rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
-		tokens = tokens[1:]
 	}
-
-	// rest of the URL
-	for len(tokens) > 0 {
-		rules = append(rules, rt.root.TraverseFindMatchingRulesRes(res, tokens, nil, rt.interner)...)
-		tokens = tokens[1:]
-	}
-
-	return rules
+	return maxLen
 }

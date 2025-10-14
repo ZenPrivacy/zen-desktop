@@ -2,24 +2,14 @@ import { Button, FormGroup, MenuItem } from '@blueprintjs/core';
 import { ItemRenderer, Select } from '@blueprintjs/select';
 import { useTranslation } from 'react-i18next';
 
-import { changeLocale, getCurrentLocale, SupportedLocale } from '../../i18n';
+import { changeLocale, getCurrentLocale, LOCALE_LABELS, LocaleItem } from '../../i18n';
 
-interface LocaleItem {
-  value: SupportedLocale;
-  label: string;
+interface LocaleSelectorProps {
+  showLabel?: boolean;
+  showHelper?: boolean;
 }
 
-const items: LocaleItem[] = [
-  { value: 'en-US', label: 'English' },
-  { value: 'de-DE', label: 'Deutsch' },
-  { value: 'kk-KZ', label: 'Қазақша' },
-  { value: 'ru-RU', label: 'Русский' },
-  { value: 'zh-CN', label: '中文（简体)' },
-  { value: 'it-IT', label: 'Italiano' },
-  { value: 'fr-FR', label: 'Français' },
-];
-
-export function LocaleSelector() {
+export function LocaleSelector({ showLabel = true, showHelper = true }: LocaleSelectorProps = {}) {
   const { t } = useTranslation();
 
   const handleLocaleChange = async (item: LocaleItem) => {
@@ -39,20 +29,31 @@ export function LocaleSelector() {
     );
   };
 
-  const currentLocale = items.find((item) => item.value === getCurrentLocale()) || items[0];
+  const currentLocale = LOCALE_LABELS.find((item) => item.value === getCurrentLocale()) || LOCALE_LABELS[0];
+
+  const selectComponent = (
+    <Select<LocaleItem>
+      items={LOCALE_LABELS}
+      activeItem={currentLocale}
+      onItemSelect={handleLocaleChange}
+      itemRenderer={renderItem}
+      filterable={false}
+      popoverProps={{ minimal: true }}
+    >
+      <Button icon="translate" text={currentLocale.label} endIcon="caret-down" />
+    </Select>
+  );
+
+  if (!showLabel && !showHelper) {
+    return selectComponent;
+  }
 
   return (
-    <FormGroup label={t('settings.language.label')} helperText={t('settings.language.helper')}>
-      <Select<LocaleItem>
-        items={items}
-        activeItem={currentLocale}
-        onItemSelect={handleLocaleChange}
-        itemRenderer={renderItem}
-        filterable={false}
-        popoverProps={{ minimal: true }}
-      >
-        <Button rightIcon="caret-down" icon="translate" text={currentLocale.label} />
-      </Select>
+    <FormGroup
+      label={showLabel ? t('settings.language.label') : undefined}
+      helperText={showHelper ? t('settings.language.helper') : undefined}
+    >
+      {selectComponent}
     </FormGroup>
   );
 }

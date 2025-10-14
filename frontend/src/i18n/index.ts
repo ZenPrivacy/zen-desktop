@@ -30,6 +30,20 @@ export const SUPPORTED_LOCALES = [
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const FALLBACK_LOCALE: SupportedLocale = 'en-US';
 
+export interface LocaleItem {
+  value: SupportedLocale;
+  label: string;
+}
+
+export const LOCALE_LABELS: LocaleItem[] = [
+  { value: 'en-US', label: 'English' },
+  { value: 'de-DE', label: 'Deutsch' },
+  { value: 'kk-KZ', label: 'Қазақша' },
+  { value: 'ru-RU', label: 'Русский' },
+  { value: 'zh-CN', label: '中文（简体）' },
+  { value: 'it-IT', label: 'Italiano' },
+];
+
 export function detectSystemLocale(): SupportedLocale {
   const browserLang = navigator.language;
   const detected = SUPPORTED_LOCALES.includes(browserLang as any) ? (browserLang as SupportedLocale) : FALLBACK_LOCALE;

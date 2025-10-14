@@ -9,12 +9,44 @@
       "home": "Start",
       "myRules": "Meine Regeln",
       "settings": "Einstellungen"
+    },
+    "update": {
+      "restartFailed": "App kann nicht neu gestartet werden: {{error}}",
+      "updateAvailable": "Eine neue Version von Zen ist verfügbar.",
+      "restart": "Neustarten"
+    }
+  },
+  "intro": {
+    "welcome": {
+      "title": "Willkommen bei Zen!",
+      "description": "Wählen Sie Ihre Sprache:"
+    },
+    "filterLists": {
+      "title": "Filterlisten",
+      "description": "Um Werbeblockierung und Datenschutz zu aktivieren, verwendet Zen <strong>Filterlisten</strong>. Sie können diese auch später in der App einrichten.",
+      "recommendation": "Basierend auf Ihrer Region empfehlen wir, die folgenden Filterlisten zu aktivieren:"
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "description": "Bitte überprüfen Sie die folgenden Einstellungen:",
+      "settingsNote": "Sie können diese Einstellungen jederzeit in der App ändern."
+    },
+    "connect": {
+      "title": "Alles bereit!",
+      "description": "Alles ist eingerichtet. Drücken Sie \"Start\", um Zens umfassenden Netzwerkschutz zu aktivieren.",
+      "caNote": "Beim ersten Start fordert Zen Sie möglicherweise auf, ein lokales Root-CA-Zertifikat zu installieren. Dies ermöglicht HTTPS-Filterung, damit Zen Werbung und Tracker auf allen Websites blockieren kann. Alles geschieht lokal – <strong>keine Daten verlassen jemals Ihr Gerät</strong>.<br />Technische Details finden Sie auf unserem GitHub.",
+      "socialText": "Wenn Sie möchten, schauen Sie sich unsere sozialen Medien an:",
+      "donateText": "Und erwägen Sie eine Spende auf:"
+    },
+    "buttons": {
+      "skip": "Einführung überspringen",
+      "next": "Weiter"
     }
   },
   "autoStartSwitch": {
     "description": "Zen beim Systemstart starten",
-    "disableError": "Autostart kann nicht deaktiviert werden",
-    "enableError": "Autostart kann nicht aktiviert werden",
+    "disableError": "Autostart kann nicht deaktiviert werden: {{error}}",
+    "enableError": "Autostart kann nicht aktiviert werden: {{error}}",
     "label": "Autostart"
   },
   "createFilterList": {
@@ -112,12 +144,10 @@
       "system": "Systemdesign verwenden"
     },
     "updates": {
-      "automatic": "Automatische Updates",
-      "choosePolicy": "Wählen Sie, wie Updates installiert werden",
-      "description": "Wenn \"Automatische Updates\" ausgewählt ist, sucht die Anwendung beim Start automatisch nach Updates und installiert sie.",
-      "disabled": "Updates deaktivieren",
-      "prompt": "Vor dem Aktualisieren nachfragen",
-      "title": "Updates"
+      "automaticUpdates": "Updates automatisch herunterladen",
+      "description": "Wenn aktiviert, prüft Zen automatisch auf Updates.",
+      "disableError": "Automatische Updates kann nicht deaktiviert werden: {{error}}",
+      "enableError": "Automatische Updates kann nicht aktiviert werden: {{error}}"
     }
   },
   "startStopButton": {

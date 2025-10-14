@@ -3,6 +3,7 @@ package networkrules
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -12,34 +13,26 @@ import (
 )
 
 var (
-	// exceptionRegex matches exception rules.
-	exceptionRegex = regexp.MustCompile(`^@@`)
-
-	reHosts       = regexp.MustCompile(`^(?:0\.0\.0\.0|127\.0\.0\.1)\s(.+)`) // Replace ' ' with \s to support edge-cases mentioned below
+	reHosts       = regexp.MustCompile(`^(?:0\.0\.0\.0|127\.0\.0\.1)\s(.+)`)
 	reHostsIgnore = regexp.MustCompile(`^(?:0\.0\.0\.0|broadcasthost|local|localhost(?:\.localdomain)?|ip6-\w+)$`)
 )
 
+type ruleStore[T any] interface {
+	Insert(string, T)
+	Get(string) []T
+	Compact()
+}
+
 type NetworkRules struct {
-	regularRuleTree   *ruletree.RuleTree[*rule.Rule]
-	exceptionRuleTree *ruletree.RuleTree[*exceptionrule.ExceptionRule]
+	primaryStore   ruleStore[*rule.Rule]
+	exceptionStore ruleStore[*exceptionrule.ExceptionRule]
 }
 
-func NewNetworkRules() *NetworkRules {
-	regularTree := ruletree.NewRuleTree[*rule.Rule]()
-	exceptionTree := ruletree.NewRuleTree[*exceptionrule.ExceptionRule]()
-
+func New() *NetworkRules {
 	return &NetworkRules{
-		regularRuleTree:   regularTree,
-		exceptionRuleTree: exceptionTree,
+		primaryStore:   ruletree.New[*rule.Rule](),
+		exceptionStore: ruletree.New[*exceptionrule.ExceptionRule](),
 	}
-}
-
-// Compact shrinks internal slice capacities in both rule trees to reduce memory usage.
-// It returns the total capacity reductions (sum of cap - len deltas) across both trees.
-func (nr *NetworkRules) Compact() int {
-	regularReductions := nr.regularRuleTree.Compact()
-	exceptionReductions := nr.exceptionRuleTree.Compact()
-	return regularReductions + exceptionReductions
 }
 
 func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isException bool, err error) {
@@ -60,42 +53,118 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 				continue
 			}
 
-			r := fmt.Sprintf("||%s^$document", host)
-			if err := nr.regularRuleTree.Add(r, &rule.Rule{
-				RawRule:    r,
+			pattern := fmt.Sprintf("||%s^$document", host)
+			nr.primaryStore.Insert(pattern, &rule.Rule{
+				RawRule:    pattern,
 				FilterName: filterName,
-			}); err != nil {
-				return false, fmt.Errorf("add host rule: %w", err)
-			}
+			})
 		}
 
 		return false, nil
 	}
 
-	if exceptionRegex.MatchString(rawRule) {
-		return true, nr.exceptionRuleTree.Add(rawRule[2:], &exceptionrule.ExceptionRule{
+	if strings.HasPrefix(rawRule, "@@") {
+		r := &exceptionrule.ExceptionRule{
 			RawRule:    rawRule,
 			FilterName: filterName,
-		})
+		}
+
+		pattern, modifiers, found := strings.Cut(rawRule[2:], "$")
+		if pattern != "" && pattern[0] == '/' && pattern[len(pattern)-1] == '/' {
+			// This is a regexp rule.
+			// TODO: implement proper support for regexp rules.
+			return true, nil
+		}
+		if found {
+			if err := r.ParseModifiers(modifiers); err != nil {
+				return false, fmt.Errorf("parse modifiers: %v", err)
+			}
+		}
+		nr.exceptionStore.Insert(pattern, r)
+
+		return true, nil
 	}
 
-	return false, nr.regularRuleTree.Add(rawRule, &rule.Rule{
+	r := &rule.Rule{
 		RawRule:    rawRule,
 		FilterName: filterName,
+	}
+
+	pattern, modifiers, found := strings.Cut(rawRule, "$")
+	if pattern != "" && pattern[0] == '/' && pattern[len(pattern)-1] == '/' {
+		// This is a regexp rule.
+		// TODO: implement proper support for regexp rules.
+		return false, nil
+	}
+	if found {
+		if err := r.ParseModifiers(modifiers); err != nil {
+			return false, fmt.Errorf("parse modifiers: %v", err)
+		}
+	}
+	nr.primaryStore.Insert(pattern, r)
+
+	return false, nil
+}
+
+func (nr *NetworkRules) ModifyReq(req *http.Request) (appliedRules []rule.Rule, shouldBlock bool, redirectURL string) {
+	url := renderURLWithoutPort(req.URL)
+
+	primaryRules := nr.primaryStore.Get(url)
+	primaryRules = filter(primaryRules, func(r *rule.Rule) bool {
+		return r.ShouldMatchReq(req)
 	})
+	if len(primaryRules) == 0 {
+		return nil, false, ""
+	}
+
+	exceptions := nr.exceptionStore.Get(url)
+	exceptions = filter(exceptions, func(er *exceptionrule.ExceptionRule) bool {
+		return er.ShouldMatchReq(req)
+	})
+
+	initialURL := req.URL.String()
+outer:
+	for _, r := range primaryRules {
+		for _, ex := range exceptions {
+			if ex.Cancels(r) {
+				continue outer
+			}
+		}
+		if r.ShouldBlockReq(req) {
+			return []rule.Rule{*r}, true, ""
+		}
+		if r.ModifyReq(req) {
+			appliedRules = append(appliedRules, *r)
+		}
+	}
+
+	finalURL := req.URL.String()
+	if initialURL != finalURL {
+		return appliedRules, false, finalURL
+	}
+
+	return appliedRules, false, ""
 }
 
 func (nr *NetworkRules) ModifyRes(req *http.Request, res *http.Response) ([]rule.Rule, error) {
-	regularRules := nr.regularRuleTree.FindMatchingRulesRes(req, res)
-	if len(regularRules) == 0 {
+	url := renderURLWithoutPort(req.URL)
+
+	primaryRules := nr.primaryStore.Get(url)
+	primaryRules = filter(primaryRules, func(r *rule.Rule) bool {
+		return r.ShouldMatchRes(res)
+	})
+	if len(primaryRules) == 0 {
 		return nil, nil
 	}
 
-	exceptions := nr.exceptionRuleTree.FindMatchingRulesRes(req, res)
+	exceptions := nr.exceptionStore.Get(url)
+	exceptions = filter(exceptions, func(er *exceptionrule.ExceptionRule) bool {
+		return er.ShouldMatchRes(res)
+	})
 
 	var appliedRules []rule.Rule
 outer:
-	for _, r := range regularRules {
+	for _, r := range primaryRules {
 		for _, ex := range exceptions {
 			if ex.Cancels(r) {
 				continue outer
@@ -114,34 +183,30 @@ outer:
 	return appliedRules, nil
 }
 
-func (nr *NetworkRules) ModifyReq(req *http.Request) (appliedRules []rule.Rule, shouldBlock bool, redirectURL string) {
-	regularRules := nr.regularRuleTree.FindMatchingRulesReq(req)
-	if len(regularRules) == 0 {
-		return nil, false, ""
-	}
+func (nr *NetworkRules) Compact() {
+	nr.primaryStore.Compact()
+	nr.exceptionStore.Compact()
+}
 
-	exceptions := nr.exceptionRuleTree.FindMatchingRulesReq(req)
-	initialURL := req.URL.String()
-outer:
-	for _, r := range regularRules {
-		for _, ex := range exceptions {
-			if ex.Cancels(r) {
-				continue outer
-			}
-		}
-		if r.ShouldBlockReq(req) {
-			return []rule.Rule{*r}, true, ""
-		}
-		if r.ModifyReq(req) {
-			appliedRules = append(appliedRules, *r)
+// filter returns a new slice containing only the elements of arr
+// that satisfy the predicate.
+func filter[T any](arr []T, predicate func(T) bool) []T {
+	var res []T
+	for _, el := range arr {
+		if predicate(el) {
+			res = append(res, el)
 		}
 	}
+	return res
+}
 
-	finalURL := req.URL.String()
-
-	if initialURL != finalURL {
-		return appliedRules, false, finalURL
+func renderURLWithoutPort(u *url.URL) string {
+	stripped := url.URL{
+		Scheme:   u.Scheme,
+		Host:     u.Hostname(),
+		Path:     u.Path,
+		RawQuery: u.RawQuery,
 	}
 
-	return appliedRules, false, ""
+	return stripped.String()
 }
