@@ -9,6 +9,38 @@
       "home": "首頁",
       "myRules": "我的規則",
       "settings": "設定"
+    },
+    "update": {
+      "restartFailed": "重新啟動應用程式失敗：{{error}}",
+      "updateAvailable": "Zen 有新版本可用。",
+      "restart": "重新啟動"
+    }
+  },
+  "intro": {
+    "welcome": {
+      "title": "歡迎使用 Zen！",
+      "description": "選擇您的語言："
+    },
+    "filterLists": {
+      "title": "過濾清單",
+      "description": "為了啟用廣告攔截和隱私保護，Zen 使用<strong>過濾清單</strong>。您也可以稍後在應用程式中設定。",
+      "recommendation": "根據您的地區設定，我們建議啟用以下過濾清單："
+    },
+    "settings": {
+      "title": "設定",
+      "description": "請檢視以下設定：",
+      "settingsNote": "您也可以隨時在應用程式中變更這些設定。"
+    },
+    "connect": {
+      "title": "準備就緒！",
+      "description": "您已準備好開始使用。按下「啟動」以啟用 Zen 的全面網路保護。",
+      "caNote": "首次啟動時，Zen 可能會提示您安裝本機 Root CA 憑證。這可啟用 HTTPS 過濾，讓 Zen 能夠在所有網站上攔截廣告和追蹤器。所有處理都在本機進行 – <strong>資料絕不會離開您的裝置</strong>。<br />完整技術細節請參閱我們的 GitHub。",
+      "socialText": "如果您願意，可以查看我們的社群媒體：",
+      "donateText": "並考慮在以下平台贊助："
+    },
+    "buttons": {
+      "skip": "跳過介紹",
+      "next": "下一步"
     }
   },
   "autoStartSwitch": {
@@ -121,12 +153,10 @@
       "system": "跟隨系統佈景主題"
     },
     "updates": {
-      "automatic": "自動更新",
-      "choosePolicy": "選擇更新安裝方式",
-      "description": "若選擇「自動更新」，應用程式將在啟動時自動檢查並套用更新。",
-      "disabled": "停用更新",
-      "prompt": "更新前詢問",
-      "title": "更新"
+      "automaticUpdates": "自動下載更新",
+      "description": "啟用時，Zen 將自動檢查更新",
+      "disableError": "停用自動更新失敗：{{error}}",
+      "enableError": "啟用自動更新失敗：{{error}}"
     }
   },
   "startStopButton": {
