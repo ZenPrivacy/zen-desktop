@@ -30,7 +30,6 @@ export function FilterLists() {
 
   const fetchLists = async () => {
     const filterLists = await GetFilterLists();
-
     setState({ ...state, filterLists, loading: false });
   };
 
@@ -71,7 +70,7 @@ export function FilterLists() {
           popoverProps={{ minimal: true }}
           filterable={false}
         >
-          <Button text={t(`filterTypes.${type}`)} rightIcon="caret-down" />
+          <Button text={t(`filterTypes.${type}`)} endIcon="caret-down" />
         </Select>
 
         {type === FilterListType.CUSTOM && (
@@ -87,16 +86,17 @@ export function FilterLists() {
           </Popover>
         )}
       </div>
+
       {state.loading && <Spinner size={SpinnerSize.SMALL} className="filter-lists__spinner" />}
 
       {state.filterLists
         .filter((filterList) => filterList.type === type)
         .map((filterList) => (
-          <ListItem
+          <FilterListItem
             key={filterList.url}
             filterList={filterList}
             showDelete={type === FilterListType.CUSTOM}
-            onChange={fetchLists}
+            onRemoved={fetchLists}
           />
         ))}
 
@@ -105,18 +105,21 @@ export function FilterLists() {
   );
 }
 
-function ListItem({
+export function FilterListItem({
   filterList,
   showDelete,
-  onChange,
+  showButtons = true,
+  onRemoved,
 }: {
   filterList: cfg.FilterList;
   showDelete?: boolean;
-  onChange?: () => void;
+  showButtons?: boolean;
+  onRemoved?: () => void;
 }) {
   const { t } = useTranslation();
   const { isProxyRunning } = useProxyState();
   const [switchLoading, setSwitchLoading] = useState(false);
+  const [switchChecked, setSwitchChecked] = useState(filterList.enabled);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -126,19 +129,23 @@ function ListItem({
         <h3 className="filter-lists__list-name">{filterList.name}</h3>
         <Tooltip content={t('common.stopProxyToToggleFilter') as string} disabled={!isProxyRunning} placement="left">
           <Switch
-            checked={filterList.enabled}
+            checked={switchChecked}
             disabled={switchLoading || isProxyRunning}
             onChange={async (e) => {
               setSwitchLoading(true);
-              const err = await ToggleFilterList(filterList.url, e.currentTarget.checked);
+              const initial = switchChecked;
+              const { checked } = e.currentTarget;
+              setSwitchChecked(checked);
+              const err = await ToggleFilterList(filterList.url, checked);
               if (err) {
+                setSwitchChecked(initial);
+                setSwitchLoading(false);
                 AppToaster.show({
                   message: t('filterLists.toggleError', { error: err }),
                   intent: 'danger',
                 });
               }
               setSwitchLoading(false);
-              onChange?.();
             }}
             size="large"
             className="filter-lists__list-switch"
@@ -152,44 +159,46 @@ function ListItem({
       ) : null}
 
       <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
-      <div className="filter-lists__list-buttons">
-        <Tooltip
-          content={t('filterLists.copied') as string}
-          isOpen={copied}
-          hoverOpenDelay={0}
-          hoverCloseDelay={0}
-          position="top"
-          className="filter-lists__list-button"
-        >
+      {showButtons && (
+        <div className="filter-lists__list-buttons">
+          <Tooltip
+            content={t('filterLists.copied') as string}
+            isOpen={copied}
+            hoverOpenDelay={0}
+            hoverCloseDelay={0}
+            position="top"
+            className="filter-lists__list-button"
+          >
+            <Button
+              icon="duplicate"
+              intent="none"
+              className="filter-lists__list-button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(filterList.url);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                } catch (err) {
+                  console.error('Copying error', err);
+                }
+              }}
+            >
+              {t('filterLists.copy')}
+            </Button>
+          </Tooltip>
+
           <Button
-            icon="duplicate"
+            icon="globe-network"
             intent="none"
             className="filter-lists__list-button"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(filterList.url);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 1500);
-              } catch (err) {
-                console.error('Copying error', err);
-              }
+            onClick={() => {
+              BrowserOpenURL(filterList.url);
             }}
           >
-            {t('filterLists.copy')}
+            {t('filterLists.goTo')}
           </Button>
-        </Tooltip>
-
-        <Button
-          icon="globe-network"
-          intent="none"
-          className="filter-lists__list-button"
-          onClick={() => {
-            BrowserOpenURL(filterList.url);
-          }}
-        >
-          {t('filterLists.goTo')}
-        </Button>
-      </div>
+        </div>
+      )}
       {showDelete && (
         <Tooltip content={t('common.stopProxyToDeleteFilter') as string} disabled={!isProxyRunning} placement="right">
           <Button
@@ -209,7 +218,7 @@ function ListItem({
                 });
               }
               setDeleteLoading(false);
-              onChange?.();
+              onRemoved?.();
             }}
           >
             {t('filterLists.delete')}

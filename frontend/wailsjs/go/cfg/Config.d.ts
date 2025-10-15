@@ -13,6 +13,10 @@ export function GetCAInstalled():Promise<boolean>;
 
 export function GetFilterLists():Promise<Array<cfg.FilterList>>;
 
+export function GetFilterListsByLocales(arg1:Array<string>):Promise<Array<cfg.FilterList>>;
+
+export function GetFirstLaunch():Promise<boolean>;
+
 export function GetIgnoredHosts():Promise<Array<string>>;
 
 export function GetLocale():Promise<string>;

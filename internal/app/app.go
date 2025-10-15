@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -106,15 +107,13 @@ func (a *App) commonStartup(ctx context.Context) {
 	go func() {
 		su, err := selfupdate.NewSelfUpdater(&http.Client{
 			Timeout: 20 * time.Second,
-		}, a.config.GetUpdatePolicy())
+		}, a.config, a.eventsHandler, a.RestartApplication)
 		if err != nil {
 			log.Printf("error creating self updater: %v", err)
 			return
 		}
 
-		if err := su.ApplyUpdate(ctx); err != nil {
-			log.Printf("failed to apply update: %v", err)
-		}
+		su.StartPeriodicChecks(ctx, time.Hour)
 	}()
 
 	time.AfterFunc(time.Second, func() {
@@ -180,7 +179,7 @@ func (a *App) StartProxy() (err error) {
 		}
 	}()
 
-	networkRules := networkrules.NewNetworkRules()
+	networkRules := networkrules.New()
 	scriptletInjector, err := scriptlet.NewInjectorWithDefaults()
 	if err != nil {
 		return fmt.Errorf("create scriptlets injector: %v", err)
@@ -417,4 +416,13 @@ func parseLaunchArgs(args []string) (start, hidden bool) {
 		}
 	}
 	return start, hidden
+}
+
+func (a *App) RestartApplication() error {
+	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("restart application: %w", err)
+	}
+	runtime.Quit(a.ctx)
+	return nil
 }

@@ -1,232 +1,552 @@
-/*
-Benchmarks for building and querying the rule tree.
-
-Run benchmarks with:
-
-	// Run all benchmarks
-	go test -bench=. ./internal/ruletree
-
-	// Run BenchmarkMatch and export a memory profile
-	go test -bench=Match$ -memprofile=mem.out ./internal/ruletree
-
-	// Run BenchmarkLoadTree and export a CPU profile
-	go test -bench=LoadTree -cpuprofile=cpu.out ./internal/ruletree
-
-Inspect profile:
-
-	go tool pprof -lines -focus=FindMatchingRulesReq mem.out
-
-pprof tips:
-  - -lines: show line-level metric attribution
-  - -focus=FindMatchingRulesReq: restrict output to FindMatchingRulesReq; filters out setup/teardown noise
-  - -ignore=runtime: hide nodes matching "runtime" (includes GC)
-  - top: show top entries (usually somewhat hard to make sense of)
-  - list <func>: show annotated source for the given function
-  - web: generate an SVG call graph and open in browser
-*/
-package ruletree_test
+package ruletree
 
 import (
 	"bufio"
-	"bytes"
-	"fmt"
-	"math/rand"
-	"net/http"
-	"net/url"
 	"os"
 	"testing"
-
-	"github.com/ZenPrivacy/zen-desktop/internal/ruletree"
 )
 
-const baseSeed = 42
+func TestInsert(t *testing.T) {
+	t.Parallel()
 
-var (
-	rnd         = rand.New(rand.NewSource(baseSeed)) // #nosec G404 -- Not used for cryptographic purposes.
-	filterLists = []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"}
-)
+	t.Run("duplicate values", func(t *testing.T) {
+		t.Parallel()
 
-func BenchmarkLoadTree(b *testing.B) {
-	rawLists := make([][]byte, 0, len(filterLists))
-	var totalBytes int64
-	for _, filename := range filterLists {
-		data, err := os.ReadFile(filename)
-		if err != nil {
-			b.Fatalf("read %s: %v", filename, err)
+		tr := New[string]()
+		tr.Insert("||example.com/ads/*", "R1a")
+
+		tr.Insert("||example.com/ads/*", "R1b")
+
+		got := tr.Get("http://example.com/ads/x")
+		set := asSet(got)
+		if _, ok := set["R1a"]; !ok {
+			t.Fatalf("missing R1a in %v", got)
 		}
-		totalBytes += int64(len(data))
-		rawLists = append(rawLists, data)
-	}
-	b.SetBytes(totalBytes)
-
-	for b.Loop() {
-		tree := ruletree.NewRuleTree[*spyData]()
-		for _, data := range rawLists {
-			scanner := bufio.NewScanner(bytes.NewReader(data))
-
-			for scanner.Scan() {
-				line := scanner.Text()
-				if line == "" {
-					continue
-				}
-
-				if err := tree.Add(line, &spyData{}); err != nil {
-					b.Fatalf("add rule %q: %v", line, err)
-				}
-			}
-
-			if err := scanner.Err(); err != nil {
-				b.Fatalf("scan: %v", err)
-			}
-		}
-	}
-
-	b.ReportAllocs()
-}
-
-func BenchmarkMatch(b *testing.B) {
-	tree, err := loadTree()
-	if err != nil {
-		b.Fatalf("load tree: %v", err)
-	}
-
-	reqs, avgBytes, err := loadReqs()
-	if err != nil {
-		b.Fatalf("load reqs: %v", err)
-	}
-	b.SetBytes(avgBytes)
-
-	var i int
-	for b.Loop() {
-		r := reqs[i%len(reqs)]
-		tree.FindMatchingRulesReq(r)
-		i++
-	}
-
-	b.ReportAllocs()
-}
-
-func BenchmarkMatchParallel(b *testing.B) {
-	tree, err := loadTree()
-	if err != nil {
-		b.Fatalf("load tree: %v", err)
-	}
-
-	reqs, avgBytes, err := loadReqs()
-	if err != nil {
-		b.Fatalf("load reqs: %v", err)
-	}
-	b.SetBytes(avgBytes)
-
-	b.ResetTimer()
-
-	b.RunParallel(func(pb *testing.PB) {
-		var i int
-		for pb.Next() {
-			r := reqs[i%len(reqs)]
-			tree.FindMatchingRulesReq(r)
-			i++
+		if _, ok := set["R1b"]; !ok {
+			t.Fatalf("missing R1b in %v", got)
 		}
 	})
-
-	b.ReportAllocs()
 }
 
-func loadTree() (*ruletree.RuleTree[*spyData], error) {
-	tree := ruletree.NewRuleTree[*spyData]()
+func TestPatternMatching(t *testing.T) {
+	t.Parallel()
 
-	for _, filename := range filterLists {
-		data, err := os.ReadFile(filename)
+	t.Run("wildcard matching", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("zero chars", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("ab*cd", "ab*cd")
+
+			got := tr.Get("abcd")
+			want := []string{"ab*cd"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("multiple chars", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("a*c", "a*c")
+
+			got := tr.Get("abbbbbc")
+			want := []string{"a*c"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("version wildcard", func(t *testing.T) {
+			t.Parallel()
+
+			t.Run("v1", func(t *testing.T) {
+				t.Parallel()
+
+				tr := New[string]()
+				tr.Insert("example.com/api/v*", "example.com/api/v*")
+
+				got := tr.Get("https://example.com/api/v1")
+				want := []string{"example.com/api/v*"}
+				if !equalSets(got, want) {
+					t.Fatalf("got=%v, want=%v", got, want)
+				}
+			})
+
+			t.Run("multiple rules", func(t *testing.T) {
+				t.Parallel()
+
+				tr := New[string]()
+				tr.Insert("example.com/api/v*", "example.com/api/v*")
+
+				tr.Insert("example.com/api/v*/endpoint", "example.com/api/v*/endpoint")
+
+				got := tr.Get("https://example.com/api/v2/endpoint")
+				want := []string{"example.com/api/v*", "example.com/api/v*/endpoint"}
+				if !equalSets(got, want) {
+					t.Fatalf("got=%v, want=%v", got, want)
+				}
+			})
+
+			t.Run("incomplete match", func(t *testing.T) {
+				t.Parallel()
+
+				tr := New[string]()
+				tr.Insert("example.com/api/v*/endpoint", "example.com/api/v*/endpoint")
+
+				got := tr.Get("https://example.com/api/v2/test")
+				want := []string{}
+				if !equalSets(got, want) {
+					t.Fatalf("got=%v, want=%v", got, want)
+				}
+			})
+		})
+	})
+
+	t.Run("separator matching", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("query parameter", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("ads^", "ads^")
+
+			got := tr.Get("http://example.com/ads?x=1")
+			want := []string{"ads^"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("multiple subsequent separators", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("ads^", "ads^")
+
+			got := tr.Get("http://example.com/ads/?x=1")
+			want := []string{"ads^"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("end of address", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("ads^", "ads^")
+
+			got := tr.Get("http://example.com/ads")
+			want := []string{"ads^"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("letters", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("ads^", "ads^")
+
+			got := tr.Get("http://example.com/adsx")
+			want := []string{}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+
+	t.Run("anchor matching", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("beginning of address", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("|http://example.org", "|http://example.org")
+
+			got := tr.Get("http://example.org/page")
+			want := []string{"|http://example.org"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("middle of address", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("|http://example.org", "|http://example.org")
+
+			got := tr.Get("http://domain.com/?url=http://example.org")
+			want := []string{}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("exact suffix", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert(".com/b.js|", ".com/b.js|")
+
+			got := tr.Get("http://example.com/b.js")
+			want := []string{".com/b.js|"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("trailing chars", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("/ads/targeted|", "/ads/targeted|")
+
+			got := tr.Get("http://example.com/ads/targeted/extra")
+			want := []string{}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+
+	t.Run("domain boundary matching", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("main domain", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com/ads", "||example.com/ads")
+
+			got := tr.Get("http://example.com/ads")
+			want := []string{"||example.com/ads"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("lookalike domain", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com/ads", "||example.com/ads")
+
+			got := tr.Get("http://notexample.com/ads")
+			want := []string{}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("subdomain", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com/ads", "||example.com/ads")
+
+			got := tr.Get("https://sub.example.com/ads")
+			want := []string{"||example.com/ads"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("lookalike subdomain", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com/ads", "||example.com/ads")
+
+			got := tr.Get("https://sub.bexample.com/ads")
+			want := []string{}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("wss protocol", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com/ads", "||example.com/ads")
+
+			got := tr.Get("wss://example.com/ads")
+			want := []string{"||example.com/ads"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+
+	t.Run("domain boundary with separator", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("plain host", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com^", "||example.com^")
+
+			got := tr.Get("https://sub.example.com")
+			want := []string{"||example.com^"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("host with path", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com^", "||example.com^")
+
+			got := tr.Get("https://sub.example.com/path")
+			want := []string{"||example.com^"}
+
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("different domain", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("||example.com^", "||example.com^")
+
+			got := tr.Get("https://badexample.com/")
+			want := []string{}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+
+	t.Run("generic matching", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("singular", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("", "")
+
+			got := tr.Get("https://example.com")
+			want := []string{""}
+
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("multiple", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			tr.Insert("", "")
+			tr.Insert("|https://example.com", "|https://example.com")
+			tr.Insert("||example.com", "||example.com")
+
+			got := tr.Get("https://example.com")
+			want := []string{"", "|https://example.com", "||example.com"}
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+
+	t.Run("complex rule intersections", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("set 1", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			rules := []string{
+				"||example.com/*",
+				"||example.com/ads/*",
+				"|http://example.com/ads/top",
+				"|https://example.com/ads/bottom",
+				"/ads/*",
+				"*/top*",
+				"ads^",
+				"swf|",
+				"|https://sub.example.com/strict|",
+			}
+
+			for _, rule := range rules {
+				tr.Insert(rule, rule)
+			}
+
+			got := tr.Get("http://sub.example.com/ads/top?x=1")
+			want := []string{
+				"||example.com/*",
+				"||example.com/ads/*",
+				"*/top*",
+				"/ads/*",
+				"ads^",
+			}
+
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("set 2", func(t *testing.T) {
+			t.Parallel()
+
+			tr := New[string]()
+			rules := []string{
+				"||example.com^",
+				"||example.com/ads/*",
+				"||example.net^",
+				"|https://example.com/login",
+				"|https://sub.example.com/strict|",
+				"str",
+				".com*ct",
+				".com*co",
+				".com*tt",
+			}
+
+			for _, rule := range rules {
+				tr.Insert(rule, rule)
+			}
+
+			got := tr.Get("https://sub.example.com/strict")
+			want := []string{
+				"||example.com^",
+				"|https://sub.example.com/strict|",
+				"str",
+				".com*ct",
+			}
+
+			if !equalSets(got, want) {
+				t.Fatalf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+
+	t.Run("testdata", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("adsdelivery", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("https://example.com/adsdelivery/test")
+			want := []string{"/adsdelivery/*"} // easylist.txt#L218
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("geodator", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("https://geodator.com/geo.php?ip=localhost")
+			want := []string{
+				"/geo.php?",       // easyprivacy.txt#L1044
+				"||geodator.com^", // easylist.txt#L14474
+			}
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("doubleclick", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("https://g.doubleclick.com/statscounter/script.js?id=GTM-123&pagegroup=test&url=zenprivacy.net")
+			want := []string{
+				"||doubleclick.com^", // easylist.txt#L39723
+				"/statscounter/*",    // easyprivacy.txt#L2235
+				"&pagegroup=*&url=",  // easyprivacy.txt#L2937
+				".js?id=GTM-",        // easyprivacy.txt#L2950
+			}
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+
+		t.Run("gtm", func(t *testing.T) {
+			t.Parallel()
+
+			tr := buildTestTree(t)
+
+			got := tr.Get("http://gtm.example.net/t/id.js?st=321")
+			want := []string{"://gtm.*.js?st="} // easyprivacy.txt#L2957
+			if !equalSets(got, want) {
+				t.Errorf("got=%v, want=%v", got, want)
+			}
+		})
+	})
+}
+
+func buildTestTree(t *testing.T) *Tree[string] {
+	t.Helper()
+
+	filterLists := []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"}
+
+	tr := New[string]()
+
+	for _, list := range filterLists {
+		f, err := os.Open(list)
 		if err != nil {
-			return nil, fmt.Errorf("read %s: %v", filename, err)
+			t.Fatalf("open %q: %v", list, err)
 		}
+		defer f.Close()
 
-		scanner := bufio.NewScanner(bytes.NewReader(data))
+		scanner := bufio.NewScanner(f)
+
 		for scanner.Scan() {
 			line := scanner.Text()
 			if line == "" {
 				continue
 			}
 
-			err := tree.Add(line, &spyData{})
-			if err != nil {
-				return nil, fmt.Errorf("add rule %q: %v", line, err)
-			}
+			tr.Insert(line, line)
 		}
 
 		if err := scanner.Err(); err != nil {
-			return nil, fmt.Errorf("scan %s: %v", filename, err)
+			t.Fatalf("scan: %v", err)
 		}
 	}
-	return tree, nil
+
+	return tr
 }
 
-// loadReqs generates a list of HTTP requests from URLs in testdata/urls.txt
-// and synthetic URLs. It returns the requests, average URL length in bytes,
-// and any error encountered.
-func loadReqs() ([]*http.Request, int64, error) {
-	urls, err := loadURLs()
-	if err != nil {
-		return nil, 0, err
+func asSet(xs []string) map[string]struct{} {
+	m := make(map[string]struct{}, len(xs))
+	for _, x := range xs {
+		m[x] = struct{}{}
 	}
+	return m
+}
 
-	reqs := make([]*http.Request, len(urls))
-	var totalURLBytes int64
-	for i, u := range urls {
-		reqs[i] = &http.Request{
-			Method: http.MethodGet,
-			URL:    u,
-			Host:   u.Hostname(),
+func equalSets(a, b []string) bool {
+	am := asSet(a)
+	bm := asSet(b)
+	if len(am) != len(bm) {
+		return false
+	}
+	for k := range am {
+		if _, ok := bm[k]; !ok {
+			return false
 		}
-		totalURLBytes += int64(len(u.String()))
 	}
-	avg := totalURLBytes / int64(len(urls))
-
-	// Shuffle the elements to avoid ordering bias.
-	rnd.Shuffle(len(reqs), func(i, j int) {
-		reqs[i], reqs[j] = reqs[j], reqs[i]
-	})
-
-	return reqs, avg, nil
-}
-
-func loadURLs() ([]*url.URL, error) {
-	const filename = "testdata/urls.txt"
-
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("read %s: %v", filename, err)
-	}
-
-	scanner := bufio.NewScanner(bytes.NewReader(data))
-
-	var urls []*url.URL
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "" {
-			continue
-		}
-		u, err := url.Parse(line)
-		if err != nil {
-			return nil, fmt.Errorf("invalid url: %s", line)
-		}
-		urls = append(urls, u)
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("scan %s: %v", filename, err)
-	}
-
-	return urls, nil
-}
-
-type spyData struct {
-	modifiers string
-}
-
-func (s *spyData) ShouldMatchRes(*http.Response) bool { return true }
-func (s *spyData) ShouldMatchReq(*http.Request) bool  { return true }
-
-func (s *spyData) ParseModifiers(modifiers string) error {
-	s.modifiers = modifiers
-	return nil
+	return true
 }

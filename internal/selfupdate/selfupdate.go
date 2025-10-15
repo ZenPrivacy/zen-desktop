@@ -11,15 +11,18 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
+
+type selfupdateEventsEmitter interface {
+	OnUpdateAvailable()
+}
 
 // NoSelfUpdate is set to "true" for builds distributed to package managers to prevent auto-updating. It is typed as a string because the linker allows only setting string variables at compile time (see https://pkg.go.dev/cmd/link).
 // Set at compile time using ldflags (see the prod-noupdate task in the /tasks/build directory).
@@ -36,11 +39,16 @@ type httpClient interface {
 }
 
 type SelfUpdater struct {
-	version      string
-	noSelfUpdate bool
-	policy       cfg.UpdatePolicyType
-	releaseTrack string
-	httpClient   httpClient
+	version       string
+	noSelfUpdate  bool
+	config        *cfg.Config
+	releaseTrack  string
+	httpClient    httpClient
+	eventsEmitter selfupdateEventsEmitter
+	restartApp    func() error
+
+	// applyUpdateMu ensures that only one applyUpdate runs at a time.
+	applyUpdateMu sync.Mutex
 }
 
 type release struct {
@@ -50,19 +58,27 @@ type release struct {
 	SHA256      string `json:"sha256"`
 }
 
-func NewSelfUpdater(httpClient httpClient, policy cfg.UpdatePolicyType) (*SelfUpdater, error) {
+func NewSelfUpdater(httpClient httpClient, config *cfg.Config, eventsEmitter selfupdateEventsEmitter, restartApp func() error) (*SelfUpdater, error) {
 	if httpClient == nil {
 		return nil, errors.New("httpClient is nil")
+	}
+	if eventsEmitter == nil {
+		return nil, errors.New("eventsEmitter is nil")
 	}
 	if cfg.Version == "" {
 		return nil, errors.New("cfg.Version is empty")
 	}
+	if restartApp == nil {
+		return nil, errors.New("restartApp is nil")
+	}
 
 	u := SelfUpdater{
-		version:      cfg.Version,
-		policy:       policy,
-		releaseTrack: releaseTrack,
-		httpClient:   httpClient,
+		version:       cfg.Version,
+		config:        config,
+		releaseTrack:  releaseTrack,
+		httpClient:    httpClient,
+		eventsEmitter: eventsEmitter,
+		restartApp:    restartApp,
 	}
 	switch NoSelfUpdate {
 	case "true":
@@ -79,11 +95,6 @@ func (su *SelfUpdater) checkForUpdates() (*release, error) {
 	log.Println("checking for updates")
 	if su.noSelfUpdate {
 		log.Println("noSelfUpdate=true, self-update disabled")
-		return nil, nil
-	}
-
-	if su.policy == cfg.UpdatePolicyDisabled {
-		log.Println("updatePolicy=disabled, self-update disabled")
 		return nil, nil
 	}
 
@@ -145,63 +156,48 @@ func (su *SelfUpdater) isNewer(version string) (bool, error) {
 	return false, nil
 }
 
-func (su *SelfUpdater) ApplyUpdate(ctx context.Context) error {
+func (su *SelfUpdater) applyUpdate() (bool, error) {
+	su.applyUpdateMu.Lock()
+	defer su.applyUpdateMu.Unlock()
+
 	rel, err := su.checkForUpdates()
 	if err != nil {
-		return fmt.Errorf("check for updates: %w", err)
+		return false, fmt.Errorf("check for updates: %w", err)
 	}
 	if rel == nil {
-		return nil
+		return false, nil
 	}
 
-	if isNewer, err := su.isNewer(rel.Version); err != nil {
-		return fmt.Errorf("check if newer: %w", err)
-	} else if !isNewer {
-		log.Println("no newer version available")
-		return nil
+	isNewer, err := su.isNewer(rel.Version)
+	if err != nil {
+		return false, fmt.Errorf("check if newer: %w", err)
 	}
-
-	if su.policy == cfg.UpdatePolicyPrompt {
-		if proceed, err := su.showUpdateDialog(ctx, rel.Description); err != nil {
-			return fmt.Errorf("show update dialog: %w", err)
-		} else if !proceed {
-			log.Println("aborting update, user declined")
-			return nil
-		}
+	if !isNewer {
+		return false, nil
 	}
 
 	tmpFile, err := su.downloadAndVerifyFile(rel.AssetURL, rel.SHA256)
 	if err != nil {
-		return fmt.Errorf("download and verify file: %w", err)
+		return false, fmt.Errorf("download and verify file: %w", err)
 	}
 	defer os.Remove(tmpFile)
 
 	switch runtime.GOOS {
 	case "darwin":
 		if err := su.applyUpdateForDarwin(tmpFile); err != nil {
-			return fmt.Errorf("apply update: %w", err)
+			return false, fmt.Errorf("apply update: %w", err)
 		}
 	case "windows", "linux":
 		if err := su.applyUpdateForWindowsOrLinux(tmpFile); err != nil {
-			return fmt.Errorf("apply update: %w", err)
+			return false, fmt.Errorf("apply update: %w", err)
 		}
 	default:
 		panic("unsupported platform")
 	}
 
-	if su.policy == cfg.UpdatePolicyPrompt {
-		if restart, err := su.showRestartDialog(ctx); err != nil {
-			return fmt.Errorf("show restart dialog: %w", err)
-		} else if !restart {
-			log.Println("user declined to restart")
-			return nil
-		}
-	}
+	log.Println("update installed successfully")
 
-	if err := su.restartApplication(ctx); err != nil {
-		return fmt.Errorf("restart application: %w", err)
-	}
-	return nil
+	return true, nil
 }
 
 func (su *SelfUpdater) downloadFile(url, filePath string) error {
@@ -255,37 +251,6 @@ func verifyFileHash(filePath, expectedHash string) error {
 	}
 
 	return nil
-}
-
-func (su *SelfUpdater) showUpdateDialog(ctx context.Context, description string) (bool, error) {
-	action, err := wailsruntime.MessageDialog(ctx, wailsruntime.MessageDialogOptions{
-		Title:         "Would you like to update Zen?",
-		Message:       description,
-		Buttons:       []string{"Yes", "No"},
-		Type:          wailsruntime.QuestionDialog,
-		DefaultButton: "Yes",
-		CancelButton:  "No",
-	})
-	if err != nil {
-		return false, fmt.Errorf("show update dialog: %w", err)
-	}
-
-	return action == "Yes", nil
-}
-
-func (su *SelfUpdater) showRestartDialog(ctx context.Context) (bool, error) {
-	action, err := wailsruntime.MessageDialog(ctx, wailsruntime.MessageDialogOptions{
-		Title:         "Zen has been updated",
-		Message:       "Zen has been updated to the latest version. Would you like to restart it now?",
-		Buttons:       []string{"Yes", "No"},
-		Type:          wailsruntime.QuestionDialog,
-		DefaultButton: "Yes",
-		CancelButton:  "No",
-	})
-	if err != nil {
-		return false, fmt.Errorf("show restart dialog: %w", err)
-	}
-	return action == "Yes", nil
 }
 
 func (su *SelfUpdater) downloadAndVerifyFile(assetURL, expectedHash string) (string, error) {
@@ -348,16 +313,16 @@ func (su *SelfUpdater) applyUpdateForDarwin(tmpFile string) error {
 	rollback := false
 	defer func() {
 		if rollback {
-			log.Printf("Restoring old app bundle from: %s", oldBundlePath)
+			log.Printf("restoring old app bundle from: %s", oldBundlePath)
 
 			if err := os.Rename(oldBundlePath, appBundlePath); err != nil {
-				log.Printf("Failed to restore old app bundle: %v", err)
+				log.Printf("failed to restore old app bundle: %v", err)
 			}
 		} else {
-			log.Printf("Removing old app bundle backup: %s", oldBundlePath)
+			log.Printf("removing old app bundle backup: %s", oldBundlePath)
 
 			if err := os.RemoveAll(oldBundlePath); err != nil {
-				log.Printf("Failed to remove old app bundle backup: %v", err)
+				log.Printf("failed to remove old app bundle backup: %v", err)
 			}
 		}
 	}()
@@ -420,15 +385,6 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 	return nil
 }
 
-func (su *SelfUpdater) restartApplication(ctx context.Context) error {
-	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("restart application: %w", err)
-	}
-	wailsruntime.Quit(ctx)
-	return nil
-}
-
 // hideFile moves the file at the given path to a temporary directory in case it cannot be removed.
 func hideFile(path string) error {
 	tmpDir := os.TempDir()
@@ -438,7 +394,7 @@ func hideFile(path string) error {
 		return fmt.Errorf("move file to temp storage: %w", err)
 	}
 
-	log.Printf("Moved file to temporary storage: %s", newPath)
+	log.Printf("moved file to temporary storage: %s", newPath)
 	return nil
 }
 
@@ -458,4 +414,55 @@ func findAppBundleInDir(dir string) (string, error) {
 func generateBackupName(originalName string) string {
 	timestamp := time.Now().UnixMilli()
 	return fmt.Sprintf("%s.backup-%d", originalName, timestamp)
+}
+
+func (su *SelfUpdater) StartPeriodicChecks(
+	ctx context.Context,
+	interval time.Duration,
+) {
+	if su.noSelfUpdate {
+		log.Println("self-update disabled, skipping periodic update checks")
+		return
+	}
+
+	// Initial check
+	policy := su.config.GetUpdatePolicy()
+	if policy == cfg.UpdatePolicyAutomatic {
+		if updated, err := su.applyUpdate(); err != nil {
+			log.Printf("failed to apply update: %v", err)
+		} else if updated {
+			if err := su.restartApp(); err != nil {
+				log.Printf("failed to restart application: %v", err)
+				su.eventsEmitter.OnUpdateAvailable()
+			}
+			return
+		}
+	}
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				policy := su.config.GetUpdatePolicy()
+				if policy != cfg.UpdatePolicyAutomatic {
+					continue
+				}
+
+				updated, err := su.applyUpdate()
+				if err != nil {
+					log.Printf("failed to apply update: %v", err)
+					continue
+				}
+				if updated {
+					su.eventsEmitter.OnUpdateAvailable()
+					return // Stop further checks
+				}
+			}
+		}
+	}()
 }

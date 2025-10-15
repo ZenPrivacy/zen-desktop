@@ -9,6 +9,38 @@
       "home": "Home",
       "myRules": "My rules",
       "settings": "Settings"
+    },
+    "update": {
+      "restartFailed": "Failed to restart app: {{error}}",
+      "updateAvailable": "A new version of Zen is available.",
+      "restart": "Restart"
+    }
+  },
+  "intro": {
+    "welcome": {
+      "title": "Welcome to Zen!",
+      "description": "Select your language:"
+    },
+    "filterLists": {
+      "title": "Filter lists",
+      "description": "To enable ad-blocking and privacy protection, Zen uses <strong>filter lists</strong>. You can also set them up later in the app.",
+      "recommendation": "Based on your locale, we recommend enabling the following filter lists:"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Review the settings below:",
+      "settingsNote": "You can also change these at any time in the app."
+    },
+    "connect": {
+      "title": "All Set!",
+      "description": "You're ready to go. Press \"Start\" to enable Zen's comprehensive network protection.",
+      "caNote": "On first start, Zen may prompt you to install a local root CA certificate. This enables HTTPS filtering so Zen can block ads and trackers on all sites. Everything happens locally – <strong>no data ever leaves your device</strong>.<br />See our GitHub for full technical details.",
+      "socialText": "If you'd like, check out our socials:",
+      "donateText": "And consider donating on:"
+    },
+    "buttons": {
+      "skip": "Skip introduction",
+      "next": "Next"
     }
   },
   "autoStartSwitch": {
@@ -121,12 +153,10 @@
       "system": "Follow system theme"
     },
     "updates": {
-      "automatic": "Automatic updates",
-      "choosePolicy": "Choose how updates are installed",
-      "description": "If \"Automatic updates\" is selected, the app will automatically check for and apply updates on launch.",
-      "disabled": "Disable updates",
-      "prompt": "Ask before updating",
-      "title": "Updates"
+      "automaticUpdates": "Automatically download updates",
+      "description": "When enabled, Zen will automatically check for updates",
+      "disableError": "Failed to disable automatic updates: {{error}}",
+      "enableError": "Failed to enable automatic updates: {{error}}"
     }
   },
   "startStopButton": {
