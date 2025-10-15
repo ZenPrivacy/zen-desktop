@@ -103,6 +103,10 @@ rubygems.org
 signpath.io
 developer.apple.com
 auth0.com
+hanko.io
+clerk.com
+workos.com
+zitadel.com
 
 # OpenAI from here: https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
 ios.chat.openai.com
