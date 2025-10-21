@@ -325,7 +325,6 @@ func (p *Proxy) proxyConnect(w http.ResponseWriter, connReq *http.Request) {
 		}
 		if err := resp.Body.Close(); err != nil {
 			log.Printf("closing body(%q): %v", logger.Redacted(connReq.Host), err)
-			break
 		}
 
 		if req.Close || resp.Close {
