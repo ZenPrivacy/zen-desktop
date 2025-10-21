@@ -284,12 +284,10 @@ func (p *Proxy) proxyConnect(w http.ResponseWriter, connReq *http.Request) {
 				break
 			}
 
-			switch req.Close {
-			case true:
+			if req.Close {
 				break
-			case false:
-				continue
 			}
+			continue
 		}
 
 		resp, err := p.requestTransport.RoundTrip(req)
