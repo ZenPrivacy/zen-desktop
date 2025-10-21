@@ -7,9 +7,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
 )
@@ -79,9 +77,7 @@ func (nr *NetworkRules) CreateRedirectResponse(req *http.Request, to string) *ht
 	header := http.Header{
 		"Location": []string{to},
 	}
-	if isCrossOrigin(req) {
-		// Satisfy CORS on cross-origin requests.
-		origin := req.Header.Get("Origin")
+	if origin := req.Header.Get("Origin"); origin != "" && origin != "null" {
 		header.Set("Access-Control-Allow-Origin", origin)
 	}
 
@@ -94,18 +90,4 @@ func (nr *NetworkRules) CreateRedirectResponse(req *http.Request, to string) *ht
 		Proto:      req.Proto,
 		Header:     header,
 	}
-}
-
-func isCrossOrigin(r *http.Request) bool {
-	origin := r.Header.Get("Origin")
-	if origin == "" || origin == "null" {
-		return false
-	}
-
-	originURL, err := url.Parse(origin)
-	if err != nil {
-		return false
-	}
-
-	return !strings.EqualFold(originURL.Host, r.Host)
 }
