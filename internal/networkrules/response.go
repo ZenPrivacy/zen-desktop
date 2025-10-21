@@ -7,7 +7,9 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/networkrules/rule"
 )
@@ -74,6 +76,15 @@ func (nr *NetworkRules) CreateBlockPageResponse(req *http.Request, appliedRules 
 
 // CreateRedirectResponse creates a response for a redirected request.
 func (nr *NetworkRules) CreateRedirectResponse(req *http.Request, to string) *http.Response {
+	header := http.Header{
+		"Location": []string{to},
+	}
+	if isCrossOrigin(req) {
+		// Satisfy CORS on cross-origin requests.
+		origin := req.Header.Get("Origin")
+		header.Set("Access-Control-Allow-Origin", origin)
+	}
+
 	return &http.Response{
 		// The use of 307 Temporary Redirect instead of 308 Permanent Redirect is intentional.
 		// 308's can be cached by clients, which might cause issues in cases of erroneous redirects, changing filter rules, etc.
@@ -81,8 +92,20 @@ func (nr *NetworkRules) CreateRedirectResponse(req *http.Request, to string) *ht
 		ProtoMajor: req.ProtoMajor,
 		ProtoMinor: req.ProtoMinor,
 		Proto:      req.Proto,
-		Header: http.Header{
-			"Location": []string{to},
-		},
+		Header:     header,
 	}
+}
+
+func isCrossOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" || origin == "null" {
+		return false
+	}
+
+	originURL, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+
+	return !strings.EqualFold(originURL.Host, r.Host)
 }
