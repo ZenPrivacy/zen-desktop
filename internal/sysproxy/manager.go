@@ -46,7 +46,7 @@ func (m *Manager) Set(proxyPort int, userConfiguredExcludedHosts []string) error
 
 	pacURL := fmt.Sprintf("http://127.0.0.1:%d/proxy.pac", actualPort)
 	if err := setSystemProxy(pacURL); err != nil {
-		return fmt.Errorf("set system proxy with URL %q: %v", pacURL, err)
+		return fmt.Errorf("set system proxy with URL %q: %w", pacURL, err)
 	}
 
 	return nil
