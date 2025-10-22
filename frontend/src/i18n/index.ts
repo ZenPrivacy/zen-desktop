@@ -45,6 +45,7 @@ export const LOCALE_LABELS: LocaleItem[] = [
   { value: 'zh-CN', label: '中文（简体）' },
   { value: 'zh-TW', label: '中文（繁體）' },
   { value: 'it-IT', label: 'Italiano' },
+  { value: 'fr-FR', label: 'Français' },
 ];
 
 export function detectSystemLocale(): SupportedLocale {
