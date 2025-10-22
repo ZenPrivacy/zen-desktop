@@ -74,6 +74,13 @@ func (nr *NetworkRules) CreateBlockPageResponse(req *http.Request, appliedRules 
 
 // CreateRedirectResponse creates a response for a redirected request.
 func (nr *NetworkRules) CreateRedirectResponse(req *http.Request, to string) *http.Response {
+	header := http.Header{
+		"Location": []string{to},
+	}
+	if origin := req.Header.Get("Origin"); origin != "" && origin != "null" {
+		header.Set("Access-Control-Allow-Origin", origin)
+	}
+
 	return &http.Response{
 		// The use of 307 Temporary Redirect instead of 308 Permanent Redirect is intentional.
 		// 308's can be cached by clients, which might cause issues in cases of erroneous redirects, changing filter rules, etc.
@@ -81,8 +88,6 @@ func (nr *NetworkRules) CreateRedirectResponse(req *http.Request, to string) *ht
 		ProtoMajor: req.ProtoMajor,
 		ProtoMinor: req.ProtoMinor,
 		Proto:      req.Proto,
-		Header: http.Header{
-			"Location": []string{to},
-		},
+		Header:     header,
 	}
 }

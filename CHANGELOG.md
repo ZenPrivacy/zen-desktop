@@ -1,5 +1,60 @@
 # Changelog
 
+## v0.14.0
+
+### What's New
+
+- **你好！**
+  Zen now speaks Traditional Chinese, thanks to @lynda0214! Want to contribute a new language or improve an existing one? Check out our contributing guidelines.
+- Minor stability improvements and bug fixes.
+
+### New Contributors
+
+- @lynda0214 made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/485
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.13.1...v0.14.0
+
+## v0.13.1
+
+### What's New
+
+- **Default update policy fix**
+  The default update policy is now set to automatic, ensuring users automatically receive the latest updates by default.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.13.0...v0.13.1
+
+## v0.13.0
+
+### What's New
+
+- **Background update checks**
+  Zen now periodically checks for updates in the background, ensuring you get the latest updates faster.
+- **Interactive onboarding**
+  A new smooth onboarding experience walks you through the initial app setup. Thanks to @kamalovk!
+- **Memory optimization**
+  Rules are now stored more efficiently, reducing the overall RAM usage. Thank you @lzap for help with the improvements!
+- **KDE system proxy support**
+  Zen now properly sets system proxy settings on KDE, which improves integration with the desktop environment. Thanks to @donnykd for implementing this feature!
+- **Ciao!**
+  Zen now speaks Italian, thanks to @davide-damico! Want to contribute a new language or improve an existing one? Check out our contributing guidelines.
+- **More MITM exclusions**
+  Thanks to @Speedauge, Zen now excludes more traffic from sensitive websites from proxying, improving the overall security of your system.
+- **Extended CSS improvements**
+  We're continuing to work on our extended CSS engine, bringing more stability and features.
+- More minor improvements and bug fixes.
+
+### New Contributors
+
+- @davide-damico made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/454
+- @lzap made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/458
+- @Speedauge made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/481
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.12.0...v0.13.0
+
 ## v0.12.0
 
 ### What's New

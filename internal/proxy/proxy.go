@@ -237,12 +237,18 @@ func (p *Proxy) proxyConnect(w http.ResponseWriter, connReq *http.Request) {
 		req, err := http.ReadRequest(connReader)
 		if err != nil {
 			if err != io.EOF {
-				if strings.Contains(err.Error(), "tls: ") {
+				msg := err.Error()
+				if strings.Contains(msg, "tls: ") {
 					log.Printf("adding %s to ignored hosts", logger.Redacted(host))
 					p.addTransparentHost(host)
 				}
-
-				log.Printf("reading request(%s): %v", logger.Redacted(connReq.Host), err)
+				// The following errors occur when the underlying clientConn is closed.
+				// This usually happens during normal request/response flow when the client
+				// decides it no longer needs the connection to the host.
+				// To avoid excessive noise in the logs, we suppress these messages.
+				if !strings.HasSuffix(msg, "connection reset by peer") && !strings.HasSuffix(msg, "An existing connection was forcibly closed by the remote host.") {
+					log.Printf("reading request(%s): %v", logger.Redacted(connReq.Host), err)
+				}
 			}
 			break
 		}
@@ -265,8 +271,23 @@ func (p *Proxy) proxyConnect(w http.ResponseWriter, connReq *http.Request) {
 			log.Printf("handling request for %q: %v", logger.Redacted(req.URL), err)
 		}
 		if filterResp != nil {
-			filterResp.Write(tlsConn)
-			break
+			if _, err := io.Copy(io.Discard, req.Body); err != nil {
+				log.Printf("discarding body for %q: %v", logger.Redacted(req.URL), err)
+				break
+			}
+			if err := req.Body.Close(); err != nil {
+				log.Printf("closing body for %q: %v", logger.Redacted(req.URL), err)
+				break
+			}
+			if err := filterResp.Write(tlsConn); err != nil {
+				log.Printf("writing filter response for %q: %v", logger.Redacted(req.URL), err)
+				break
+			}
+
+			if req.Close {
+				break
+			}
+			continue
 		}
 
 		resp, err := p.requestTransport.RoundTrip(req)

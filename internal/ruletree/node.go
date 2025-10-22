@@ -145,16 +145,14 @@ func (n *node[T]) traverse(url string) []T {
 	return data
 }
 
-var separators []bool
+var separators [256]bool
 
 func init() {
-	separators = make([]bool, 256)
-
 	for _, ch := range "~:/?#[]@!$&'()*+,;=" {
-		separators[int(ch)] = true
+		separators[ch] = true
 	}
 }
 
 func isSeparator(char byte) bool {
-	return separators[int(char)]
+	return separators[char]
 }

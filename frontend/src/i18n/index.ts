@@ -10,6 +10,7 @@ import itIT from './locales/it-IT.json';
 import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
 import zhCN from './locales/zh-CN.json';
+import zhTW from './locales/zh-TW.json';
 
 export const SUPPORTED_LOCALES = [
   'en',
@@ -24,6 +25,7 @@ export const SUPPORTED_LOCALES = [
   'ru-RU',
   'zh',
   'zh-CN',
+  'zh-TW',
   'fr',
   'fr-FR',
 ] as const;
@@ -41,6 +43,7 @@ export const LOCALE_LABELS: LocaleItem[] = [
   { value: 'kk-KZ', label: 'Қазақша' },
   { value: 'ru-RU', label: 'Русский' },
   { value: 'zh-CN', label: '中文（简体）' },
+  { value: 'zh-TW', label: '中文（繁體）' },
   { value: 'it-IT', label: 'Italiano' },
 ];
 
@@ -81,6 +84,7 @@ export async function initI18n() {
       'ru-RU': { translation: ruRU },
       zh: { translation: zhCN },
       'zh-CN': { translation: zhCN },
+      'zh-TW': { translation: zhTW },
       it: { translation: itIT },
       'it-IT': { translation: itIT },
       fr: { translation: frFR },
