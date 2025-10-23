@@ -55,6 +55,7 @@ bankffin.kz
 jusan.kz
 onlinebank.kz
 freedompay.kz
+wlp-acs.com
 
 # Payment processors
 paypal.com
