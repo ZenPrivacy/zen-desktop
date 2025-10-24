@@ -66,7 +66,10 @@ func (inj *Injector) Inject(req *http.Request, res *http.Response) error {
 		return nil
 	}
 
-	nonce := csp.PatchHeaders(res.Header, csp.InlineScript)
+	nonce, err := csp.PatchHeaders(res, csp.InlineScript)
+	if err != nil {
+		return fmt.Errorf("patch CSP headers: %w", err)
+	}
 
 	var injection bytes.Buffer
 	if nonce == "" {
