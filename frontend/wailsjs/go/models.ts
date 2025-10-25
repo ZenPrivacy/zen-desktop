@@ -5,6 +5,11 @@ export namespace cfg {
 	    PROMPT = "prompt",
 	    DISABLED = "disabled",
 	}
+
+}
+
+export namespace filter {
+	
 	export class FilterList {
 	    name: string;
 	    type: string;
