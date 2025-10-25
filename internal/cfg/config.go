@@ -3,7 +3,6 @@ package cfg
 import (
 	"embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +10,9 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+
+	"github.com/ZenPrivacy/zen-core/filter"
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 var (
@@ -55,8 +57,8 @@ type Config struct {
 	sync.RWMutex
 
 	Filter struct {
-		FilterLists []FilterList `json:"filterLists"`
-		MyRules     []string     `json:"myRules"`
+		FilterLists []filter.FilterList `json:"filterLists"`
+		MyRules     []string            `json:"myRules"`
 	} `json:"filter"`
 	Certmanager struct {
 		CAInstalled bool `json:"caInstalled"`
@@ -72,15 +74,6 @@ type Config struct {
 
 	// firstLaunch is true if the application is being run for the first time.
 	firstLaunch bool
-}
-
-type FilterList struct {
-	Name    string         `json:"name"`
-	Type    FilterListType `json:"type"`
-	URL     string         `json:"url"`
-	Enabled bool           `json:"enabled"`
-	Trusted bool           `json:"trusted"`
-	Locales []string       `json:"locales"`
 }
 
 type DebugData struct {
@@ -112,30 +105,6 @@ func (c *Config) ExportDebugData() (string, error) {
 		return "", fmt.Errorf("failed to marshal debug data: %w", err)
 	}
 	return string(jsonData), nil
-}
-
-func (f *FilterList) UnmarshalJSON(data []byte) error {
-	type TempFilterList FilterList
-	var temp TempFilterList
-
-	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
-	}
-
-	if temp.Name == "" {
-		return errors.New("name is required")
-	}
-
-	if temp.URL == "" {
-		return errors.New("URL is required")
-	}
-
-	if temp.Type == "" {
-		return errors.New("type is required")
-	}
-
-	*f = FilterList(temp)
-	return nil
 }
 
 func init() {
@@ -222,7 +191,7 @@ func (c *Config) Save() error {
 }
 
 // GetFilterLists returns the list of enabled filter lists.
-func (c *Config) GetFilterLists() []FilterList {
+func (c *Config) GetFilterLists() []filter.FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -230,7 +199,7 @@ func (c *Config) GetFilterLists() []FilterList {
 }
 
 // AddFilterList adds a new filter list to the list of enabled filter lists.
-func (c *Config) AddFilterList(list FilterList) string {
+func (c *Config) AddFilterList(list filter.FilterList) string {
 	c.Lock()
 	defer c.Unlock()
 
@@ -248,7 +217,7 @@ func (c *Config) AddFilterList(list FilterList) string {
 	return ""
 }
 
-func (c *Config) AddFilterLists(lists []FilterList) error {
+func (c *Config) AddFilterLists(lists []filter.FilterList) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -297,11 +266,11 @@ func (c *Config) ToggleFilterList(url string, enabled bool) string {
 }
 
 // GetTargetTypeFilterLists returns the list of filter lists with particular type.
-func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterList {
+func (c *Config) GetTargetTypeFilterLists(targetType filter.FilterListType) []filter.FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
-	var filterLists []FilterList
+	var filterLists []filter.FilterList
 	for _, filterList := range c.Filter.FilterLists {
 		if filterList.Type == targetType {
 			filterLists = append(filterLists, filterList)
@@ -310,7 +279,7 @@ func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterLis
 	return filterLists
 }
 
-func (c *Config) GetFilterListsByLocales(searchLocales []string) []FilterList {
+func (c *Config) GetFilterListsByLocales(searchLocales []string) []filter.FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -333,7 +302,7 @@ func (c *Config) GetFilterListsByLocales(searchLocales []string) []FilterList {
 		}
 	}
 
-	var filterLists []FilterList
+	var filterLists []filter.FilterList
 outer:
 	for _, filterList := range c.Filter.FilterLists {
 		for _, locale := range filterList.Locales {
@@ -484,4 +453,22 @@ func (c *Config) GetFirstLaunch() bool {
 	defer c.RUnlock()
 
 	return c.firstLaunch
+}
+
+func GetCacheDir() (string, error) {
+	var appName string
+	switch runtime.GOOS {
+	case "darwin", "windows":
+		appName = constants.AppName
+	case "linux":
+		appName = constants.AppNameLowercase
+	default:
+		panic("unsupported platform")
+	}
+
+	base, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(base, appName, "filters"), nil
 }

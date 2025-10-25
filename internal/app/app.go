@@ -12,22 +12,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ZenPrivacy/zen-desktop/internal/certgen"
-	"github.com/ZenPrivacy/zen-desktop/internal/certstore"
+	"github.com/ZenPrivacy/zen-core/certgen"
+	"github.com/ZenPrivacy/zen-core/certstore"
+	"github.com/ZenPrivacy/zen-core/cosmetic"
+	"github.com/ZenPrivacy/zen-core/cssrule"
+	"github.com/ZenPrivacy/zen-core/extendedcss"
+	"github.com/ZenPrivacy/zen-core/filter"
+	"github.com/ZenPrivacy/zen-core/filter/whitelistserver"
+	"github.com/ZenPrivacy/zen-core/filterliststore"
+	"github.com/ZenPrivacy/zen-core/jsrule"
+	"github.com/ZenPrivacy/zen-core/networkrules"
+	"github.com/ZenPrivacy/zen-core/proxy"
+	"github.com/ZenPrivacy/zen-core/scriptlet"
+	"github.com/ZenPrivacy/zen-core/sysproxy"
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
-	"github.com/ZenPrivacy/zen-desktop/internal/cosmetic"
-	"github.com/ZenPrivacy/zen-desktop/internal/cssrule"
-	"github.com/ZenPrivacy/zen-desktop/internal/extendedcss"
-	"github.com/ZenPrivacy/zen-desktop/internal/filter"
-	"github.com/ZenPrivacy/zen-desktop/internal/filter/filterliststore"
-	"github.com/ZenPrivacy/zen-desktop/internal/filter/whitelistserver"
-	"github.com/ZenPrivacy/zen-desktop/internal/jsrule"
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
-	"github.com/ZenPrivacy/zen-desktop/internal/networkrules"
-	"github.com/ZenPrivacy/zen-desktop/internal/proxy"
-	"github.com/ZenPrivacy/zen-desktop/internal/scriptlet"
 	"github.com/ZenPrivacy/zen-desktop/internal/selfupdate"
-	"github.com/ZenPrivacy/zen-desktop/internal/sysproxy"
 	"github.com/ZenPrivacy/zen-desktop/internal/systray"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -64,11 +65,16 @@ func NewApp(name string, config *cfg.Config, startOnDomReady bool) (*App, error)
 		return nil, errors.New("config is nil")
 	}
 
-	certStore, err := certstore.NewDiskCertStore(config)
+	certStore, err := certstore.NewDiskCertStore(config, cfg.DataDir, constants.OrgName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cert store: %v", err)
 	}
-	filterListStore, err := filterliststore.New()
+
+	cacheDir, err := cfg.GetCacheDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cache dir: %v", err)
+	}
+	filterListStore, err := filterliststore.New(cacheDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create filter list store: %v", err)
 	}
@@ -195,7 +201,7 @@ func (a *App) StartProxy() (err error) {
 	jsRuleInjector := jsrule.NewInjector()
 	whitelistSrv := whitelistserver.New(networkRules)
 
-	filter, err := filter.NewFilter(a.config, networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, a.filterListStore, whitelistSrv)
+	filter, err := filter.NewFilter(networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, a.filterListStore, whitelistSrv, a.config.GetFilterLists(), a.config.GetMyRules())
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}
@@ -205,7 +211,7 @@ func (a *App) StartProxy() (err error) {
 	}
 	a.whitelistSrv = whitelistSrv
 
-	certGenerator, err := certgen.NewCertGenerator(a.certStore)
+	certGenerator, err := certgen.NewCertGenerator(a.certStore, constants.OrgName)
 	if err != nil {
 		return fmt.Errorf("create cert manager: %v", err)
 	}
@@ -332,7 +338,7 @@ func (a *App) ExportCustomFilterLists() error {
 		return errors.New("no file selected")
 	}
 
-	customFilterLists := a.config.GetTargetTypeFilterLists(cfg.FilterListTypeCustom)
+	customFilterLists := a.config.GetTargetTypeFilterLists(filter.FilterListTypeCustom)
 
 	if len(customFilterLists) == 0 {
 		return errors.New("no custom filter lists to export")
@@ -373,7 +379,7 @@ func (a *App) ImportCustomFilterLists() error {
 		return err
 	}
 
-	var filterLists []cfg.FilterList
+	var filterLists []filter.FilterList
 	if err := json.Unmarshal(data, &filterLists); err != nil {
 		log.Printf("failed to unmarshal filter lists: %v", err)
 		return errors.New("incorrect filter lists format")
