@@ -14,8 +14,8 @@ permissions:
   checks: write
 
 jobs:
-  test:
-    name: Test (${{ matrix.os }})
+  test-go:
+    name: Test Go (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -29,17 +29,6 @@ jobs:
           go-version-file: ./go.mod
       - name: Run go version
         run: go version
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: node --version
-      - name: Install scriptlets npm packages
-        run: npm ci
-        working-directory: scriptlets
-      - name: Install extended-css npm packages
-        run: npm ci
-        working-directory: extended-css
       - name: Set up Task
         uses: arduino/setup-task@v1
         with:

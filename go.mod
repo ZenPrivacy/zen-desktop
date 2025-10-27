@@ -6,7 +6,7 @@ module github.com/ZenPrivacy/zen-desktop
 go 1.25.3
 
 require (
-	github.com/ZenPrivacy/zen-core v1.0.0
+	github.com/ZenPrivacy/zen-core v1.0.2
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/wailsapp/wails/v2 v2.10.2
 	golang.org/x/sys v0.37.0
