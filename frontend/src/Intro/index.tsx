@@ -21,7 +21,7 @@ export function Intro({ onClose }: IntroProps) {
   const { t } = useTranslation();
 
   const [currentScreen, setCurrentScreen] = useState(1);
-  const [filterLists, setFilterLists] = useState<filter.FilterList[]>([]);
+  const [filterLists, setFilterLists] = useState<filter.List[]>([]);
   const [filterListsLoading, setFilterListsLoading] = useState(true);
 
   useEffect(() => {

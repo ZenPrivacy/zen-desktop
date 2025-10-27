@@ -338,7 +338,7 @@ func (a *App) ExportCustomFilterLists() error {
 		return errors.New("no file selected")
 	}
 
-	customFilterLists := a.config.GetTargetTypeFilterLists(filter.FilterListTypeCustom)
+	customFilterLists := a.config.GetTargetTypeFilterLists(filter.ListTypeCustom)
 
 	if len(customFilterLists) == 0 {
 		return errors.New("no custom filter lists to export")
@@ -379,7 +379,7 @@ func (a *App) ImportCustomFilterLists() error {
 		return err
 	}
 
-	var filterLists []filter.FilterList
+	var filterLists []filter.List
 	if err := json.Unmarshal(data, &filterLists); err != nil {
 		log.Printf("failed to unmarshal filter lists: %v", err)
 		return errors.New("incorrect filter lists format")

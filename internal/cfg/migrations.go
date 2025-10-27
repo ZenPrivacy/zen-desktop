@@ -17,7 +17,7 @@ import (
 // Warning: RunMigration() runs the migrations in arbitrary order.
 var migrations = map[string]func(c *Config) error{
 	"v0.3.0": func(c *Config) error {
-		errStr := c.AddFilterList(filter.FilterList{
+		errStr := c.AddFilterList(filter.List{
 			Name:    "DandelionSprout's URL Shortener",
 			Type:    "privacy",
 			URL:     "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt",
@@ -93,7 +93,7 @@ var migrations = map[string]func(c *Config) error{
 		if err := c.Save(); err != nil {
 			return fmt.Errorf("save config: %v", err)
 		}
-		errStr := c.AddFilterList(filter.FilterList{
+		errStr := c.AddFilterList(filter.List{
 			Name:    "Zen - Ads",
 			Type:    "ads",
 			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
@@ -119,7 +119,7 @@ var migrations = map[string]func(c *Config) error{
 		if err := c.Save(); err != nil {
 			return fmt.Errorf("save config: %v", err)
 		}
-		errStr := c.AddFilterList(filter.FilterList{
+		errStr := c.AddFilterList(filter.List{
 			Name:    "Zen - Privacy",
 			Type:    "privacy",
 			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt",

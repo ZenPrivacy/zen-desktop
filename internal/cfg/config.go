@@ -27,12 +27,6 @@ var (
 //go:embed default-config.json
 var defaultConfig embed.FS
 
-type FilterListType string
-
-const (
-	FilterListTypeCustom FilterListType = "custom"
-)
-
 type UpdatePolicyType string
 
 const (
@@ -57,8 +51,8 @@ type Config struct {
 	sync.RWMutex
 
 	Filter struct {
-		FilterLists []filter.FilterList `json:"filterLists"`
-		MyRules     []string            `json:"myRules"`
+		FilterLists []filter.List `json:"filterLists"`
+		MyRules     []string      `json:"myRules"`
 	} `json:"filter"`
 	Certmanager struct {
 		CAInstalled bool `json:"caInstalled"`
@@ -191,7 +185,7 @@ func (c *Config) Save() error {
 }
 
 // GetFilterLists returns the list of enabled filter lists.
-func (c *Config) GetFilterLists() []filter.FilterList {
+func (c *Config) GetFilterLists() []filter.List {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -199,7 +193,7 @@ func (c *Config) GetFilterLists() []filter.FilterList {
 }
 
 // AddFilterList adds a new filter list to the list of enabled filter lists.
-func (c *Config) AddFilterList(list filter.FilterList) string {
+func (c *Config) AddFilterList(list filter.List) string {
 	c.Lock()
 	defer c.Unlock()
 
@@ -217,7 +211,7 @@ func (c *Config) AddFilterList(list filter.FilterList) string {
 	return ""
 }
 
-func (c *Config) AddFilterLists(lists []filter.FilterList) error {
+func (c *Config) AddFilterLists(lists []filter.List) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -266,11 +260,11 @@ func (c *Config) ToggleFilterList(url string, enabled bool) string {
 }
 
 // GetTargetTypeFilterLists returns the list of filter lists with particular type.
-func (c *Config) GetTargetTypeFilterLists(targetType filter.FilterListType) []filter.FilterList {
+func (c *Config) GetTargetTypeFilterLists(targetType filter.ListType) []filter.List {
 	c.RLock()
 	defer c.RUnlock()
 
-	var filterLists []filter.FilterList
+	var filterLists []filter.List
 	for _, filterList := range c.Filter.FilterLists {
 		if filterList.Type == targetType {
 			filterLists = append(filterLists, filterList)
@@ -279,7 +273,7 @@ func (c *Config) GetTargetTypeFilterLists(targetType filter.FilterListType) []fi
 	return filterLists
 }
 
-func (c *Config) GetFilterListsByLocales(searchLocales []string) []filter.FilterList {
+func (c *Config) GetFilterListsByLocales(searchLocales []string) []filter.List {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -302,7 +296,7 @@ func (c *Config) GetFilterListsByLocales(searchLocales []string) []filter.Filter
 		}
 	}
 
-	var filterLists []filter.FilterList
+	var filterLists []filter.List
 outer:
 	for _, filterList := range c.Filter.FilterLists {
 		for _, locale := range filterList.Locales {

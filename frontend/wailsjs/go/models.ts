@@ -10,7 +10,7 @@ export namespace cfg {
 
 export namespace filter {
 	
-	export class FilterList {
+	export class List {
 	    name: string;
 	    type: string;
 	    url: string;
@@ -19,7 +19,7 @@ export namespace filter {
 	    locales: string[];
 	
 	    static createFrom(source: any = {}) {
-	        return new FilterList(source);
+	        return new List(source);
 	    }
 	
 	    constructor(source: any = {}) {

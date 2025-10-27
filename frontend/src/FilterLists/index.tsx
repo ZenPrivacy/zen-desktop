@@ -21,7 +21,7 @@ import { FilterListType } from './types';
 export function FilterLists() {
   const { t } = useTranslation();
   const [state, setState] = useState<{
-    filterLists: filter.FilterList[];
+    filterLists: filter.List[];
     loading: boolean;
   }>({
     filterLists: [],
@@ -111,7 +111,7 @@ export function FilterListItem({
   showButtons = true,
   onRemoved,
 }: {
-  filterList: filter.FilterList;
+  filterList: filter.List;
   showDelete?: boolean;
   showButtons?: boolean;
   onRemoved?: () => void;

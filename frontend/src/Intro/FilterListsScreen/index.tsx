@@ -4,7 +4,7 @@ import { filter } from '../../../wailsjs/go/models';
 import { FilterListItem } from '../../FilterLists';
 
 interface FilterListsScreenProps {
-  filterLists: filter.FilterList[];
+  filterLists: filter.List[];
 }
 
 export function FilterListsScreen({ filterLists }: FilterListsScreenProps) {

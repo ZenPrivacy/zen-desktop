@@ -4,17 +4,17 @@ import {filter} from '../models';
 import {cfg} from '../models';
 import {sync} from '../models';
 
-export function AddFilterList(arg1:filter.FilterList):Promise<string>;
+export function AddFilterList(arg1:filter.List):Promise<string>;
 
-export function AddFilterLists(arg1:Array<filter.FilterList>):Promise<void>;
+export function AddFilterLists(arg1:Array<filter.List>):Promise<void>;
 
 export function ExportDebugData():Promise<string>;
 
 export function GetCAInstalled():Promise<boolean>;
 
-export function GetFilterLists():Promise<Array<filter.FilterList>>;
+export function GetFilterLists():Promise<Array<filter.List>>;
 
-export function GetFilterListsByLocales(arg1:Array<string>):Promise<Array<filter.FilterList>>;
+export function GetFilterListsByLocales(arg1:Array<string>):Promise<Array<filter.List>>;
 
 export function GetFirstLaunch():Promise<boolean>;
 
@@ -28,7 +28,7 @@ export function GetPACPort():Promise<number>;
 
 export function GetPort():Promise<number>;
 
-export function GetTargetTypeFilterLists(arg1:filter.FilterListType):Promise<Array<filter.FilterList>>;
+export function GetTargetTypeFilterLists(arg1:filter.ListType):Promise<Array<filter.List>>;
 
 export function GetUpdatePolicy():Promise<cfg.UpdatePolicyType>;
 
