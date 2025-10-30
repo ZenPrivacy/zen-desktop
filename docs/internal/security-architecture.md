@@ -52,6 +52,15 @@ Zen's source code is hosted on GitHub. We apply the following security measures:
 - Only project leads can create and modify release tags and releases.
 - CI actions follow best practices, such as minimal privileges and pinned action versions.
 
+### Immutable releases
+
+Zen's releases are immutable. Once a release is published, it – and the associated Git tag – cannot be modified. This ensures that a potential attacker cannot silently inject malicious binaries into an existing release.
+
+To verify that a release is immutable, check for the "Immutable" label below the title on the release page.
+
+To learn more about immutable releases, see [GitHub's documentation](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases).
+
+
 ### Artifact attestations
 
 Zen's artifacts, including release assets listed in our GitHub README and on the [project website](https://zenprivacy.net) are built [via GitHub CI](/.github/workflows/build.yml). The CI uses [artifact attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) to provide cryptographically verifiable proof of their provenance and integrity. In particular, the attestations allow you to verify that:
