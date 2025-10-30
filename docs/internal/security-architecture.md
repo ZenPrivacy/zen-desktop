@@ -28,7 +28,8 @@ We're currently exploring ways to encrypt the private key using system APIs (see
 
 Zen configures the system proxy using a [PAC script](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file) (see [the implementation](https://github.com/ZenPrivacy/zen-core/blob/master/sysproxy/pac.go)). It allows Zen to specify a list of hostnames traffic **to which** should not be proxied. There's a list common to all platforms, as well as platform-specific lists for Windows and macOS. The [common list](https://github.com/ZenPrivacy/zen-core/blob/master/sysproxy/exclusions/common.txt) includes the following categories:
 
-
+- Sensitive
+- Login (auth gateways)
 - Government and eGov websites
 - Password managers
 - Banks and financial institutions
