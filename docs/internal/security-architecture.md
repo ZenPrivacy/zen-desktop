@@ -18,16 +18,18 @@ To enable its content blocking and privacy protection features, Zen generates an
 
 - The CA public/private key pair is generated locally on the user's computer.
 - The private key is never sent to any remote server.
-- The private key is stored with [minimal permissions](/internal/certstore/diskcertstore.go#L197) (`0600`) to reduce (though not eliminate) the risk of it being compromised by malicious processes running on the same computer.
+- The private key is stored with [minimal permissions](https://github.com/ZenPrivacy/zen-core/blob/master/certstore/diskcertstore.go#L201) (`0600`) to reduce (though not eliminate) the risk of it being compromised by malicious processes running on the same computer.
 
-You can verify these claims by reviewing the relevant code in [`diskcertstore.go`](/internal/certstore/diskcertstore.go).
+You can verify these claims by reviewing the relevant code in [`diskcertstore.go`](https://github.com/ZenPrivacy/zen-core/blob/master/certstore/diskcertstore.go).
 
 We're currently exploring ways to encrypt the private key using system APIs (see [Electron's safeStorage API documentation](https://www.electronjs.org/docs/latest/api/safe-storage) for examples). If you have suggestions or would like to contribute to this effort, please let us know.
 
 ### No proxying for sensitive hostnames
 
-Zen configures the system proxy using a [PAC script](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file) (see [the implementation](/internal/sysproxy/pac.go)). It allows Zen to specify a list of hostnames traffic **to which** should not be proxied. There's a list common to all platforms, as well as platform-specific lists for Windows and macOS. The [common list](/internal/sysproxy/exclusions/common.txt) includes the following categories:
+Zen configures the system proxy using a [PAC script](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file) (see [the implementation](https://github.com/ZenPrivacy/zen-core/blob/master/sysproxy/pac.go)). It allows Zen to specify a list of hostnames traffic **to which** should not be proxied. There's a list common to all platforms, as well as platform-specific lists for Windows and macOS. The [common list](https://github.com/ZenPrivacy/zen-core/blob/master/sysproxy/exclusions/common.txt) includes the following categories:
 
+- Sensitive
+- Login (auth gateways)
 - Government and eGov websites
 - Password managers
 - Banks and financial institutions
@@ -37,7 +39,7 @@ Zen configures the system proxy using a [PAC script](https://developer.mozilla.o
 
 We encourage users to suggest additional entries for this list - both within the current categories and potentially new ones.
 
-Platform-specific lists include hosts identified by OS vendors as ones that should not be proxied. See [the Windows list](/internal/sysproxy/exclusions/windows.txt) and [the macOS list](/internal/sysproxy/exclusions/darwin.txt) for details.
+Platform-specific lists include hosts identified by OS vendors as ones that should not be proxied. See [the Windows list](https://github.com/ZenPrivacy/zen-core/blob/master/sysproxy/exclusions/windows.txt) and [the macOS list](https://github.com/ZenPrivacy/zen-core/blob/master/sysproxy/exclusions/darwin.txt) for details.
 
 ## Infrastructure-level security
 
@@ -49,6 +51,15 @@ Zen's source code is hosted on GitHub. We apply the following security measures:
 - All pull requests must be reviewed by at least one other organization member and must pass all tests and checks before being merged.
 - Only project leads can create and modify release tags and releases.
 - CI actions follow best practices, such as minimal privileges and pinned action versions.
+
+### Immutable releases
+
+Zen's releases are immutable. Once a release is published, it – and the associated Git tag – cannot be modified. This ensures that a potential attacker cannot silently inject malicious binaries into an existing release.
+
+To verify that a release is immutable, check for the "Immutable" label below the title on the release page.
+
+To learn more about immutable releases, see [GitHub's documentation](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases).
+
 
 ### Artifact attestations
 
