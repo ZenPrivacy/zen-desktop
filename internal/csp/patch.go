@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"mime"
 	"net/http"
 	"strings"
 
@@ -74,10 +73,12 @@ func patchPolicies(policies []string, nonce string, kind inlineKind) ([]string, 
 
 	nonceToken := "'nonce-" + nonce + "'"
 	changed := false
-
+	// In case of multiple lines/policies, the browsers will select the most restrictive one.
+	// For this reason, we modify each independently so they all allow the inline tag.
+	// See more: https://content-security-policy.com/examples/multiple-csp-headers/.
 	for i, line := range policies {
 		rawDirs := strings.Split(line, ";")
-
+		// Find the most specific directive governing this kind on this line/policy.
 		bestIdx, bestName, bestPrio, bestValue := -1, "", 0, ""
 		for j, raw := range rawDirs {
 			d := strings.TrimSpace(raw)
@@ -89,7 +90,7 @@ func patchPolicies(policies []string, nonce string, kind inlineKind) ([]string, 
 				bestIdx, bestName, bestPrio, bestValue = j, name, prio, value
 			}
 		}
-
+		// No relevant directive on this line; leave it as-is.
 		if bestIdx == -1 {
 			continue
 		}
@@ -100,7 +101,7 @@ func patchPolicies(policies []string, nonce string, kind inlineKind) ([]string, 
 
 		var newValue string
 		switch bestValue {
-		case "", "'none'":
+		case "'none'":
 			newValue = nonceToken
 		default:
 			newValue = bestValue + " " + nonceToken
@@ -125,22 +126,15 @@ func patchMetaCSPs(res *http.Response, nonce string, kind inlineKind) (bool, err
 		return false, nil
 	}
 
-	contentType := res.Header.Get("Content-Type")
-	if contentType == "" {
-		return false, nil
-	}
-
-	mediaType, _, err := mime.ParseMediaType(contentType)
-	if err != nil || !strings.EqualFold(mediaType, "text/html") {
-		return false, nil
-	}
-
-	err = httprewrite.StreamRewrite(res, func(src io.ReadCloser, dst *io.PipeWriter) {
+	err := httprewrite.StreamRewrite(res, func(src io.ReadCloser, dst *io.PipeWriter) {
 		defer src.Close()
 
 		z := html.NewTokenizer(src)
+		var foundBody bool
+	loop:
 		for {
-			switch z.Next() {
+			tt := z.Next()
+			switch tt {
 			case html.ErrorToken:
 				dst.CloseWithError(z.Err())
 				return
@@ -177,6 +171,22 @@ func patchMetaCSPs(res *http.Response, nonce string, kind inlineKind) (bool, err
 					dst.CloseWithError(err)
 					return
 				}
+				if tt == html.StartTagToken && strings.EqualFold(tok.Data, "body") {
+					foundBody = true
+					break loop
+				}
+			case html.EndTagToken:
+				raw := z.Raw()
+				if _, err := dst.Write(raw); err != nil {
+					dst.CloseWithError(err)
+					return
+				}
+				tok := z.Token()
+				// The head is over, no more meta tags.
+				if strings.EqualFold(tok.Data, "head") {
+					foundBody = true
+					break loop
+				}
 			default:
 				if _, err := dst.Write(z.Raw()); err != nil {
 					dst.CloseWithError(err)
@@ -184,6 +194,15 @@ func patchMetaCSPs(res *http.Response, nonce string, kind inlineKind) (bool, err
 				}
 			}
 		}
+
+		if foundBody {
+			if _, err := io.Copy(dst, src); err != nil {
+				dst.CloseWithError(err)
+				return
+			}
+		}
+
+		dst.Close()
 	})
 	if err != nil {
 		return false, err
