@@ -1,5 +1,7 @@
 github.com/ZenPrivacy/zen-core v1.0.3 h1:eODCCgSVBfG3H/pkBndZBsDBLO1FLFVCCUYLXVMFQPs=
 github.com/ZenPrivacy/zen-core v1.0.3/go.mod h1:90KCSuaHdhBhORN3IxF5X2UUxW+69RzG+BhXb0htLzA=
+github.com/ZenPrivacy/zen-core v1.0.4 h1:7WULW5feWcwdfX3A4bKaXbNgZsJbP5GvplAadl8opt8=
+github.com/ZenPrivacy/zen-core v1.0.4/go.mod h1:90KCSuaHdhBhORN3IxF5X2UUxW+69RzG+BhXb0htLzA=
 github.com/andybalholm/brotli v1.2.0 h1:ukwgCxwYrmACq68yiUqwIWnGY0cTPox/M94sVwToPjQ=
 github.com/andybalholm/brotli v1.2.0/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
