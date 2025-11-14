@@ -16,9 +16,15 @@ import './style.css';
 
   const style = document.createElement('style');
   style.innerHTML = `
-      body, html {
-        font-family: 'Twemoji Country Flags', Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
-      }
+html, body {
+  font-family: 'Twemoji Country Flags', Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+}
+
+@supports (font-variation-settings: normal) {
+  html, body {
+    font-family: 'Twemoji Country Flags', InterVariable, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+  }
+}
     `;
   document.head.appendChild(style);
 })();
