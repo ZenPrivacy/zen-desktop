@@ -63,7 +63,7 @@ brew install --cask zen-privacy
 - x64: [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_linux_amd64.tar.gz)
 - ARM64: [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_linux_arm64.tar.gz)
 
-On Linux, automatic proxy configuration is currently only supported on GNOME-based desktop environments.
+On Linux, automatic proxy configuration is currently only supported on GNOME- and KDE-based desktop environments.
 
 ## Screenshots
 
