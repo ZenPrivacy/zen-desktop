@@ -171,6 +171,6 @@
     "startError": "Échec du démarrage du proxy : {{error}}",
     "stop": "Arrêter",
     "stopError": "Échec de l'arrêt du proxy : {{error}}",
-    "unsupportedDEGuide": "La configuration automatique du proxy système n'est actuellement prise en charge que sur GNOME.<br />Veuillez suivre <guide-link>ce guide</guide-link> pour définir le proxy par application."
+    "unsupportedDEGuide": "La configuration automatique du proxy système n’est actuellement prise en charge que sur GNOME et KDE.<br />Veuillez suivre <guide-link>ce guide</guide-link> pour définir le proxy par application."
   }
 }

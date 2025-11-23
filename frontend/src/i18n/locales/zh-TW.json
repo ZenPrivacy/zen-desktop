@@ -164,7 +164,7 @@
     "startError": "啟動代理伺服器失敗：{{error}}",
     "stop": "停止",
     "stopError": "停止代理伺服器失敗：{{error}}",
-    "unsupportedDEGuide": "目前僅支援 GNOME 的系統代理伺服器自動設定。<br />請按照 <guide-link>此指南</guide-link> 按應用程式設定代理伺服器。"
+    "unsupportedDEGuide": "目前僅支援 GNOME 和 KDE 的系統代理伺服器自動設定。<br />請按照 <guide-link>此指南</guide-link> 按應用程式設定代理伺服器。"
   },
   "common": {
     "stopProxyToModify": "請停止代理伺服器以修改此設定",
