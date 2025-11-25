@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "過濾清單",
       "home": "首頁",
-      "myRules": "我的規則",
+      "rules": "規則",
       "settings": "設定"
     },
     "update": {
@@ -100,7 +100,7 @@
     "import": "匯入",
     "successMessage": "自訂過濾清單匯入成功"
   },
-  "myRules": {
+  "rules": {
     "help": "說明",
     "placeholder": "在此新增您的自訂規則..."
   },

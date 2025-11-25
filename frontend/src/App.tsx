@@ -14,9 +14,9 @@ import { AppHeader } from './components/AppHeader';
 import { useProxyState } from './context/ProxyStateContext';
 import { FilterLists } from './FilterLists';
 import { Intro } from './Intro';
-import { MyRules } from './MyRules';
 import { useProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';
+import { Rules } from './Rules';
 import { SettingsManager } from './SettingsManager';
 import { StartStopButton } from './StartStopButton';
 
@@ -56,7 +56,7 @@ function App() {
   }, []);
 
   const { proxyState } = useProxyState();
-  const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'myRules' | 'settings'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'rules' | 'settings'>('home');
   const [showIntro, setShowIntro] = useState(false);
 
   useEffect(() => {
@@ -84,8 +84,8 @@ function App() {
             <Button icon="filter" active={activeTab === 'filterLists'} onClick={() => setActiveTab('filterLists')}>
               {t('app.tabs.filterLists')}
             </Button>
-            <Button icon="code" active={activeTab === 'myRules'} onClick={() => setActiveTab('myRules')}>
-              {t('app.tabs.myRules')}
+            <Button icon="code" active={activeTab === 'rules'} onClick={() => setActiveTab('rules')}>
+              {t('app.tabs.rules')}
             </Button>
             <Button icon="settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
               {t('app.tabs.settings')}
@@ -106,7 +106,7 @@ function App() {
               )}
             </div>
             {activeTab === 'filterLists' && <FilterLists />}
-            {activeTab === 'myRules' && <MyRules />}
+            {activeTab === 'rules' && <Rules />}
             {activeTab === 'settings' && <SettingsManager />}
           </div>
           <StartStopButton />

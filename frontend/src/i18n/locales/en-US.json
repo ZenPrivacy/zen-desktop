@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "Filter lists",
       "home": "Home",
-      "myRules": "My rules",
+      "rules": "Rules",
       "settings": "Settings"
     },
     "update": {
@@ -100,7 +100,7 @@
     "import": "Import",
     "successMessage": "Custom filter lists imported successfully"
   },
-  "myRules": {
+  "rules": {
     "help": "Help",
     "placeholder": "Add your custom rules here..."
   },

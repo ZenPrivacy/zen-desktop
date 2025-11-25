@@ -38,16 +38,16 @@ export function GetLocale() {
   return window['go']['cfg']['Config']['GetLocale']();
 }
 
-export function GetMyRules() {
-  return window['go']['cfg']['Config']['GetMyRules']();
-}
-
 export function GetPACPort() {
   return window['go']['cfg']['Config']['GetPACPort']();
 }
 
 export function GetPort() {
   return window['go']['cfg']['Config']['GetPort']();
+}
+
+export function GetRules() {
+  return window['go']['cfg']['Config']['GetRules']();
 }
 
 export function GetTargetTypeFilterLists(arg1) {
@@ -102,12 +102,12 @@ export function SetLocale(arg1) {
   return window['go']['cfg']['Config']['SetLocale'](arg1);
 }
 
-export function SetMyRules(arg1) {
-  return window['go']['cfg']['Config']['SetMyRules'](arg1);
-}
-
 export function SetPort(arg1) {
   return window['go']['cfg']['Config']['SetPort'](arg1);
+}
+
+export function SetRules(arg1) {
+  return window['go']['cfg']['Config']['SetRules'](arg1);
 }
 
 export function SetUpdatePolicy(arg1) {

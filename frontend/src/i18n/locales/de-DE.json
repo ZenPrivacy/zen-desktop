@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "Filterlisten",
       "home": "Start",
-      "myRules": "Meine Regeln",
+      "rules": "Regeln",
       "settings": "Einstellungen"
     },
     "update": {
@@ -91,7 +91,7 @@
     "import": "Importieren",
     "successMessage": "Benutzerdefinierte Filterlisten erfolgreich importiert"
   },
-  "myRules": {
+  "rules": {
     "help": "Hilfe",
     "placeholder": "Fügen Sie hier Ihre eigenen Regeln hinzu..."
   },

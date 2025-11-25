@@ -201,7 +201,7 @@ func (a *App) StartProxy() (err error) {
 	jsRuleInjector := jsrule.NewInjector()
 	whitelistSrv := whitelistserver.New(networkRules)
 
-	filter, err := filter.NewFilter(networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, a.filterListStore, whitelistSrv, a.config.GetFilterLists(), a.config.GetMyRules())
+	filter, err := filter.NewFilter(networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, a.filterListStore, whitelistSrv, a.config.GetFilterLists(), a.config.GetRules())
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}

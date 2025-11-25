@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "过滤列表",
       "home": "主页",
-      "myRules": "我的规则",
+      "rules": "规则",
       "settings": "设置"
     },
     "update": {
@@ -91,7 +91,7 @@
     "import": "导入",
     "successMessage": "自定义过滤列表导入成功"
   },
-  "myRules": {
+  "rules": {
     "help": "帮助",
     "placeholder": "在此添加您的自定义规则..."
   },
