@@ -8,6 +8,7 @@ go 1.25.3
 require (
 	github.com/ZenPrivacy/zen-core v1.0.6
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/wailsapp/wails/v2 v2.10.2
 	golang.org/x/sys v0.38.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -33,7 +34,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hectane/go-acl v0.0.0-20230122075934-ca0b05cb1adb // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
