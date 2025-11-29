@@ -49,3 +49,9 @@ tasks:
     desc: Run go fmt on improperly formatted Go files.
     cmds:
       - golangci-lint fmt
+
+  pull-exclusions:
+    desc: Pull the updates from the zen-https-exclusions repository.
+    cmds:
+      - git subtree pull --prefix=internal/sysproxy/exclusions https://github.com/ZenPrivacy/zen-https-exclusions master --squash
+
