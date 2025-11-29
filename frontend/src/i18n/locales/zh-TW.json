@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "過濾清單",
       "home": "首頁",
-      "myRules": "我的規則",
+      "rules": "規則",
       "settings": "設定"
     },
     "update": {
@@ -100,7 +100,7 @@
     "import": "匯入",
     "successMessage": "自訂過濾清單匯入成功"
   },
-  "myRules": {
+  "rules": {
     "help": "說明",
     "placeholder": "在此新增您的自訂規則..."
   },
@@ -164,7 +164,7 @@
     "startError": "啟動代理伺服器失敗：{{error}}",
     "stop": "停止",
     "stopError": "停止代理伺服器失敗：{{error}}",
-    "unsupportedDEGuide": "目前僅支援 GNOME 的系統代理伺服器自動設定。<br />請按照 <guide-link>此指南</guide-link> 按應用程式設定代理伺服器。"
+    "unsupportedDEGuide": "目前僅支援 GNOME 和 KDE 的系統代理伺服器自動設定。<br />請按照 <guide-link>此指南</guide-link> 按應用程式設定代理伺服器。"
   },
   "common": {
     "stopProxyToModify": "請停止代理伺服器以修改此設定",

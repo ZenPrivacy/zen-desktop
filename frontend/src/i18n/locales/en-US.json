@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "Filter lists",
       "home": "Home",
-      "myRules": "My rules",
+      "rules": "Rules",
       "settings": "Settings"
     },
     "update": {
@@ -100,7 +100,7 @@
     "import": "Import",
     "successMessage": "Custom filter lists imported successfully"
   },
-  "myRules": {
+  "rules": {
     "help": "Help",
     "placeholder": "Add your custom rules here..."
   },
@@ -164,7 +164,7 @@
     "startError": "Failed to start proxy: {{error}}",
     "stop": "Stop",
     "stopError": "Failed to stop proxy: {{error}}",
-    "unsupportedDEGuide": "Automatic system proxy configuration is currently only supported on GNOME.<br />Please follow <guide-link>this guide</guide-link> to set the proxy on a per-app basis."
+    "unsupportedDEGuide": "Automatic system proxy configuration is currently only supported on GNOME and KDE.<br />Please follow <guide-link>this guide</guide-link> to set the proxy on a per-app basis."
   },
   "common": {
     "stopProxyToModify": "Stop the proxy to modify this setting",

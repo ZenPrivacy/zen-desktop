@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "Listes de filtres",
       "home": "Accueil",
-      "myRules": "Règles personnalisées",
+      "rules": "Règles",
       "settings": "Paramètres"
     },
     "update": {
@@ -25,7 +25,7 @@
   "common": {
     "stopProxyToAddFilter": "Arrêter le proxy pour ajouter une nouvelle liste de filtres",
     "stopProxyToDeleteFilter": "Arrêter le proxy pour supprimer cette liste",
-    "stopProxyToEditRules": "Arrêter le proxy pour modifier les règles personnalisées",
+    "stopProxyToEditRules": "Arrêter le proxy pour modifier les règles",
     "stopProxyToModify": "Arrêter le proxy pour modifier ce paramètre",
     "stopProxyToToggleFilter": "Arrêter le proxy pour activer/désactiver cette liste"
   },
@@ -107,7 +107,7 @@
       "title": "Bienvenue dans Zen !"
     }
   },
-  "myRules": {
+  "rules": {
     "help": "Aide",
     "placeholder": "Ajoutez vos règles personnalisées ici..."
   },
@@ -171,6 +171,6 @@
     "startError": "Échec du démarrage du proxy : {{error}}",
     "stop": "Arrêter",
     "stopError": "Échec de l'arrêt du proxy : {{error}}",
-    "unsupportedDEGuide": "La configuration automatique du proxy système n'est actuellement prise en charge que sur GNOME.<br />Veuillez suivre <guide-link>ce guide</guide-link> pour définir le proxy par application."
+    "unsupportedDEGuide": "La configuration automatique du proxy système n'est actuellement prise en charge que sur GNOME et KDE.<br />Veuillez suivre <guide-link>ce guide</guide-link> pour définir le proxy par application."
   }
 }

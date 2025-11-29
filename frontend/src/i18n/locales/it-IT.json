@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "Liste di filtri",
       "home": "Home",
-      "myRules": "Le mie regole",
+      "rules": "Regole",
       "settings": "Impostazioni"
     },
     "update": {
@@ -100,7 +100,7 @@
     "import": "Importa",
     "successMessage": "Liste di filtri personalizzate importate con successo"
   },
-  "myRules": {
+  "rules": {
     "help": "Aiuto",
     "placeholder": "Aggiungi qui le tue regole personalizzate..."
   },
@@ -164,7 +164,7 @@
     "startError": "Impossibile avviare il proxy: {{error}}",
     "stop": "Ferma",
     "stopError": "Impossibile fermare il proxy: {{error}}",
-    "unsupportedDEGuide": "La configurazione automatica del proxy di sistema è attualmente supportata solo su GNOME.<br />Segui <guide-link>questa guida</guide-link> per impostare il proxy per singola app."
+    "unsupportedDEGuide": "La configurazione automatica del proxy di sistema è attualmente supportata solo su GNOME e KDE.<br />Segui <guide-link>questa guida</guide-link> per impostare il proxy per singola app."
   },
   "common": {
     "stopProxyToModify": "Ferma il proxy per modificare questa impostazione",

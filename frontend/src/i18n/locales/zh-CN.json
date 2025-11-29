@@ -7,7 +7,7 @@
     "tabs": {
       "filterLists": "过滤列表",
       "home": "主页",
-      "myRules": "我的规则",
+      "rules": "规则",
       "settings": "设置"
     },
     "update": {
@@ -91,7 +91,7 @@
     "import": "导入",
     "successMessage": "自定义过滤列表导入成功"
   },
-  "myRules": {
+  "rules": {
     "help": "帮助",
     "placeholder": "在此添加您的自定义规则..."
   },
@@ -155,7 +155,7 @@
     "startError": "启动代理失败：{{error}}",
     "stop": "停止",
     "stopError": "停止代理失败：{{error}}",
-    "unsupportedDEGuide": "目前仅支持 GNOME 的系统代理自动配置。<br />请按照 <guide-link>此指南</guide-link> 按应用设置代理。"
+    "unsupportedDEGuide": "目前仅支持 GNOME 和 KDE 的系统代理自动配置。<br />请按照 <guide-link>此指南</guide-link> 按应用设置代理。"
   },
   "common": {
     "stopProxyToModify": "请停止代理以修改此设置",

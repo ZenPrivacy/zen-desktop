@@ -1,20 +1,20 @@
-.my-rules {
+.rules {
   display: flex;
   flex-direction: column;
   height: calc(100% - 8px);
 }
 
-.my-rules__help-button {
+.rules__help-button {
   margin-bottom: 8px;
 }
 
-.my-rules__textarea {
+.rules__textarea {
   font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   font-size: 0.9em;
   height: 100% !important;
 }
 
-.my-rules__tooltip {
+.rules__tooltip {
   height: 100%;
   width: 100%;
 }

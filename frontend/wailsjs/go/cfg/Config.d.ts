@@ -22,11 +22,11 @@ export function GetIgnoredHosts():Promise<Array<string>>;
 
 export function GetLocale():Promise<string>;
 
-export function GetMyRules():Promise<Array<string>>;
-
 export function GetPACPort():Promise<number>;
 
 export function GetPort():Promise<number>;
+
+export function GetRules():Promise<Array<string>>;
 
 export function GetTargetTypeFilterLists(arg1:filter.ListType):Promise<Array<filter.List>>;
 
@@ -54,9 +54,9 @@ export function SetIgnoredHosts(arg1:Array<string>):Promise<void>;
 
 export function SetLocale(arg1:string):Promise<void>;
 
-export function SetMyRules(arg1:Array<string>):Promise<void>;
-
 export function SetPort(arg1:number):Promise<string>;
+
+export function SetRules(arg1:Array<string>):Promise<void>;
 
 export function SetUpdatePolicy(arg1:cfg.UpdatePolicyType):Promise<void>;
 

@@ -52,7 +52,9 @@ type Config struct {
 
 	Filter struct {
 		FilterLists []filter.List `json:"filterLists"`
-		MyRules     []string      `json:"myRules"`
+		// Deprecated: use Rules.
+		MyRules []string `json:"myRules"`
+		Rules   []string `json:"rules"`
 	} `json:"filter"`
 	Certmanager struct {
 		CAInstalled bool `json:"caInstalled"`
@@ -72,7 +74,7 @@ type Config struct {
 
 type DebugData struct {
 	EnabledFilterListURLs []string `json:"enabledFilterListURLs"`
-	CustomRules           []string `json:"customRules"`
+	Rules                 []string `json:"rules"`
 	Platform              string   `json:"platform"`
 	Architecture          string   `json:"architecture"`
 	Version               string   `json:"version"`
@@ -89,7 +91,7 @@ func (c *Config) ExportDebugData() (string, error) {
 	}
 	debugData := DebugData{
 		EnabledFilterListURLs: enabledFilterListURLs,
-		CustomRules:           c.Filter.MyRules,
+		Rules:                 c.Filter.Rules,
 		Platform:              runtime.GOOS,
 		Architecture:          runtime.GOARCH,
 		Version:               Version,
@@ -316,18 +318,18 @@ outer:
 	return filterLists
 }
 
-func (c *Config) GetMyRules() []string {
+func (c *Config) GetRules() []string {
 	c.RLock()
 	defer c.RUnlock()
 
-	return c.Filter.MyRules
+	return c.Filter.Rules
 }
 
-func (c *Config) SetMyRules(rules []string) error {
+func (c *Config) SetRules(rules []string) error {
 	c.Lock()
 	defer c.Unlock()
 
-	c.Filter.MyRules = rules
+	c.Filter.Rules = rules
 	if err := c.Save(); err != nil {
 		err = fmt.Errorf("failed to save config: %v", err)
 		log.Println(err)
