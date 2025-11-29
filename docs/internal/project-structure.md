@@ -9,7 +9,6 @@ This document describes the file structure of the project.
 - `docs/external`: External documentation for users.
 - `frontend`: Frontend JS/TS code. Read more in [frontend/README.md](../../frontend/README.md).
 - `internal`: Backend Go packages.
-- `proxy`: Hosts excluded from proxying. Read more in [proxy/README.md](../../proxy/README.md).
 - `scriptlets`: JS/TS functions injected into webpages for advanced content blocking.
 - `scripts`: Node.js scripts for manifest file uploads. May be used for other purposes in the future.
 - `tasks`: Platform-specific build-related [Taskfiles](https://taskfile.dev).
