@@ -60,7 +60,13 @@ func (m *Manager) Clear() error {
 	}
 
 	if err := unsetSystemProxy(); err != nil {
-		return fmt.Errorf("unset system proxy: %v", err)
+		// FIX: If the desktop environment is unsupported (e.g., XFCE, i3), we log the error
+		// but proceed to close the server so the application state doesn't get stuck.
+		if errors.Is(err, ErrUnsupportedDesktopEnvironment) {
+			log.Printf("warning: clearing system proxy failed (unsupported desktop environment), proceeding to close server: %v", err)
+		} else {
+			return fmt.Errorf("unset system proxy: %v", err)
+		}
 	}
 
 	if err := m.server.Close(); err != nil {
