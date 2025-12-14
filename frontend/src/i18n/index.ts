@@ -37,7 +37,7 @@ export interface LocaleItem {
   label: string;
 }
 
-export const LOCALE_LABELS: LocaleItem[] = [
+export const LOCALE_LABELS = [
   { value: 'en-US', label: 'English' },
   { value: 'de-DE', label: 'Deutsch' },
   { value: 'kk-KZ', label: 'Қазақша' },
@@ -46,7 +46,16 @@ export const LOCALE_LABELS: LocaleItem[] = [
   { value: 'zh-TW', label: '中文（繁體）' },
   { value: 'it-IT', label: 'Italiano' },
   { value: 'fr-FR', label: 'Français' },
-];
+] satisfies LocaleItem[];
+
+// Sort language options into a consistent, user-friendly alphabetical order.
+// Uses Unicode root collation ("und") to keep the order stable and identical for everyone.
+LOCALE_LABELS.sort((a, b) =>
+  new Intl.Collator('und', {
+    usage: 'sort',
+    sensitivity: 'base',
+  }).compare(a.label, b.label),
+);
 
 export function detectSystemLocale(): SupportedLocale {
   const browserLang = navigator.language;
