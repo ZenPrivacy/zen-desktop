@@ -50,12 +50,11 @@ export const LOCALE_LABELS = [
 
 // Sort language options into a consistent, user-friendly alphabetical order.
 // Uses Unicode root collation ("und") to keep the order stable and identical for everyone.
-LOCALE_LABELS.sort((a, b) =>
-  new Intl.Collator('und', {
-    usage: 'sort',
-    sensitivity: 'base',
-  }).compare(a.label, b.label),
-);
+const localeLabelsCollator = new Intl.Collator('und', {
+  usage: 'sort',
+  sensitivity: 'base',
+});
+LOCALE_LABELS.sort((a, b) => localeLabelsCollator.compare(a.label, b.label));
 
 export function detectSystemLocale(): SupportedLocale {
   const browserLang = navigator.language;
