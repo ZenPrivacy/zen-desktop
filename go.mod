@@ -66,5 +66,3 @@ require (
 	golang.org/x/text v0.31.0 // indirect
 	howett.net/plist v1.0.1 // indirect
 )
-
-replace github.com/ZenPrivacy/zen-core => ../core
