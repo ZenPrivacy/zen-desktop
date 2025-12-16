@@ -6,7 +6,7 @@ module github.com/ZenPrivacy/zen-desktop
 go 1.25.3
 
 require (
-	github.com/ZenPrivacy/zen-core v1.0.6
+	github.com/ZenPrivacy/zen-core v1.0.7
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/wailsapp/wails/v2 v2.10.2
@@ -66,3 +66,5 @@ require (
 	golang.org/x/text v0.31.0 // indirect
 	howett.net/plist v1.0.1 // indirect
 )
+
+replace github.com/ZenPrivacy/zen-core => ../core
