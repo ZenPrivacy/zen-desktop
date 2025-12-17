@@ -22,6 +22,10 @@ func detectDesktopEnvironment() string {
 		return "gnome"
 	}
 
+	if strings.Contains(xdg, "xfce") {
+		return "xfce"
+	}
+
 	// Fallback DE checks
 	ds := strings.ToLower(os.Getenv("DESKTOP_SESSION"))
 	if strings.Contains(ds, "kde") || strings.Contains(ds, "plasma") || strings.ToLower(os.Getenv("KDE_FULL_SESSION")) == "true" {
@@ -30,6 +34,10 @@ func detectDesktopEnvironment() string {
 
 	if strings.Contains(ds, "gnome") {
 		return "gnome"
+	}
+
+	if strings.Contains(ds, "xfce") {
+		return "xfce"
 	}
 
 	return ""
@@ -55,6 +63,9 @@ func setSystemProxy(pacURL string) error {
 
 	case "gnome":
 		return setGnomeProxy(pacURL)
+
+	case "xfce":
+		return setXFCEProxy(pacURL)
 
 	default:
 		return ErrUnsupportedDesktopEnvironment
@@ -104,6 +115,15 @@ func setGnomeProxy(pacURL string) error {
 	return nil
 }
 
+func setXFCEProxy(pacURL string) error {
+	// XFCE doesn't have native proxy settings, so use gsettings which most applications on XFCE respect
+	if !binaryExists("gsettings") {
+		return fmt.Errorf("gsettings not found in PATH, cannot configure proxy for XFCE")
+	}
+
+	return setGnomeProxy(pacURL)
+}
+
 func unsetSystemProxy() error {
 	desktop := detectDesktopEnvironment()
 	switch desktop {
@@ -121,6 +141,9 @@ func unsetSystemProxy() error {
 
 	case "gnome":
 		return unsetGnomeProxy()
+
+	case "xfce":
+		return unsetXFCEProxy()
 
 	default:
 		return ErrUnsupportedDesktopEnvironment
@@ -168,6 +191,15 @@ func unsetGnomeProxy() error {
 	}
 
 	return nil
+}
+
+func unsetXFCEProxy() error {
+	// XFCE doesn't have native proxy settings, so use gsettings
+	if !binaryExists("gsettings") {
+		return fmt.Errorf("gsettings not found in PATH, cannot unset proxy for XFCE")
+	}
+
+	return unsetGnomeProxy()
 }
 
 func runCmdWithTimeout(name string, args ...string) ([]byte, error) {
