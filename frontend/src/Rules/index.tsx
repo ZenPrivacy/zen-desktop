@@ -153,7 +153,7 @@ export function Rules() {
             icon="clean" 
             disabled={isProxyRunning} 
             onClick={handleFormat}
-            title="Sort and remove duplicates"
+            title={translate('rules.formatTooltip') || 'Sort and remove duplicates'}
           >
             {translate('rules.format') || 'Format'}
           </Button>
