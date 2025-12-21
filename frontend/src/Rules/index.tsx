@@ -51,21 +51,27 @@ export function Rules() {
   const readOnlyCompartment = useMemo(() => new Compartment(), []);
 
   // Fetch rules on mount
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
+ useEffect(() => {
+   (async () => {
+    try {
       const filters = await GetRules();
-      if (isMounted) {
-        setInitialRules(filters?.join('\n') ?? '');
-      }
-    })();
-    return () => { isMounted = false; };
-  }, []);
+      setInitialRules(filters?.join('\n') ?? '');
+    } catch (error) {
+      console.error('Failed to load rules:', error);
+      setInitialRules(''); // Show empty editor instead of infinite spinner
+    }
+   })();
+ }, []);
 
   const setFilters = useDebouncedCallback(async (rules: string) => {
+  try {
     await SetRules(
       rules.split('\n').map((f) => f.trim()).filter((f) => f.length > 0)
     );
+  } catch (error) {
+    console.error('Failed to save rules:', error);
+    // Consider showing a toast notification to the user
+  }
   }, 500);
 
   /**
