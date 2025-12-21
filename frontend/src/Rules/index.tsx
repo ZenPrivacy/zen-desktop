@@ -166,7 +166,7 @@ export function Rules() {
             {translate('rules.format') || 'Format'}
           </Button>
         </ButtonGroup>
-        <div className="rules__hint">Press Ctrl+F to Search</div>
+        <div className="rules__hint">{translate('rules.searchHint') || 'Press Ctrl+F to Search'}</div>
       </div>
       <Tooltip
         content={translate('common.stopProxyToEditRules') as string}
