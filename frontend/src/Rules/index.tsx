@@ -101,6 +101,7 @@ export function Rules() {
   };
 
   // Initialize Editor
+  const initialProxyStateRef = useRef(isProxyRunning);
   useEffect(() => {
     if (initialRules !== null && editorRef.current && !viewRef.current) {
       const state = EditorState.create({
@@ -116,7 +117,7 @@ export function Rules() {
           oneDark,
           adblockLanguage,
           syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-          readOnlyCompartment.of(EditorState.readOnly.of(isProxyRunning)),
+          readOnlyCompartment.of(EditorState.readOnly.of(initialProxyStateRef.current)),
           EditorView.lineWrapping,
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
@@ -134,7 +135,7 @@ export function Rules() {
         viewRef.current = null;
       }
     };
-  }, [initialRules, isProxyRunning, readOnlyCompartment, setFilters]);
+  }, [initialRules, readOnlyCompartment, setFilters]);
 
   // Handle read-only state changes
   useEffect(() => {
