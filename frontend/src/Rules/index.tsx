@@ -4,22 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 
 // CodeMirror 6 Core & UI
-import { EditorView, keymap, drawSelection, highlightActiveLine, scrollPastEnd, lineNumbers } from "@codemirror/view";
-import { EditorState, Compartment } from "@codemirror/state";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { 
-  search, 
-  searchKeymap, 
-  openSearchPanel, 
-  findNext, 
-  replaceNext, 
-  replaceAll 
-} from "@codemirror/search";
-import { oneDark } from "@codemirror/theme-one-dark";
+import { EditorView, keymap, drawSelection, highlightActiveLine, scrollPastEnd, lineNumbers } from '@codemirror/view';
+import { EditorState, Compartment } from '@codemirror/state';
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
+import { search, searchKeymap } from '@codemirror/search';
+import { oneDark } from '@codemirror/theme-one-dark';
 
 // Language & Highlighting
-import { StreamLanguage, syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
-import { tags as t } from "@lezer/highlight";
+import { StreamLanguage, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
+import { tags as t } from '@lezer/highlight';
 
 import './index.css';
 import { GetRules, SetRules } from '../../wailsjs/go/cfg/Config';
@@ -33,20 +26,20 @@ const HELP_URL = 'https://github.com/ZenPrivacy/zen-desktop/blob/master/docs/ext
  */
 const adblockLanguage = StreamLanguage.define({
   token(stream) {
-    if (stream.sol() && stream.peek() === "!") {
+    if (stream.sol() && stream.peek() === '!') {
       stream.skipToEnd();
-      return "comment";
+      return 'comment';
     }
-    if (stream.match(/^@@/)) return "keyword";
-    if (stream.match(/^\|\|/)) return "operator";
+    if (stream.match(/^@@/)) return 'keyword';
+    if (stream.match(/^\|\|/)) return 'operator';
     stream.next();
     return null;
   },
   tokenTable: {
     comment: t.comment,
     keyword: t.keyword,
-    operator: t.operator
-  }
+    operator: t.operator,
+  },
 });
 
 export function Rules() {
@@ -57,11 +50,16 @@ export function Rules() {
   const viewRef = useRef<EditorView | null>(null);
   const readOnlyCompartment = useMemo(() => new Compartment(), []);
 
+  // Fetch rules on mount
   useEffect(() => {
+    let isMounted = true;
     (async () => {
       const filters = await GetRules();
-      setInitialRules(filters?.join('\n') ?? '');
+      if (isMounted) {
+        setInitialRules(filters?.join('\n') ?? '');
+      }
     })();
+    return () => { isMounted = false; };
   }, []);
 
   const setFilters = useDebouncedCallback(async (rules: string) => {
@@ -96,6 +94,7 @@ export function Rules() {
     });
   };
 
+  // Initialize Editor
   useEffect(() => {
     if (initialRules !== null && editorRef.current && !viewRef.current) {
       const state = EditorState.create({
@@ -106,8 +105,7 @@ export function Rules() {
           drawSelection(),
           highlightActiveLine(),
           scrollPastEnd(),
-          // FIX: Changed 'topMost' to 'top' to fix TS2345
-          search({ top: true }), 
+          search({ top: true }),
           keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
           oneDark,
           adblockLanguage,
@@ -123,12 +121,16 @@ export function Rules() {
       });
       viewRef.current = new EditorView({ state, parent: editorRef.current });
     }
-    return () => {
-      viewRef.current?.destroy();
-      viewRef.current = null;
-    };
-  }, [initialRules]);
 
+    return () => {
+      if (viewRef.current) {
+        viewRef.current.destroy();
+        viewRef.current = null;
+      }
+    };
+  }, [initialRules, isProxyRunning, readOnlyCompartment, setFilters]);
+
+  // Handle read-only state changes
   useEffect(() => {
     if (viewRef.current) {
       viewRef.current.dispatch({
@@ -148,10 +150,10 @@ export function Rules() {
           <Button variant="outlined" icon="help" onClick={() => BrowserOpenURL(HELP_URL)}>
             {translate('rules.help')}
           </Button>
-          <Button 
-            variant="outlined" 
-            icon="clean" 
-            disabled={isProxyRunning} 
+          <Button
+            variant="outlined"
+            icon="clean"
+            disabled={isProxyRunning}
             onClick={handleFormat}
             title={translate('rules.formatTooltip') || 'Sort and remove duplicates'}
           >
@@ -166,9 +168,9 @@ export function Rules() {
         className="rules__tooltip"
         placement="top"
       >
-        <div 
-          ref={editorRef} 
-          className={`rules__editor-container ${isProxyRunning ? 'is-disabled' : ''}`} 
+        <div
+          ref={editorRef}
+          className={`rules__editor-container ${isProxyRunning ? 'is-disabled' : ''}`}
         />
       </Tooltip>
     </div>
