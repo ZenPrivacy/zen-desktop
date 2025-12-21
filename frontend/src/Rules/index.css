@@ -57,3 +57,10 @@
   border: 1px solid #181a1f !important; 
   border-radius: 3px; 
 }
+.rules--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
