@@ -2,12 +2,13 @@ import { Button } from '@blueprintjs/core';
 import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { StartProxy, StopProxy } from '../wailsjs/go/app/App';
-import { EventsOn } from '../wailsjs/runtime/runtime';
+import { StartProxy, StopProxy } from '../../../wailsjs/go/app/App';
+import { EventsOn } from '../../../wailsjs/runtime/runtime';
+import { BrowserLink } from '../../common/BrowserLink';
+import { AppToaster } from '../../common/toaster';
+import { useProxyState } from '../../context/ProxyStateContext';
 
-import { BrowserLink } from './common/BrowserLink';
-import { AppToaster } from './common/toaster';
-import { useProxyState } from './context/ProxyStateContext';
+import './index.css';
 
 const PROXY_CHANNEL = 'proxy:action';
 const LINUX_PROXY_GUIDE_URL = 'https://github.com/ZenPrivacy/zen-desktop/blob/master/docs/external/linux-proxy-conf.md';
@@ -90,7 +91,7 @@ export function StartStopButton() {
       onClick={proxyState === 'off' ? StartProxy : StopProxy}
       fill
       intent="primary"
-      className="footer"
+      className="start-stop-btn"
       size="large"
       loading={proxyState === 'loading'}
     >
