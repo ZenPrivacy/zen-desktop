@@ -11,6 +11,7 @@ import { EventsOn } from '../wailsjs/runtime/runtime';
 import { ThemeType, useTheme } from './common/ThemeManager';
 import { AppToaster } from './common/toaster';
 import { AppHeader } from './components/AppHeader';
+import { StartStopButton } from './components/StartStopButton';
 import { useProxyState } from './context/ProxyStateContext';
 import { FilterLists } from './FilterLists';
 import { Intro } from './Intro';
@@ -18,7 +19,6 @@ import { useProxyHotkey } from './ProxyHotkey';
 import { RequestLog } from './RequestLog';
 import { Rules } from './Rules';
 import { SettingsManager } from './SettingsManager';
-import { StartStopButton } from './StartStopButton';
 
 function App() {
   const { t } = useTranslation();

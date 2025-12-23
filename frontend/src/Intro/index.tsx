@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import './index.css';
 import { GetFilterListsByLocales } from '../../wailsjs/go/cfg/Config';
 import { filter } from '../../wailsjs/go/models';
+import { StartStopButton } from '../components/StartStopButton';
 import { useProxyState } from '../context/ProxyStateContext';
-import { StartStopButton } from '../StartStopButton';
 
 import { ConnectScreen } from './ConnectScreen';
 import { FilterListsScreen } from './FilterListsScreen';
