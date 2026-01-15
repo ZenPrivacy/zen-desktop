@@ -55,3 +55,13 @@ tasks:
     cmds:
       - git subtree pull --prefix=internal/sysproxy/exclusions https://github.com/ZenPrivacy/zen-https-exclusions master --squash
 
+  link-core:
+    desc: Add local replace directive for zen-core in go.mod.
+    cmds:
+      - go mod edit -replace=github.com/ZenPrivacy/zen-core=../core
+
+  unlink-core:
+    desc: Remove local replace directive for zen-core from go.mod.
+    cmds:
+      - go mod edit -dropreplace=github.com/ZenPrivacy/zen-core
+
