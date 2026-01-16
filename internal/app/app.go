@@ -201,10 +201,11 @@ func (a *App) StartProxy() (err error) {
 	jsRuleInjector := jsrule.NewInjector()
 	whitelistSrv := whitelistserver.New(networkRules)
 
-	filter, err := filter.NewFilter(networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, a.filterListStore, whitelistSrv, a.config.GetFilterLists(), a.config.GetRules())
+	filter, err := filter.NewFilter(networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, whitelistSrv)
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}
+	a.initFilter(filter)
 
 	if err := whitelistSrv.Start(); err != nil {
 		return fmt.Errorf("start whitelist server: %v", err)
@@ -338,7 +339,7 @@ func (a *App) ExportCustomFilterLists() error {
 		return errors.New("no file selected")
 	}
 
-	customFilterLists := a.config.GetTargetTypeFilterLists(filter.ListTypeCustom)
+	customFilterLists := a.config.GetTargetTypeFilterLists(cfg.FilterListTypeRegional)
 
 	if len(customFilterLists) == 0 {
 		return errors.New("no custom filter lists to export")
@@ -379,7 +380,7 @@ func (a *App) ImportCustomFilterLists() error {
 		return err
 	}
 
-	var filterLists []filter.List
+	var filterLists []cfg.FilterList
 	if err := json.Unmarshal(data, &filterLists); err != nil {
 		log.Printf("failed to unmarshal filter lists: %v", err)
 		return errors.New("incorrect filter lists format")
