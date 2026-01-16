@@ -5,12 +5,7 @@ export namespace cfg {
 	    PROMPT = "prompt",
 	    DISABLED = "disabled",
 	}
-
-}
-
-export namespace filter {
-	
-	export class List {
+	export class FilterList {
 	    name: string;
 	    type: string;
 	    url: string;
@@ -19,7 +14,7 @@ export namespace filter {
 	    locales: string[];
 	
 	    static createFrom(source: any = {}) {
-	        return new List(source);
+	        return new FilterList(source);
 	    }
 	
 	    constructor(source: any = {}) {

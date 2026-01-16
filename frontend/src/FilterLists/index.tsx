@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { GetFilterLists, RemoveFilterList, ToggleFilterList } from '../../wailsjs/go/cfg/Config';
 // eslint-disable-next-line import/order
-import { filter } from '../../wailsjs/go/models';
+import { cfg } from '../../wailsjs/go/models';
 
 import './index.css';
 
@@ -21,7 +21,7 @@ import { FilterListType } from './types';
 export function FilterLists() {
   const { t } = useTranslation();
   const [state, setState] = useState<{
-    filterLists: filter.List[];
+    filterLists: cfg.FilterList[];
     loading: boolean;
   }>({
     filterLists: [],
@@ -111,7 +111,7 @@ export function FilterListItem({
   showButtons = true,
   onRemoved,
 }: {
-  filterList: filter.List;
+  filterList: cfg.FilterList;
   showDelete?: boolean;
   showButtons?: boolean;
   onRemoved?: () => void;

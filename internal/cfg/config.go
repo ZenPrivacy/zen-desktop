@@ -11,7 +11,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ZenPrivacy/zen-core/filter"
 	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
@@ -44,6 +43,26 @@ var UpdatePolicyEnum = []struct {
 	{UpdatePolicyDisabled, "DISABLED"},
 }
 
+type FilterListType string
+
+const (
+	FilterListTypeGeneral  FilterListType = "general"
+	FilterListTypeAds      FilterListType = "ads"
+	FilterListTypePrivacy  FilterListType = "privacy"
+	FilterListTypeMalware  FilterListType = "malware"
+	FilterListTypeRegional FilterListType = "regional"
+	FilterListTypeCustom   FilterListType = "custom"
+)
+
+type FilterList struct {
+	Name    string         `json:"name"`
+	Type    FilterListType `json:"type"`
+	URL     string         `json:"url"`
+	Enabled bool           `json:"enabled"`
+	Trusted bool           `json:"trusted"`
+	Locales []string       `json:"locales"`
+}
+
 // Config stores and manages the configuration for the application.
 // Although all fields are public, this is only for use by the JSON marshaller.
 // All access to the Config should be done through the exported methods.
@@ -51,7 +70,7 @@ type Config struct {
 	sync.RWMutex
 
 	Filter struct {
-		FilterLists []filter.List `json:"filterLists"`
+		FilterLists []FilterList `json:"filterLists"`
 		// Deprecated: use Rules.
 		MyRules []string `json:"myRules"`
 		Rules   []string `json:"rules"`
@@ -187,7 +206,7 @@ func (c *Config) Save() error {
 }
 
 // GetFilterLists returns the list of enabled filter lists.
-func (c *Config) GetFilterLists() []filter.List {
+func (c *Config) GetFilterLists() []FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -195,7 +214,7 @@ func (c *Config) GetFilterLists() []filter.List {
 }
 
 // AddFilterList adds a new filter list to the list of enabled filter lists.
-func (c *Config) AddFilterList(list filter.List) string {
+func (c *Config) AddFilterList(list FilterList) string {
 	c.Lock()
 	defer c.Unlock()
 
@@ -213,7 +232,7 @@ func (c *Config) AddFilterList(list filter.List) string {
 	return ""
 }
 
-func (c *Config) AddFilterLists(lists []filter.List) error {
+func (c *Config) AddFilterLists(lists []FilterList) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -262,11 +281,11 @@ func (c *Config) ToggleFilterList(url string, enabled bool) string {
 }
 
 // GetTargetTypeFilterLists returns the list of filter lists with particular type.
-func (c *Config) GetTargetTypeFilterLists(targetType filter.ListType) []filter.List {
+func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
-	var filterLists []filter.List
+	var filterLists []FilterList
 	for _, filterList := range c.Filter.FilterLists {
 		if filterList.Type == targetType {
 			filterLists = append(filterLists, filterList)
@@ -275,7 +294,7 @@ func (c *Config) GetTargetTypeFilterLists(targetType filter.ListType) []filter.L
 	return filterLists
 }
 
-func (c *Config) GetFilterListsByLocales(searchLocales []string) []filter.List {
+func (c *Config) GetFilterListsByLocales(searchLocales []string) []FilterList {
 	c.RLock()
 	defer c.RUnlock()
 
@@ -298,7 +317,7 @@ func (c *Config) GetFilterListsByLocales(searchLocales []string) []filter.List {
 		}
 	}
 
-	var filterLists []filter.List
+	var filterLists []FilterList
 outer:
 	for _, filterList := range c.Filter.FilterLists {
 		for _, locale := range filterList.Locales {
