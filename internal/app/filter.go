@@ -40,4 +40,6 @@ func (a *App) initFilter(filter *filter.Filter) {
 	})
 
 	wg.Wait()
+
+	filter.Finalize()
 }
