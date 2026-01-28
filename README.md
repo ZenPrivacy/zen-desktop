@@ -84,8 +84,20 @@ On Linux, automatic proxy configuration is currently only supported on GNOME- an
       </td>
     </tr>
     <tr>
-      <td align="center" valign="top"><img src="https://github.com/ZenPrivacy/zen-desktop/blob/master/assets/screenshots/main-window.png?raw=true" alt="Zen's main window"/></td>
-      <td align="center" valign="top"><img src="https://github.com/ZenPrivacy/zen-desktop/blob/master/assets/screenshots/filter-lists.png?raw=true" alt="Zen's filter list manager"/></td>
+      <td align="center" valign="top">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="assets/screenshots/main-page-dark.jpg">
+          <source media="(prefers-color-scheme: light)" srcset="assets/screenshots/main-page-light.jpg">
+          <img alt="Screenshot of Zen's Home screen showing blocked network requests. One entry details a blocked request to a Marketo tracking script from politico.com, with several other advertising and analytics domains listed below. Navigation tabs and a Donate button appear at the top, and a blue Stop button is visible at the bottom." src="assets/screenshots/main-page-light.jpg">
+        </picture>
+      </td>
+      <td align="center" valign="top">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="assets/screenshots/regional-dark.jpg">
+          <source media="(prefers-color-scheme: light)" srcset="assets/screenshots/regional-light.jpg">
+          <img alt="Screenshot of the Zen's Filter lists screen showing a regional category with multiple ad-block filter lists from different countries. Each list includes a name, a source URL, and toggle switches indicating whether it is enabled." src="assets/screenshots/regional-light.jpg">
+        </picture>
+      </td>
     </tr>
   </tbody>
 </table>
