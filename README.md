@@ -95,7 +95,7 @@ On Linux, automatic proxy configuration is currently only supported on GNOME- an
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset="assets/screenshots/regional-dark.png">
           <source media="(prefers-color-scheme: light)" srcset="assets/screenshots/regional-light.png">
-          <img alt="Screenshot of the Zen's Filter lists screen showing a regional category with multiple ad-block filter lists from different countries. Each list includes a name, a source URL, and toggle switches indicating whether it is enabled." src="assets/screenshots/regional-light.png">
+          <img alt="Screenshot of Zen's Filter lists screen showing a regional category with multiple ad-block filter lists from different countries. Each list includes a name, a source URL, and toggle switches indicating whether it is enabled." src="assets/screenshots/regional-light.png">
         </picture>
       </td>
     </tr>
