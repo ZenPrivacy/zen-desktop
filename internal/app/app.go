@@ -279,7 +279,11 @@ func (a *App) StopProxy() (err error) {
 	}
 
 	if err := a.systemProxyManager.Clear(); err != nil {
-		return fmt.Errorf("clear system proxy: %v", err)
+		if errors.Is(err, sysproxy.ErrUnsupportedDesktopEnvironment) {
+			log.Printf("system proxy not cleared (unsupported desktop environment): %v", err)
+		} else {
+			return fmt.Errorf("clear system proxy: %w", err)
+		}
 	}
 
 	if err := a.proxy.Stop(); err != nil {

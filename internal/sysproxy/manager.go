@@ -60,7 +60,7 @@ func (m *Manager) Clear() error {
 	}
 
 	if err := unsetSystemProxy(); err != nil {
-		return fmt.Errorf("unset system proxy: %v", err)
+		return fmt.Errorf("unset system proxy: %w", err)
 	}
 
 	if err := m.server.Close(); err != nil {
