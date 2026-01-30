@@ -97,6 +97,7 @@ export function FilterLists() {
             filterList={filterList}
             showDelete={type === FilterListType.CUSTOM}
             onRemoved={fetchLists}
+            onToggled={fetchLists}
           />
         ))}
 
@@ -110,11 +111,13 @@ export function FilterListItem({
   showDelete,
   showButtons = true,
   onRemoved,
+  onToggled,
 }: {
   filterList: cfg.FilterList;
   showDelete?: boolean;
   showButtons?: boolean;
   onRemoved?: () => void;
+  onToggled?: () => void;
 }) {
   const { t } = useTranslation();
   const { isProxyRunning } = useProxyState();
@@ -146,6 +149,7 @@ export function FilterListItem({
                 });
               }
               setSwitchLoading(false);
+              onToggled?.();
             }}
             size="large"
             className="filter-lists__list-switch"
