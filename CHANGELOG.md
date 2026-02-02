@@ -1,5 +1,74 @@
 # Changelog
 
+## v0.16.0
+
+### What's New
+- __Performance improvements__
+  We've optimized our filtering engine, with significant performance gains on long URLs.
+- __Better UI__
+  The application now includes a new logo and a new font, improving visual consistency across platforms, along with other minor UI refinements.
+- __Better injection reliability__
+  Improved handling of Content Security Policy (CSP) ensures that injections work more reliably across a wider range of sites. Thanks to @kasyap1234 for the contribution!
+- __NSS trust store__
+  The app now also installs the CA certificate into the NSS trust store. This notably improves the experience on Firefox – you're now less likely to encounter certificate errors on first launch. Thanks @donnykd for implementing this!
+- __More reliable proxy on macOS__
+  We've improved how the system proxy is configured on macOS, ensuring filtering remains active across all network interfaces. This also improves compatibility with various VPNs.
+- Other minor improvements and bug fixes.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.15.4...v0.16.0
+
+## v0.15.4
+
+### What's New
+- __File downloads fix__
+  Fixed an issue that caused downloaded files to become corrupted. Thanks to @rugabunda for reporting it.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.15.3...v0.15.4
+
+## v0.15.3
+
+### What's New
+- __Windows uninstaller fix__
+  The uninstaller now automatically terminates any running instances of Zen, ensuring a complete removal.
+- Other minor bug fixes.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.15.2...v0.15.3
+
+## v0.15.2
+
+### What's New
+- **Hosts rules fix**
+  Host style rules are now working as intended.
+- Other minor bugfixes.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.15.1...v0.15.2
+
+## v0.15.1
+
+### What's New
+This release fixes the "myRules is nil" error experienced during application startup. We apologize for the inconvenience.
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.15.0...v0.15.1
+
+## v0.15.0
+
+### What's New
+- __Salut!__
+  Zen now speaks French, thanks to @Armitryx! Want to contribute a new language or improve an existing one? Check out our contributing guidelines.
+- Bug fixes and minor improvements.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.14.0...v0.15.0
+
 ## v0.14.0
 
 ### What's New
