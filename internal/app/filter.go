@@ -17,15 +17,8 @@ func (a *App) initFilter(filter *filter.Filter) {
 			continue
 		}
 		wg.Go(func() {
-			contents, err := a.filterListStore.Get(filterList.URL)
-			if err != nil {
-				log.Printf("failed to get filter list %q from store: %v", filterList.URL, err)
-				return
-			}
-			defer contents.Close()
-			if err := filter.AddList(filterList.Name, filterList.Trusted, contents); err != nil {
+			if err := filter.AddURL(filterList.URL, filterList.Name, filterList.Trusted); err != nil {
 				log.Printf("failed to add filter list %q to filter: %v", filterList.URL, err)
-				return
 			}
 		})
 	}
@@ -33,7 +26,7 @@ func (a *App) initFilter(filter *filter.Filter) {
 	wg.Go(func() {
 		myRules := a.config.GetRules()
 		reader := strings.NewReader(strings.Join(myRules, "\n"))
-		if err := filter.AddList(myRulesFilterName, true, reader); err != nil {
+		if err := filter.AddReader(reader, myRulesFilterName, true); err != nil {
 			log.Printf("failed to add my rules to filter: %v", err)
 			return
 		}

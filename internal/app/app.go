@@ -12,18 +12,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ZenPrivacy/zen-core/asset"
 	"github.com/ZenPrivacy/zen-core/certgen"
 	"github.com/ZenPrivacy/zen-core/certstore"
-	"github.com/ZenPrivacy/zen-core/cosmetic"
-	"github.com/ZenPrivacy/zen-core/cssrule"
-	"github.com/ZenPrivacy/zen-core/extendedcss"
 	"github.com/ZenPrivacy/zen-core/filter"
 	"github.com/ZenPrivacy/zen-core/filter/whitelistserver"
 	"github.com/ZenPrivacy/zen-core/filterliststore"
-	"github.com/ZenPrivacy/zen-core/jsrule"
 	"github.com/ZenPrivacy/zen-core/networkrules"
 	"github.com/ZenPrivacy/zen-core/proxy"
-	"github.com/ZenPrivacy/zen-core/scriptlet"
 	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
 	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 	"github.com/ZenPrivacy/zen-desktop/internal/logger"
@@ -54,6 +50,7 @@ type App struct {
 	systrayMgr      *systray.Manager
 	filterListStore *filterliststore.FilterListStore
 	whitelistSrv    *whitelistserver.Server
+	assetSrv        *asset.Server
 }
 
 // NewApp initializes the app.
@@ -185,23 +182,28 @@ func (a *App) StartProxy() (err error) {
 		}
 	}()
 
+	certGenerator, err := certgen.NewCertGenerator(a.certStore, constants.OrgName)
+	if err != nil {
+		return fmt.Errorf("create cert manager: %v", err)
+	}
+
 	networkRules := networkrules.New()
-	scriptletInjector, err := scriptlet.NewInjectorWithDefaults()
-	if err != nil {
-		return fmt.Errorf("create scriptlets injector: %v", err)
-	}
-
-	extendedCSSInjector, err := extendedcss.NewInjectorWithDefaults()
-	if err != nil {
-		return fmt.Errorf("create extended css injector: %v", err)
-	}
-
-	cosmeticRulesInjector := cosmetic.NewInjector()
-	cssRulesInjector := cssrule.NewInjector()
-	jsRuleInjector := jsrule.NewInjector()
 	whitelistSrv := whitelistserver.New(networkRules)
 
-	filter, err := filter.NewFilter(networkRules, scriptletInjector, cosmeticRulesInjector, cssRulesInjector, jsRuleInjector, extendedCSSInjector, a.eventsHandler, whitelistSrv)
+	const assetPort = 26514
+	assetInjector, err := asset.NewEngine(assetPort)
+	if err != nil {
+		return fmt.Errorf("create asset injector: %v", err)
+	}
+	a.assetSrv, err = asset.NewServer(assetPort, assetInjector, certGenerator)
+	if err != nil {
+		return fmt.Errorf("create asset server: %v", err)
+	}
+	if err := a.assetSrv.ListenAndServe(); err != nil {
+		return fmt.Errorf("start asset server: %v", err)
+	}
+
+	filter, err := filter.NewFilter(networkRules, assetInjector, a.filterListStore, a.eventsHandler, whitelistSrv)
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}
@@ -211,11 +213,6 @@ func (a *App) StartProxy() (err error) {
 		return fmt.Errorf("start whitelist server: %v", err)
 	}
 	a.whitelistSrv = whitelistSrv
-
-	certGenerator, err := certgen.NewCertGenerator(a.certStore, constants.OrgName)
-	if err != nil {
-		return fmt.Errorf("create cert manager: %v", err)
-	}
 
 	a.proxy, err = proxy.NewProxy(filter, certGenerator, a.config.GetPort())
 	if err != nil {
@@ -292,6 +289,10 @@ func (a *App) StopProxy() (err error) {
 
 	if err := a.whitelistSrv.Stop(); err != nil {
 		return fmt.Errorf("stop whitelist server: %w", err)
+	}
+
+	if err := a.assetSrv.Stop(context.TODO()); err != nil {
+		return fmt.Errorf("stop asset server: %w", err)
 	}
 
 	a.whitelistSrv = nil
