@@ -100,6 +100,12 @@
     "helper": "使用 1024 以下的端口可能需要管理员权限。",
     "label": "端口"
   },
+  "assetPortInput": {
+    "description": "内部资源服务器用于注入脚本和样式的端口。",
+    "helper": "使用 1024 以下的端口可能需要管理员权限。",
+    "label": "资源服务器端口",
+    "setError": "设置资源服务器端口失败：{{error}}"
+  },
   "requestLog": {
     "emptyState": "开始浏览以查看被拦截的请求。",
     "filterName": "过滤器名称",

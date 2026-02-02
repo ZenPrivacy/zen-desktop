@@ -9,6 +9,8 @@ export function AddFilterLists(arg1:Array<cfg.FilterList>):Promise<void>;
 
 export function ExportDebugData():Promise<string>;
 
+export function GetAssetPort():Promise<number>;
+
 export function GetCAInstalled():Promise<boolean>;
 
 export function GetFilterLists():Promise<Array<cfg.FilterList>>;
@@ -46,6 +48,8 @@ export function RemoveFilterList(arg1:string):Promise<string>;
 export function RunMigrations():Promise<void>;
 
 export function Save():Promise<void>;
+
+export function SetAssetPort(arg1:number):Promise<void>;
 
 export function SetCAInstalled(arg1:boolean):Promise<void>;
 

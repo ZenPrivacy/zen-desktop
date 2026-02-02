@@ -106,8 +106,14 @@
   },
   "portInput": {
     "description": "La porta su cui il server proxy ascolterà (0 per casuale).",
-    "helper": "L’uso di una porta inferiore a 1024 potrebbe richiedere privilegi elevati.",
+    "helper": "L'uso di una porta inferiore a 1024 potrebbe richiedere privilegi elevati.",
     "label": "Porta"
+  },
+  "assetPortInput": {
+    "description": "La porta utilizzata dal server asset interno per iniettare script e stili.",
+    "helper": "L'uso di una porta inferiore a 1024 potrebbe richiedere privilegi elevati.",
+    "label": "Porta del server asset",
+    "setError": "Impossibile impostare la porta del server asset: {{error}}"
   },
   "requestLog": {
     "emptyState": "Inizia a navigare per vedere le richieste bloccate.",

@@ -10,6 +10,7 @@ import { BrowserOpenURL } from '../../wailsjs/runtime';
 import { BrowserLink } from '../common/BrowserLink';
 import { useProxyState } from '../context/ProxyStateContext';
 
+import { AssetPortInput } from './AssetPortInput';
 import { AutostartSwitch } from './AutostartSwitch';
 import { AutoupdateSwitch } from './AutoupdateSwitch';
 import { ExportDebugDataButton } from './ExportDebugDataButton';
@@ -70,6 +71,7 @@ export function SettingsManager() {
 
         <div className="settings-manager__section-body">
           <PortInput />
+          <AssetPortInput />
           <IgnoredHostsInput />
           <UninstallCADialog proxyState={proxyState} />
         </div>

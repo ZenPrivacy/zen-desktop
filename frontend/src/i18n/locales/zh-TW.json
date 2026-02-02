@@ -109,6 +109,12 @@
     "helper": "使用 1024 以下的連接埠可能需要系統管理員權限。",
     "label": "連接埠"
   },
+  "assetPortInput": {
+    "description": "內部資源伺服器用於注入腳本和樣式的連接埠。",
+    "helper": "使用 1024 以下的連接埠可能需要系統管理員權限。",
+    "label": "資源伺服器連接埠",
+    "setError": "設定資源伺服器連接埠失敗：{{error}}"
+  },
   "requestLog": {
     "emptyState": "開始瀏覽以檢視被攔截的請求。",
     "filterName": "過濾器名稱",

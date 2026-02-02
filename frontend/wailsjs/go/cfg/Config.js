@@ -14,6 +14,10 @@ export function ExportDebugData() {
   return window['go']['cfg']['Config']['ExportDebugData']();
 }
 
+export function GetAssetPort() {
+  return window['go']['cfg']['Config']['GetAssetPort']();
+}
+
 export function GetCAInstalled() {
   return window['go']['cfg']['Config']['GetCAInstalled']();
 }
@@ -88,6 +92,10 @@ export function RunMigrations() {
 
 export function Save() {
   return window['go']['cfg']['Config']['Save']();
+}
+
+export function SetAssetPort(arg1) {
+  return window['go']['cfg']['Config']['SetAssetPort'](arg1);
 }
 
 export function SetCAInstalled(arg1) {

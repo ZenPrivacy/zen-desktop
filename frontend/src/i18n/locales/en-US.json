@@ -109,6 +109,12 @@
     "helper": "Using a port below 1024 may require elevated privileges.",
     "label": "Port"
   },
+  "assetPortInput": {
+    "description": "The port used by the internal asset server for injecting scripts and styles.",
+    "helper": "Using a port below 1024 may require elevated privileges.",
+    "label": "Asset server port",
+    "setError": "Failed to set asset server port: {{error}}"
+  },
   "requestLog": {
     "emptyState": "Start browsing to see blocked requests.",
     "filterName": "Filter name",
