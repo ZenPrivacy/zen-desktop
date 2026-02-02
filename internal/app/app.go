@@ -295,6 +295,7 @@ func (a *App) StopProxy() (err error) {
 		return fmt.Errorf("stop asset server: %w", err)
 	}
 
+	a.assetSrv = nil
 	a.whitelistSrv = nil
 	a.proxy = nil
 	a.proxyOn = false
