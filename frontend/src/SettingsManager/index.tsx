@@ -88,7 +88,7 @@ export function SettingsManager() {
             (<BrowserLink href={CHANGELOG_URL}>{t('settings.about.changelog')}</BrowserLink>)
           </span>
         </div>
-        <div>© 2025 Zen Privacy Project Developers</div>
+        <div>© 2026 Zen contributors</div>
         <Button
           variant="minimal"
           size="small"

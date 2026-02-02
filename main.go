@@ -81,7 +81,7 @@ func main() {
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
 				Title:   constants.AppName,
-				Message: fmt.Sprintf("Your Comprehensive Ad-Blocker and Privacy Guard\nVersion: %s\n© 2025 Zen Privacy Project Developers", cfg.Version),
+				Message: fmt.Sprintf("Your Comprehensive Ad-Blocker and Privacy Guard\nVersion: %s\n© 2026 Zen contributors", cfg.Version),
 			},
 		},
 		HideWindowOnClose: runtime.GOOS == "darwin" || runtime.GOOS == "windows",

@@ -5,7 +5,7 @@
 Zen, including its source code and all attached documentation, is licensed under the MIT License.
 
 ```
-Copyright (c) 2025 Zen Privacy Project Developers
+Copyright (c) 2026 Zen contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
