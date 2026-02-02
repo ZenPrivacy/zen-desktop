@@ -202,6 +202,14 @@ func (a *App) StartProxy() (err error) {
 	if err := a.assetSrv.ListenAndServe(); err != nil {
 		return fmt.Errorf("start asset server: %v", err)
 	}
+	defer func() {
+		if err != nil {
+			if err := a.assetSrv.Stop(context.TODO()); err != nil {
+				log.Printf("failed to stop asset server: %v", err)
+			}
+			a.assetSrv = nil
+		}
+	}()
 
 	filter, err := filter.NewFilter(networkRules, assetInjector, a.filterListStore, a.eventsHandler, whitelistSrv)
 	if err != nil {
