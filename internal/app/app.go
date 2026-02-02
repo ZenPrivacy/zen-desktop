@@ -190,7 +190,7 @@ func (a *App) StartProxy() (err error) {
 	networkRules := networkrules.New()
 	whitelistSrv := whitelistserver.New(networkRules)
 
-	const assetPort = 26514
+	assetPort := a.config.GetAssetPort()
 	assetInjector, err := asset.NewEngine(assetPort)
 	if err != nil {
 		return fmt.Errorf("create asset injector: %v", err)

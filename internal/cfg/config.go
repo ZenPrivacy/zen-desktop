@@ -72,8 +72,9 @@ type Config struct {
 	Filter struct {
 		FilterLists []FilterList `json:"filterLists"`
 		// Deprecated: use Rules.
-		MyRules []string `json:"myRules"`
-		Rules   []string `json:"rules"`
+		MyRules   []string `json:"myRules"`
+		Rules     []string `json:"rules"`
+		AssetPort int      `json:"assetPort"`
 	} `json:"filter"`
 	Certmanager struct {
 		CAInstalled bool `json:"caInstalled"`
@@ -423,6 +424,31 @@ func (c *Config) GetPACPort() int {
 	defer c.RUnlock()
 
 	return c.Proxy.PACPort
+}
+
+// GetAssetPort returns the port the asset server is set to listen on.
+func (c *Config) GetAssetPort() int {
+	c.RLock()
+	defer c.RUnlock()
+
+	return c.Filter.AssetPort
+}
+
+// SetAssetPort sets the port the asset server is set to listen on.
+func (c *Config) SetAssetPort(port int) error {
+	if port < 1 || port > 65535 {
+		return fmt.Errorf("port must be between 1 and 65535")
+	}
+
+	c.Lock()
+	defer c.Unlock()
+
+	c.Filter.AssetPort = port
+	if err := c.Save(); err != nil {
+		log.Printf("failed to save config: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (c *Config) GetVersion() string {

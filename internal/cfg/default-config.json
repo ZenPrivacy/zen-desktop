@@ -321,7 +321,8 @@
         "type": "regional",
         "locales": ["vi"]
       }
-    ]
+    ],
+    "assetPort": 26514
   },
   "certmanager": {
     "caInstalled": false
