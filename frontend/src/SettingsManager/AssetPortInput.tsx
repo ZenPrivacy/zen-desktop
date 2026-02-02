@@ -34,7 +34,17 @@ export function AssetPortInput() {
   }, 500);
 
   return (
-    <FormGroup label={t('assetPortInput.label')} labelFor="asset-port" helperText={t('assetPortInput.description')}>
+    <FormGroup
+      label={t('assetPortInput.label')}
+      labelFor="asset-port"
+      helperText={
+        <>
+          {t('assetPortInput.description')}
+          <br />
+          {t('assetPortInput.helper')}
+        </>
+      }
+    >
       <Tooltip content={t('common.stopProxyToModify') as string} disabled={!isProxyRunning} placement="top">
         <NumericInput
           id="asset-port"
@@ -42,6 +52,9 @@ export function AssetPortInput() {
           max={65535}
           value={state.port}
           onValueChange={(port) => {
+            if (Number.isNaN(port)) {
+              return;
+            }
             setState({ ...state, port });
             setPort(port);
           }}
