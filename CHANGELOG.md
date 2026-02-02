@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.17.0
+
+### What's New
+
+- __Support for the `!#include` directive in filter lists__
+  This improves compatibility with a wider range of filter lists, including regional ones.
+- __`:style()` extended CSS pseudo-class support__
+  Zen is now even better at hiding unwanted elements on webpages.
+- __Improved cache behavior__
+  Injected page assets are no longer cached by browsers, so pages update instantly when you change the configuration or turn Zen off.
+- __Improved Linux support__
+  Added partial support for XFCE – thanks to @xoxorwr!
+- Other bug fixes and performance improvements.
+
+### New Contributors
+
+- @xoxorwr made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/558
+
+Thank you for using Zen!
+
+__Full Changelog__: https://github.com/ZenPrivacy/zen-desktop/compare/v0.16.0...v0.17.0
+
 ## v0.16.0
 
 ### What's New
