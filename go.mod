@@ -3,7 +3,7 @@ module github.com/ZenPrivacy/zen-desktop
 // Note: Always set the patch version when updating the Go version.
 // Omitting the patch version may cause some Go commands to fail.
 // For more details, see: https://go.dev/doc/toolchain#version
-go 1.25.3
+go 1.26.0
 
 require (
 	github.com/ZenPrivacy/zen-core v1.4.0
