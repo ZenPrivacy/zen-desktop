@@ -71,55 +71,55 @@
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/main-zen.txt",
-        "name": "Zen - All",
+        "name": "no-doomscroll - All",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/main-zen.txt",
-        "name": "Zen - YouTube",
+        "name": "no-doomscroll - YouTube",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/tiktok/main-zen.txt",
-        "name": "Zen - TikTok",
+        "name": "no-doomscroll - TikTok",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/instagram/main-zen.txt",
-        "name": "Zen - Instagram",
+        "name": "no-doomscroll - Instagram",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/x/main-zen.txt",
-        "name": "Zen - X",
+        "name": "no-doomscroll - X",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/reddit/main-zen.txt",
-        "name": "Zen - Reddit",
+        "name": "no-doomscroll - Reddit",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/bluesky/main-zen.txt",
-        "name": "Zen - Bluesky",
+        "name": "no-doomscroll - Bluesky",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/linkedin/main-zen.txt",
-        "name": "Zen - LinkedIn",
+        "name": "no-doomscroll - LinkedIn",
         "enabled": false,
         "type": "digitalWellbeing"
       },
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/twitch/main-zen.txt",
-        "name": "Zen - Twitch",
+        "name": "no-doomscroll - Twitch",
         "enabled": false,
         "type": "digitalWellbeing"
       },
