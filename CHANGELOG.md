@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.18.0
+
+### What's New
+- __no-doomscroll__
+  Zen now ships with no-doomscroll – a set of filter lists that remove infinite feeds from social media websites, letting you use them without getting pulled into endless scrolling. You can enable them under Filter lists / Digital wellbeing. Learn more on the [no-doomscroll homepage](https://github.com/ZenPrivacy/filter-lists/blob/master/no-doomscroll/readme.md).
+- Other minor improvements.
+
+Thank you for using Zen!
+
+__Full Changelog__: https://github.com/ZenPrivacy/zen-desktop/compare/v0.17.0...v0.18.0
+
 ## v0.17.0
 
 ### What's New
