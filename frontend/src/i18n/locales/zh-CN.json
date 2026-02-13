@@ -71,11 +71,13 @@
     "more": "更多",
     "removeError": "移除过滤列表失败：{{error}}",
     "toggleError": "切换过滤列表失败：{{error}}",
-    "trusted": "受信任"
+    "trusted": "受信任",
+    "whatIsThis": "这是什么"
   },
   "filterTypes": {
     "ads": "广告",
     "custom": "自定义",
+    "digitalWellbeing": "数字健康",
     "general": "通用",
     "malware": "恶意软件",
     "privacy": "隐私",

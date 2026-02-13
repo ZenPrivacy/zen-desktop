@@ -80,11 +80,13 @@
     "trusted": "信任",
     "copy": "複製連結",
     "copied": "已複製",
-    "goTo": "在瀏覽器中開啟"
+    "goTo": "在瀏覽器中開啟",
+    "whatIsThis": "這是什麼"
   },
   "filterTypes": {
     "ads": "廣告",
     "custom": "自訂",
+    "digitalWellbeing": "數位健康",
     "general": "一般",
     "malware": "惡意軟體",
     "privacy": "隱私",

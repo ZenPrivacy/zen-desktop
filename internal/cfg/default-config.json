@@ -70,6 +70,60 @@
         "type": "general"
       },
       {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/main-zen.txt",
+        "name": "Zen - All",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/main-zen.txt",
+        "name": "Zen - YouTube",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/tiktok/main-zen.txt",
+        "name": "Zen - TikTok",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/instagram/main-zen.txt",
+        "name": "Zen - Instagram",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/x/main-zen.txt",
+        "name": "Zen - X",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/reddit/main-zen.txt",
+        "name": "Zen - Reddit",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/bluesky/main-zen.txt",
+        "name": "Zen - Bluesky",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/linkedin/main-zen.txt",
+        "name": "Zen - LinkedIn",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/twitch/main-zen.txt",
+        "name": "Zen - Twitch",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
         "url": "https://raw.githubusercontent.com/AnXh3L0/blocklist/master/albanian-easylist-addition/Albania.txt",
         "name": "🇦🇱AL 🇽🇰XK Adblock List for Albania and Kosovo",
         "enabled": false,

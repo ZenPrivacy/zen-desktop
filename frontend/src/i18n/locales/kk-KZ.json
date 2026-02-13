@@ -71,11 +71,13 @@
     "more": "Тағы",
     "removeError": "Сүзгілер тізімін жою мүмкін болмады: {{error}}",
     "toggleError": "Сүзгілер тізімін ауыстыру мүмкін болмады: {{error}}",
-    "trusted": "Сенімді"
+    "trusted": "Сенімді",
+    "whatIsThis": "Бұл не"
   },
   "filterTypes": {
     "ads": "Жарнамалар",
     "custom": "Клиент",
+    "digitalWellbeing": "Цифрлық әл-ауқат",
     "general": "Жалпы",
     "malware": "Малвэр (зиянды бағдарлама)",
     "privacy": "Құпиялылық",

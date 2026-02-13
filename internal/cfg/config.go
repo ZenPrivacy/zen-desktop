@@ -46,12 +46,13 @@ var UpdatePolicyEnum = []struct {
 type FilterListType string
 
 const (
-	FilterListTypeGeneral  FilterListType = "general"
-	FilterListTypeAds      FilterListType = "ads"
-	FilterListTypePrivacy  FilterListType = "privacy"
-	FilterListTypeMalware  FilterListType = "malware"
-	FilterListTypeRegional FilterListType = "regional"
-	FilterListTypeCustom   FilterListType = "custom"
+	FilterListTypeGeneral          FilterListType = "general"
+	FilterListTypeAds              FilterListType = "ads"
+	FilterListTypePrivacy          FilterListType = "privacy"
+	FilterListTypeMalware          FilterListType = "malware"
+	FilterListTypeRegional         FilterListType = "regional"
+	FilterListTypeDigitalWellbeing FilterListType = "digitalWellbeing"
+	FilterListTypeCustom           FilterListType = "custom"
 )
 
 type FilterList struct {

@@ -80,11 +80,13 @@
     "trusted": "Attendibile",
     "copy": "Copia link",
     "copied": "Copiato",
-    "goTo": "Apri nel browser"
+    "goTo": "Apri nel browser",
+    "whatIsThis": "Che cos'è"
   },
   "filterTypes": {
     "ads": "Pubblicità",
     "custom": "Personalizzato",
+    "digitalWellbeing": "Benessere digitale",
     "general": "Generale",
     "malware": "Malware",
     "privacy": "Privacy",

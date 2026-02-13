@@ -80,11 +80,13 @@
     "trusted": "Trusted",
     "copy": "Copy link",
     "copied": "Copied",
-    "goTo": "Open in browser"
+    "goTo": "Open in browser",
+    "whatIsThis": "What is this"
   },
   "filterTypes": {
     "ads": "Ads",
     "custom": "Custom",
+    "digitalWellbeing": "Digital Wellbeing",
     "general": "General",
     "malware": "Malware",
     "privacy": "Privacy",

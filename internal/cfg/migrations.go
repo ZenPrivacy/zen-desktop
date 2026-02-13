@@ -190,6 +190,71 @@ var migrations = map[string]func(c *Config) error{
 		}
 		return nil
 	},
+	"v0.18.0": func(c *Config) error {
+		lists := []FilterList{
+			{
+				Name:    "Zen - All",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - YouTube",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - TikTok",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/tiktok/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - Instagram",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/instagram/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - X",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/x/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - Reddit",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/reddit/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - Bluesky",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/bluesky/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - LinkedIn",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/linkedin/main-zen.txt",
+				Enabled: false,
+			},
+			{
+				Name:    "Zen - Twitch",
+				Type:    FilterListTypeDigitalWellbeing,
+				URL:     "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/twitch/main-zen.txt",
+				Enabled: false,
+			},
+		}
+		for _, list := range lists {
+			errStr := c.AddFilterList(list)
+			if errStr != "" {
+				return fmt.Errorf("add no-doomscroll list %q: %s", list.Name, errStr)
+			}
+		}
+		return nil
+	},
 }
 
 // RunMigrations runs the version-to-version migrations.

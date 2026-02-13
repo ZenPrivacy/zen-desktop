@@ -71,11 +71,13 @@
     "more": "Mehr",
     "removeError": "Filterliste kann nicht entfernt werden: {{error}}",
     "toggleError": "Filterliste kann nicht umgeschaltet werden: {{error}}",
-    "trusted": "Vertraut"
+    "trusted": "Vertraut",
+    "whatIsThis": "Was ist das"
   },
   "filterTypes": {
     "ads": "Anzeigen",
     "custom": "Eigene",
+    "digitalWellbeing": "Digitales Wohlbefinden",
     "general": "Allgemein",
     "malware": "Malware",
     "privacy": "Datenschutz",

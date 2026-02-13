@@ -73,6 +73,17 @@ export function FilterLists() {
           <Button text={t(`filterTypes.${type}`)} endIcon="caret-down" />
         </Select>
 
+        {type === FilterListType.DIGITAL_WELLBEING && (
+          <Button
+            icon="help"
+            onClick={() => {
+              BrowserOpenURL('https://github.com/ZenPrivacy/filter-lists/tree/master/no-doomscroll');
+            }}
+          >
+            {t('filterLists.whatIsThis')}
+          </Button>
+        )}
+
         {type === FilterListType.CUSTOM && (
           <Popover
             content={

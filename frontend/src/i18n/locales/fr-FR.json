@@ -60,11 +60,13 @@
     "more": "Plus",
     "removeError": "Échec de la suppression de la liste : {{error}}",
     "toggleError": "Échec du changement d'état de la liste : {{error}}",
-    "trusted": "Liste de confiance"
+    "trusted": "Liste de confiance",
+    "whatIsThis": "Qu'est-ce que c'est"
   },
   "filterTypes": {
     "ads": "Publicité",
     "custom": "Personnalisé",
+    "digitalWellbeing": "Bien-être numérique",
     "general": "Général",
     "malware": "Malware",
     "privacy": "Confidentialité",
