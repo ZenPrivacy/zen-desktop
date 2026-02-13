@@ -18,6 +18,8 @@ import { ExportFilterList } from './ExportFilterList';
 import { ImportFilterList } from './ImportFilterList';
 import { FilterListType } from './types';
 
+const NO_DOOMSCROLL_URL = 'https://github.com/ZenPrivacy/filter-lists/tree/master/no-doomscroll';
+
 export function FilterLists() {
   const { t } = useTranslation();
   const [state, setState] = useState<{
@@ -77,7 +79,7 @@ export function FilterLists() {
           <Button
             icon="help"
             onClick={() => {
-              BrowserOpenURL('https://github.com/ZenPrivacy/filter-lists/tree/master/no-doomscroll');
+              BrowserOpenURL(NO_DOOMSCROLL_URL);
             }}
           >
             {t('filterLists.whatIsThis')}
