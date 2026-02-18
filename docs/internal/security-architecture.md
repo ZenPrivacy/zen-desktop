@@ -48,7 +48,7 @@ Platform-specific lists include hosts identified by OS vendors as ones that shou
 Zen's source code is hosted on GitHub. We apply the following security measures:
 
 - Two-factor authentication (2FA) is required for all organization members.
-- All pull requests must be reviewed by at least one other organization member and must pass all tests and checks before being merged.
+- All pull requests must pass all tests and checks before being merged.
 - Only project leads can create and modify release tags and releases.
 - CI actions follow best practices, such as minimal privileges and pinned action versions.
 
