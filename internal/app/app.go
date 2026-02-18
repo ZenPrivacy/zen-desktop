@@ -110,7 +110,7 @@ func (a *App) commonStartup(ctx context.Context) {
 	if err != nil {
 		log.Printf("failed to initialize self-updater: %v", err)
 	} else if su != nil {
-		go su.RunScheduledUpdateChecks(ctx)
+		go su.RunScheduledUpdateChecks()
 	}
 
 	time.AfterFunc(time.Second, func() {

@@ -1,7 +1,6 @@
 package selfupdate
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -96,9 +95,7 @@ func NewSelfUpdater(config *cfg.Config, eventsEmitter eventsEmitter) (*SelfUpdat
 	return &u, nil
 }
 
-func (su *SelfUpdater) RunScheduledUpdateChecks(
-	ctx context.Context,
-) {
+func (su *SelfUpdater) RunScheduledUpdateChecks() {
 	check := func() bool {
 		policy := su.config.GetUpdatePolicy()
 		if policy != cfg.UpdatePolicyAutomatic {
@@ -123,14 +120,9 @@ func (su *SelfUpdater) RunScheduledUpdateChecks(
 	ticker := time.NewTicker(checkInterval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ctx.Done():
+	for range ticker.C {
+		if check() {
 			return
-		case <-ticker.C:
-			if check() {
-				return
-			}
 		}
 	}
 }
