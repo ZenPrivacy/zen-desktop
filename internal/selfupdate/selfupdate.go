@@ -112,9 +112,8 @@ func (su *SelfUpdater) RunScheduledUpdateChecks(
 		if updated {
 			su.eventsEmitter.OnUpdateAvailable()
 			return true
-		} else {
-			return false
 		}
+		return false
 	}
 
 	if check() {
