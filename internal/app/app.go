@@ -440,7 +440,7 @@ func parseLaunchArgs(args []string) (start, hidden bool) {
 }
 
 func (a *App) RestartApplication() error {
-	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204
+	cmd := exec.Command(os.Args[0], os.Args[1:]...) // #nosec G204 G702 -- restarting the app with the same arguments is ok
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("restart application: %w", err)
 	}
