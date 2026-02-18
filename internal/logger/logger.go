@@ -44,7 +44,7 @@ func getLogsDir(appName string) (string, error) {
 		path = filepath.Join(homeDir, ".local", "share", appName, "logs")
 	}
 
-	if err := os.MkdirAll(path, 0755); err != nil {
+	if err := os.MkdirAll(path, 0755); err != nil { // #nosec G703 -- path is constructed from user home directory and app name
 		return "", fmt.Errorf("create log directory: %v", err)
 	}
 

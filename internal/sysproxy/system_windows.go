@@ -57,7 +57,7 @@ func unsetSystemProxy() error {
 }
 
 func callInternetSetOption(dwOption int) {
-	ret, _, err := internetSetOption.Call(0, uintptr(dwOption), 0, 0)
+	ret, _, err := internetSetOption.Call(0, uintptr(dwOption), 0, 0) // #nosec G115 -- dwOption is a small Win32 constant
 	if ret == 0 {
 		log.Printf("failed to call InternetSetOption with option %d: %v", dwOption, err)
 	}

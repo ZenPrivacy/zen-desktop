@@ -259,10 +259,10 @@ func (t *winTray) wndProc(hWnd windows.Handle, message uint32, wParam, lParam ui
 	)
 	switch message {
 	case WM_COMMAND:
-		menuItemId := int32(wParam)
+		menuItemId := int32(wParam) // #nosec G115 -- WM_COMMAND wParam carries a menu item ID; int32 cast is intentional to check for -1
 		// https://docs.microsoft.com/en-us/windows/win32/menurc/wm-command#menus
 		if menuItemId != -1 {
-			systrayMenuItemSelected(uint32(wParam))
+			systrayMenuItemSelected(uint32(wParam)) // #nosec G115 -- menu item ID fits in uint32, guarded by the int32 check above
 		}
 	case WM_CLOSE:
 		pDestroyWindow.Call(uintptr(t.window))
@@ -343,7 +343,7 @@ func (t *winTray) initInstance() error {
 	res, _, _ := pRegisterWindowMessage.Call(
 		uintptr(unsafe.Pointer(taskbarEventNamePtr)),
 	)
-	t.wmTaskbarCreated = uint32(res)
+	t.wmTaskbarCreated = uint32(res) // #nosec G115 -- RegisterWindowMessage returns an atom in range 0xC000-0xFFFF
 
 	t.loadedImages = make(map[string]windows.Handle)
 
@@ -568,7 +568,7 @@ func (t *winTray) addOrUpdateMenuItem(menuItemId uint32, parentId uint32, title 
 		position := t.getVisibleItemIndex(parentId, menuItemId)
 		res, _, err = pInsertMenuItem.Call(
 			uintptr(menu),
-			uintptr(position),
+			uintptr(position), // #nosec G115 -- position is a small menu item index
 			1,
 			uintptr(unsafe.Pointer(&mi)),
 		)
@@ -608,7 +608,7 @@ func (t *winTray) addSeparatorMenuItem(menuItemId, parentId uint32) error {
 	t.muMenus.RUnlock()
 	res, _, err := pInsertMenuItem.Call(
 		menu,
-		uintptr(position),
+		uintptr(position), // #nosec G115 -- position is a small menu item index
 		1,
 		uintptr(unsafe.Pointer(&mi)),
 	)
@@ -655,8 +655,8 @@ func (t *winTray) showMenu() error {
 	res, _, err = pTrackPopupMenu.Call(
 		uintptr(t.menus[0]),
 		TPM_BOTTOMALIGN|TPM_LEFTALIGN,
-		uintptr(p.X),
-		uintptr(p.Y),
+		uintptr(p.X), // #nosec G115 -- screen coordinates are int32 (LONG), uintptr is same width or wider
+		uintptr(p.Y), // #nosec G115 -- screen coordinates are int32 (LONG), uintptr is same width or wider
 		0,
 		uintptr(t.window),
 		0,
@@ -798,7 +798,7 @@ func nativeLoop() {
 		// If the function retrieves the WM_QUIT message, the return value is zero.
 		// If there is an error, the return value is -1
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644936(v=vs.85).aspx
-		switch int32(ret) {
+		switch int32(ret) { // #nosec G115 -- GetMessage returns -1, 0, or nonzero; int32 cast is the standard pattern to check for -1
 		case -1:
 			log.Printf("systray message loop error: %v", err)
 			return
