@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"sync"
@@ -107,17 +106,12 @@ func (a *App) commonStartup(ctx context.Context) {
 	a.config.RunMigrations()
 	a.systrayMgr.Init(ctx)
 
-	go func() {
-		su, err := selfupdate.NewSelfUpdater(&http.Client{
-			Timeout: 20 * time.Second,
-		}, a.config, a.eventsHandler, a.RestartApplication)
-		if err != nil {
-			log.Printf("error creating self updater: %v", err)
-			return
-		}
-
-		su.StartPeriodicChecks(ctx, time.Hour)
-	}()
+	su, err := selfupdate.NewSelfUpdater(a.config, a.eventsHandler)
+	if err != nil {
+		log.Printf("failed to initialize self-updater: %v", err)
+	} else if su != nil {
+		go su.RunScheduledUpdateChecks(ctx)
+	}
 
 	time.AfterFunc(time.Second, func() {
 		// This is a workaround for the issue where not all React components are mounted in time.
