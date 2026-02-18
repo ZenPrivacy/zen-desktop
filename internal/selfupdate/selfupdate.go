@@ -56,8 +56,8 @@ type SelfUpdater struct {
 	httpClient    httpClient
 	eventsEmitter eventsEmitter
 
-	// applyUpdateMu ensures that only one applyUpdate runs at a time.
-	applyUpdateMu sync.Mutex
+	// execUpdateMu ensures that only one applyUpdate runs at a time.
+	execUpdateMu sync.Mutex
 }
 
 // NewSelfUpdater returns nil if the app should not self-update.
@@ -136,9 +136,10 @@ func (su *SelfUpdater) RunScheduledUpdateChecks(
 	}
 }
 
+// execUpdate checks and executes an update if available. Returns true if an update was applied.
 func (su *SelfUpdater) execUpdate() (bool, error) {
-	su.applyUpdateMu.Lock()
-	defer su.applyUpdateMu.Unlock()
+	su.execUpdateMu.Lock()
+	defer su.execUpdateMu.Unlock()
 
 	rel, err := su.checkForUpdates()
 	if err != nil {
