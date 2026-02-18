@@ -192,19 +192,18 @@ func (su *SelfUpdater) checkForUpdates() (*release, error) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "zen-desktop")
 
-	res, err := su.httpClient.Do(req)
+	resp, err := su.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
 	}
+	defer resp.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("manifest request failed with status code %d", res.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("manifest request failed with status code %d", resp.StatusCode)
 	}
 
-	defer res.Body.Close()
-
 	var rel release
-	if err := json.NewDecoder(res.Body).Decode(&rel); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
@@ -254,12 +253,11 @@ func (su *SelfUpdater) downloadFile(url, filePath string) error {
 	if err != nil {
 		return fmt.Errorf("download file: %w", err)
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("download file failed with status code %d", resp.StatusCode)
 	}
-
-	defer resp.Body.Close()
 
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
