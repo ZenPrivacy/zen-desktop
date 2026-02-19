@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.18.1
+
+### What's New
+- __Fixed self-updates__
+  Self-updates were failing for some users due to a 20-second timeout that sometimes wasn't enough to download the update over GitHub's CDN. The timeout has been increased to fix this.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.18.0...v0.18.1
+
 ## v0.18.0
 
 ### What's New
