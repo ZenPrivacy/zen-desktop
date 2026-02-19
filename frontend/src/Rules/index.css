@@ -1,20 +1,66 @@
+/* src/Rules/index.css */
+
 .rules {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 8px);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-.rules__help-button {
+.rules__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
-.rules__textarea {
-  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
-  font-size: 0.9em;
-  height: 100% !important;
+.rules__hint {
+  font-size: 11px;
+  opacity: 0.5;
+  font-family: var(--bp5-font-family-monospace);
 }
 
 .rules__tooltip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.rules__editor-container {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* CodeMirror UI Enhancements */
+.cm-editor { height: 100% !important; }
+.cm-gutters { background-color: #21252b !important; border-right: 1px solid #333 !important; }
+.cm-lineNumbers .cm-gutterElement { padding: 0 8px !important; color: #606873 !important; }
+
+/* Search Panel Styling to match One Dark */
+.cm-search {
+  background: #282c34 !important;
+  color: #abb2bf !important;
+  border-bottom: 1px solid #181a1f !important;
+  padding: 8px !important;
+}
+.cm-search input { 
+  background: #21252b !important; 
+  color: white !important; 
+  border: 1px solid #181a1f !important; 
+  border-radius: 3px; 
+}
+.rules--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 100%;
   width: 100%;
 }
