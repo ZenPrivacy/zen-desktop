@@ -3,10 +3,18 @@ package selfupdate
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
 )
+
+type failingHTTPClient struct{}
+
+func (f *failingHTTPClient) Do(_ *http.Request) (*http.Response, error) {
+	return nil, errors.New("simulated download failure")
+}
 
 func TestIsNewer(t *testing.T) {
 	t.Parallel()
@@ -100,6 +108,32 @@ func TestIsNewer(t *testing.T) {
 			t.Error("got true, want false")
 		}
 	})
+}
+
+func TestDownloadAndVerifyFileCleansUpOnError(t *testing.T) {
+	su := &SelfUpdater{
+		httpClient: &failingHTTPClient{},
+	}
+
+	tmpDir := os.TempDir()
+	before, _ := filepath.Glob(filepath.Join(tmpDir, "downloaded-*"))
+	beforeSet := make(map[string]bool, len(before))
+	for _, f := range before {
+		beforeSet[f] = true
+	}
+
+	_, err := su.downloadAndVerifyFile("http://example.com/file.zip", "deadbeef")
+	if err == nil {
+		t.Fatal("got nil, want error")
+	}
+
+	after, _ := filepath.Glob(filepath.Join(tmpDir, "downloaded-*"))
+	for _, f := range after {
+		if !beforeSet[f] {
+			os.Remove(f)
+			t.Errorf("temp file was not cleaned up: %s", f)
+		}
+	}
 }
 
 func TestPathTraversal(t *testing.T) {
