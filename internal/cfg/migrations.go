@@ -268,13 +268,21 @@ var migrations = map[string]func(c *Config) error{
 			ytMainURL        = "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/main-zen.txt"
 		)
 
-		// Remove new URLs if already present (e.g. manually added to "Custom")
-		// so the subsequent update/insert doesn't create duplicates.
+		// Remove all variants of Zen filter URLs and YouTube Shorts,
+		// then re-add with the correct jsDelivr URLs. This covers all
+		// cases: first migration (old URLs), repeat run (new URLs),
+		// and manual additions (both URLs present).
+		zenAdsEnabled := true
+		zenPrivacyEnabled := true
 		ytShortsEnabled := false
 		filtered := c.Filter.FilterLists[:0]
 		for _, list := range c.Filter.FilterLists {
 			switch list.URL {
-			case newZenAdsURL, newZenPrivacyURL:
+			case oldZenAdsURL, newZenAdsURL:
+				zenAdsEnabled = list.Enabled
+				continue
+			case oldZenPrivacyURL, newZenPrivacyURL:
+				zenPrivacyEnabled = list.Enabled
 				continue
 			case ytShortsURL:
 				ytShortsEnabled = list.Enabled
@@ -284,17 +292,22 @@ var migrations = map[string]func(c *Config) error{
 		}
 		c.Filter.FilterLists = filtered
 
-		// Update old GitHub URLs to jsDelivr.
-		for i, list := range c.Filter.FilterLists {
-			switch list.URL {
-			case oldZenAdsURL:
-				c.Filter.FilterLists[i].URL = newZenAdsURL
-				log.Printf("v0.19.0 migration: updating Zen - Ads URL to jsDelivr")
-			case oldZenPrivacyURL:
-				c.Filter.FilterLists[i].URL = newZenPrivacyURL
-				log.Printf("v0.19.0 migration: updating Zen - Privacy URL to jsDelivr")
-			}
-		}
+		// Re-add Zen filter lists with jsDelivr URLs at the top.
+		c.Filter.FilterLists = append([]FilterList{
+			{
+				Name:    "Zen - Ads",
+				Type:    FilterListTypeAds,
+				URL:     newZenAdsURL,
+				Enabled: zenAdsEnabled,
+			},
+			{
+				Name:    "Zen - Privacy",
+				Type:    FilterListTypePrivacy,
+				URL:     newZenPrivacyURL,
+				Enabled: zenPrivacyEnabled,
+			},
+		}, c.Filter.FilterLists...)
+		log.Printf("v0.19.0 migration: added Zen - Ads and Zen - Privacy with jsDelivr URLs")
 
 		// Add YouTube Shorts list right after "no-doomscroll - YouTube".
 		shortsList := FilterList{
