@@ -255,6 +255,72 @@ var migrations = map[string]func(c *Config) error{
 		}
 		return nil
 	},
+	"v0.19.0": func(c *Config) error {
+		c.Lock()
+		defer c.Unlock()
+
+		const (
+			oldZenAdsURL     = "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt"
+			newZenAdsURL     = "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/ads/ads.txt"
+			oldZenPrivacyURL = "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt"
+			newZenPrivacyURL = "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/privacy/privacy.txt"
+			ytShortsURL      = "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/shorts-zen.txt"
+			ytMainURL        = "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/main-zen.txt"
+		)
+
+		// Remove new URLs if already present (e.g. manually added to "Custom")
+		// so the subsequent update/insert doesn't create duplicates.
+		ytShortsEnabled := false
+		filtered := c.Filter.FilterLists[:0]
+		for _, list := range c.Filter.FilterLists {
+			switch list.URL {
+			case newZenAdsURL, newZenPrivacyURL:
+				continue
+			case ytShortsURL:
+				ytShortsEnabled = list.Enabled
+				continue
+			}
+			filtered = append(filtered, list)
+		}
+		c.Filter.FilterLists = filtered
+
+		// Update old GitHub URLs to jsDelivr.
+		for i, list := range c.Filter.FilterLists {
+			switch list.URL {
+			case oldZenAdsURL:
+				c.Filter.FilterLists[i].URL = newZenAdsURL
+				log.Printf("v0.19.0 migration: updating Zen - Ads URL to jsDelivr")
+			case oldZenPrivacyURL:
+				c.Filter.FilterLists[i].URL = newZenPrivacyURL
+				log.Printf("v0.19.0 migration: updating Zen - Privacy URL to jsDelivr")
+			}
+		}
+
+		// Add YouTube Shorts list right after "no-doomscroll - YouTube".
+		shortsList := FilterList{
+			Name:    "no-doomscroll - YouTube Shorts",
+			Type:    FilterListTypeDigitalWellbeing,
+			URL:     ytShortsURL,
+			Enabled: ytShortsEnabled,
+		}
+		inserted := false
+		for i, list := range c.Filter.FilterLists {
+			if list.URL == ytMainURL {
+				c.Filter.FilterLists = append(c.Filter.FilterLists[:i+1], append([]FilterList{shortsList}, c.Filter.FilterLists[i+1:]...)...)
+				inserted = true
+				break
+			}
+		}
+		if !inserted {
+			c.Filter.FilterLists = append(c.Filter.FilterLists, shortsList)
+		}
+		log.Printf("v0.19.0 migration: added no-doomscroll - YouTube Shorts list")
+
+		if err := c.Save(); err != nil {
+			return fmt.Errorf("save config: %v", err)
+		}
+		return nil
+	},
 }
 
 // RunMigrations runs the version-to-version migrations.
