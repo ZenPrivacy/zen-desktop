@@ -2,7 +2,7 @@
   "filter": {
     "filterLists": [
       {
-        "url": "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/ads/ads.txt",
         "name": "Zen - Ads",
         "enabled": true,
         "type": "ads"
@@ -21,7 +21,7 @@
         "trusted": true
       },
       {
-        "url": "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt",
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/privacy/privacy.txt",
         "name": "Zen - Privacy",
         "enabled": true,
         "type": "privacy"
@@ -78,6 +78,12 @@
       {
         "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/main-zen.txt",
         "name": "no-doomscroll - YouTube",
+        "enabled": false,
+        "type": "digitalWellbeing"
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/gh/ZenPrivacy/filter-lists@master/no-doomscroll/youtube/shorts-zen.txt",
+        "name": "no-doomscroll - YouTube Shorts",
         "enabled": false,
         "type": "digitalWellbeing"
       },
