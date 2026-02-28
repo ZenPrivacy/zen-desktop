@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 
 	"github.com/ZenPrivacy/zen-desktop/internal/autostart"
 	"github.com/blang/semver"
@@ -325,7 +326,7 @@ var migrations = []migration{
 		inserted := false
 		for i, list := range c.Filter.FilterLists {
 			if list.URL == ytMainURL {
-				c.Filter.FilterLists = append(c.Filter.FilterLists[:i+1], append([]FilterList{shortsList}, c.Filter.FilterLists[i+1:]...)...)
+				c.Filter.FilterLists = slices.Insert(c.Filter.FilterLists, i+1, shortsList)
 				inserted = true
 				break
 			}
