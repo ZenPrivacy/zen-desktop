@@ -32,7 +32,7 @@
       "settingsNote": "You can also change these at any time in the app."
     },
     "connect": {
-      "title": "All Set!",
+      "title": "All set!",
       "description": "You're ready to go. Press \"Start\" to enable Zen's comprehensive network protection.",
       "caNote": "On first start, Zen may prompt you to install a local root CA certificate. This enables HTTPS filtering so Zen can block ads and trackers on all sites. Everything happens locally – <strong>no data ever leaves your device</strong>.<br />See our GitHub for full technical details.",
       "socialText": "If you'd like, check out our socials:",
@@ -86,7 +86,7 @@
   "filterTypes": {
     "ads": "Ads",
     "custom": "Custom",
-    "digitalWellbeing": "Digital Wellbeing",
+    "digitalWellbeing": "Digital wellbeing",
     "general": "General",
     "malware": "Malware",
     "privacy": "Privacy",
@@ -95,7 +95,7 @@
   "ignoredHostsInput": {
     "description": "Hosts to exclude from proxying. Use this for services with certificate pinning or those disrupted by proxying.",
     "helper": "Enter one host per line.",
-    "label": "Ignored Hosts"
+    "label": "Ignored hosts"
   },
   "importFilterList": {
     "errorMessage": "Failed to import filter lists: {{error}}",
