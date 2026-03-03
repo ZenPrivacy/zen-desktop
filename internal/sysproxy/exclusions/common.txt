@@ -56,6 +56,7 @@ jusan.kz
 onlinebank.kz
 freedompay.kz
 wlp-acs.com
+homebank.kz
 
 # Payment processors
 paypal.com
@@ -123,3 +124,5 @@ ws.chatgpt.com
 account.booking.com
 # https://github.com/ZenPrivacy/zen-desktop/issues/407
 updates.ghub.logitechg.com
+# https://github.com/ZenPrivacy/zen-https-exclusions/issues/3
+steamserver.net
