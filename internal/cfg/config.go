@@ -464,19 +464,43 @@ func (c *Config) SetAssetPort(port int) error {
 }
 
 // GetExternalProxy returns the external proxy configuration.
+// Returns a defensive copy so callers cannot mutate internal state.
 func (c *Config) GetExternalProxy() *ExternalProxyConfig {
 	c.RLock()
 	defer c.RUnlock()
 
-	return c.Proxy.ExternalProxy
+	if c.Proxy.ExternalProxy == nil {
+		return nil
+	}
+	copy := *c.Proxy.ExternalProxy
+	return &copy
 }
 
 // SetExternalProxy sets the external proxy configuration.
+// Validates connection settings when the proxy is enabled.
 func (c *Config) SetExternalProxy(epc *ExternalProxyConfig) error {
+	if epc != nil && epc.Enabled {
+		if epc.Protocol != "http" && epc.Protocol != "socks5" {
+			return fmt.Errorf("protocol must be \"http\" or \"socks5\"")
+		}
+		if epc.Host == "" {
+			return fmt.Errorf("host must not be empty")
+		}
+		if epc.Port < 1 || epc.Port > 65535 {
+			return fmt.Errorf("port must be between 1 and 65535")
+		}
+	}
+
 	c.Lock()
 	defer c.Unlock()
 
-	c.Proxy.ExternalProxy = epc
+	// Store a defensive copy to avoid shared mutable state.
+	if epc != nil {
+		copy := *epc
+		c.Proxy.ExternalProxy = &copy
+	} else {
+		c.Proxy.ExternalProxy = nil
+	}
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
 		return err

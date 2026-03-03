@@ -35,16 +35,21 @@ export function ExternalProxyInput() {
 
     useEffect(() => {
         (async () => {
-            const config = await GetExternalProxy();
-            setState({
-                enabled: config?.enabled ?? false,
-                protocol: config?.protocol ?? 'socks5',
-                host: config?.host ?? '',
-                port: config?.port ?? 0,
-                username: config?.username ?? '',
-                password: config?.password ?? '',
-                loading: false,
-            });
+            try {
+                const config = await GetExternalProxy();
+                setState({
+                    enabled: config?.enabled ?? false,
+                    protocol: config?.protocol ?? 'socks5',
+                    host: config?.host ?? '',
+                    port: config?.port ?? 0,
+                    username: config?.username ?? '',
+                    password: config?.password ?? '',
+                    loading: false,
+                });
+            } catch (ex) {
+                console.error('Failed to load external proxy config:', ex);
+                setState((prev) => ({ ...prev, loading: false }));
+            }
         })();
     }, []);
 
@@ -53,7 +58,9 @@ export function ExternalProxyInput() {
             await SetExternalProxy(config);
         } catch (ex) {
             AppToaster.show({
-                message: t('externalProxy.saveError', { error: ex }),
+                message: t('externalProxy.saveError', {
+                    error: ex instanceof Error ? ex.message : String(ex),
+                }),
                 intent: 'danger',
             });
         }
@@ -62,14 +69,18 @@ export function ExternalProxyInput() {
     const update = (patch: Partial<ExternalProxyConfig>) => {
         setState((prev) => {
             const updated = { ...prev, ...patch };
-            saveConfig({
+            const config: ExternalProxyConfig = {
                 enabled: updated.enabled,
                 protocol: updated.protocol,
                 host: updated.host,
                 port: updated.port,
                 username: updated.username,
                 password: updated.password,
-            });
+            };
+            // Only persist when disabled OR when enabled with valid host+port
+            if (!config.enabled || (config.host.trim() !== '' && config.port >= 1 && config.port <= 65535)) {
+                saveConfig(config);
+            }
             return updated;
         });
     };
