@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.19.0
+
+### What's New
+
+This is a performance-focused update with many improvements across the stack.
+
+- Zen's proxy now speaks **HTTP/2** in addition to HTTP/1.1, for both inbound and outbound traffic. Thanks to @brycewray for initiating the conversation on this.
+- The rule matching engine is **2x faster on average**, with more than **200x improvement on long URLs** (1,000+ characters). This particularly affected Google Meet and Google Chat – expect much improved loading times on these services.
+- Extended CSS rule application now optimizes `:has`, `:not`, and `:is` pseudo-class evaluation when it can be run natively. Thanks to @krystian3w for advice along the way.
+- Other minor improvements and bug fixes.
+
+### New Contributors
+- @LinaKACI-pro made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/603
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.18.1...v0.19.0
+
 ## v0.18.1
 
 ### What's New
