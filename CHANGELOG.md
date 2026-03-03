@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.19.1
+
+### What's New
+
+This is a hotfix to v0.19.0.
+
+- __Steam fix__
+  This release fixes the "NO CONNECTION" issue in Steam.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.19.0...v0.19.1
+
 ## v0.19.0
 
 ### What's New
