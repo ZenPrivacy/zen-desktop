@@ -13,6 +13,8 @@ export function GetAssetPort():Promise<number>;
 
 export function GetCAInstalled():Promise<boolean>;
 
+export function GetExternalProxy():Promise<cfg.ExternalProxyConfig>;
+
 export function GetFilterLists():Promise<Array<cfg.FilterList>>;
 
 export function GetFilterListsByLocales(arg1:Array<string>):Promise<Array<cfg.FilterList>>;
@@ -52,6 +54,8 @@ export function Save():Promise<void>;
 export function SetAssetPort(arg1:number):Promise<void>;
 
 export function SetCAInstalled(arg1:boolean):Promise<void>;
+
+export function SetExternalProxy(arg1:cfg.ExternalProxyConfig):Promise<void>;
 
 export function SetIgnoredHosts(arg1:Array<string>):Promise<void>;
 

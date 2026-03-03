@@ -5,6 +5,28 @@ export namespace cfg {
 	    PROMPT = "prompt",
 	    DISABLED = "disabled",
 	}
+	export class ExternalProxyConfig {
+	    enabled: boolean;
+	    protocol: string;
+	    host: string;
+	    port: number;
+	    username?: string;
+	    password?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ExternalProxyConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.protocol = source["protocol"];
+	        this.host = source["host"];
+	        this.port = source["port"];
+	        this.username = source["username"];
+	        this.password = source["password"];
+	    }
+	}
 	export class FilterList {
 	    name: string;
 	    type: string;
