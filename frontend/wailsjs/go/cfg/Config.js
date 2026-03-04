@@ -22,6 +22,10 @@ export function GetCAInstalled() {
   return window['go']['cfg']['Config']['GetCAInstalled']();
 }
 
+export function GetExternalProxy() {
+  return window['go']['cfg']['Config']['GetExternalProxy']();
+}
+
 export function GetFilterLists() {
   return window['go']['cfg']['Config']['GetFilterLists']();
 }
@@ -100,6 +104,10 @@ export function SetAssetPort(arg1) {
 
 export function SetCAInstalled(arg1) {
   return window['go']['cfg']['Config']['SetCAInstalled'](arg1);
+}
+
+export function SetExternalProxy(arg1) {
+  return window['go']['cfg']['Config']['SetExternalProxy'](arg1);
 }
 
 export function SetIgnoredHosts(arg1) {
