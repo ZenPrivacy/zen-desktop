@@ -12,6 +12,7 @@ require (
 	github.com/wailsapp/wails/v2 v2.10.2
 	golang.org/x/sys v0.38.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+	howett.net/plist v1.0.1
 )
 
 require (
@@ -64,5 +65,4 @@ require (
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
-	howett.net/plist v1.0.1 // indirect
 )

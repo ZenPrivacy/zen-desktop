@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+	"howett.net/plist"
 )
 
 var (
@@ -27,20 +28,25 @@ func setSystemProxy(pacURL string) error {
 	}
 	networkServices = svcs
 
+	cmds := make([][]string, 0, len(networkServices)*3)
 	for _, svc := range networkServices {
-		cmd := exec.Command("networksetup", "-setwebproxystate", svc, "off")
-		if out, err := cmd.CombinedOutput(); err != nil {
-			return fmt.Errorf("unset web proxy for network service %q: %v (%q)", svc, err, out)
-		}
+		cmds = append(cmds,
+			[]string{"networksetup", "-setwebproxystate", svc, "off"},
+			[]string{"networksetup", "-setsecurewebproxystate", svc, "off"},
+			[]string{"networksetup", "-setautoproxyurl", svc, pacURL},
+		)
+	}
 
-		cmd = exec.Command("networksetup", "-setsecurewebproxystate", svc, "off")
-		if out, err := cmd.CombinedOutput(); err != nil {
-			return fmt.Errorf("unset secure web proxy for network service %q: %v (%q)", svc, err, out)
+	if requiresAdminPrivileges() {
+		if out, err := runElevated(cmds); err != nil {
+			return fmt.Errorf("set system proxy with elevation: %v (%q)", err, out)
 		}
+		return nil
+	}
 
-		cmd = exec.Command("networksetup", "-setautoproxyurl", svc, pacURL)
-		if out, err := cmd.CombinedOutput(); err != nil {
-			return fmt.Errorf("set autoproxyurl to %q for network service %q: %v (%q)", pacURL, svc, err, out)
+	for _, args := range cmds {
+		if out, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil { // #nosec G204 -- command input comes from trusted sources
+			return fmt.Errorf("%s: %v (%q)", strings.Join(args, " "), err, out)
 		}
 	}
 
@@ -52,16 +58,43 @@ func unsetSystemProxy() error {
 		return nil
 	}
 
-	var result error
+	cmds := make([][]string, 0, len(networkServices))
 	for _, svc := range networkServices {
-		cmd := exec.Command("networksetup", "-setautoproxystate", svc, "off")
-		if out, err := cmd.CombinedOutput(); err != nil {
-			result = multierror.Append(result, fmt.Errorf("set autoproxystate to off for network service %q: %v (%q)", svc, err, out))
+		cmds = append(cmds, []string{"networksetup", "-setautoproxystate", svc, "off"})
+	}
+
+	var finalErr error
+	if requiresAdminPrivileges() {
+		if out, err := runElevated(cmds); err != nil {
+			finalErr = fmt.Errorf("unset system proxy with elevation: %v (%q)", err, out)
+		}
+	} else {
+		for _, args := range cmds {
+			if out, err := exec.Command(args[0], args[1:]...).CombinedOutput(); err != nil { // #nosec G204 -- command input comes from trusted sources
+				finalErr = multierror.Append(finalErr, fmt.Errorf("%s: %v (%q)", strings.Join(args, " "), err, out))
+			}
 		}
 	}
 
 	networkServices = nil
-	return result
+	return finalErr
+}
+
+// requiresAdminPrivileges checks whether macOS requires admin privileges to modify network settings.
+func requiresAdminPrivileges() bool {
+	out, err := exec.Command("security", "authorizationdb", "read", "system.preferences.network").CombinedOutput()
+	if err != nil {
+		return false
+	}
+
+	var entry struct {
+		Shared bool `plist:"shared"`
+	}
+	if _, err := plist.Unmarshal(out, &entry); err != nil {
+		return false
+	}
+	// When "Require an administrator password to access system-wide settings" is enabled, "shared" is false.
+	return !entry.Shared
 }
 
 // discoverNetworkServices returns a list of all network service names.
@@ -93,4 +126,20 @@ func discoverNetworkServices() ([]string, error) {
 	}
 
 	return services, nil
+}
+
+// runElevated runs the given commands with administrator privileges via osascript (which sets real uid=0).
+// The user will see a single macOS password prompt.
+func runElevated(cmds [][]string) ([]byte, error) {
+	parts := make([]string, len(cmds))
+	for i, args := range cmds {
+		quoted := make([]string, len(args))
+		for j, a := range args {
+			quoted[j] = fmt.Sprintf("%q", a)
+		}
+		parts[i] = strings.Join(quoted, " ")
+	}
+	shellCmd := strings.Join(parts, "&&")
+	script := fmt.Sprintf(`do shell script %q with administrator privileges with prompt "Authorize Zen to modify system proxy settings"`, shellCmd)
+	return exec.Command("osascript", "-e", script).CombinedOutput()
 }
