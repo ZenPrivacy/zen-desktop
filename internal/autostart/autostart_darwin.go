@@ -13,6 +13,8 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/ZenPrivacy/zen-desktop/internal/constants"
 )
 
 const (
@@ -24,6 +26,12 @@ const (
 	<dict>
 		<key>Label</key>
 		<string>{{.ReverseDNSAppName}}</string>
+		<key>AssociatedBundleIdentifiers</key>
+		<array>
+			<string>{{.ReverseDNSAppName}}</string>
+		</array>
+		<key>ServiceDescription</key>
+		<string>{{.AppName}}</string>
 		<key>Program</key>
 		<string>{{.Program}}</string>
 		<key>ProgramArguments</key>
@@ -44,6 +52,7 @@ const (
 type plistTemplateParameters struct {
 	Program           string
 	ReverseDNSAppName string
+	AppName           string
 }
 
 func (m Manager) IsEnabled() (enabled bool, err error) {
@@ -103,6 +112,7 @@ func (m Manager) Enable() (err error) {
 	if err := t.Execute(f, plistTemplateParameters{
 		ReverseDNSAppName: reverseDNSAppName,
 		Program:           execPath,
+		AppName:           constants.AppName,
 	}); err != nil {
 		return fmt.Errorf("execute template: %w", err)
 	}
