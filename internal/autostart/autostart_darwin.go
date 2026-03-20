@@ -24,6 +24,10 @@ const (
 	<dict>
 		<key>Label</key>
 		<string>{{.ReverseDNSAppName}}</string>
+		<key>AssociatedBundleIdentifiers</key>
+		<array>
+			<string>{{.ReverseDNSAppName}}</string>
+		</array>
 		<key>Program</key>
 		<string>{{.Program}}</string>
 		<key>ProgramArguments</key>
