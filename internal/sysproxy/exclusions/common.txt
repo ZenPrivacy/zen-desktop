@@ -126,5 +126,3 @@ account.booking.com
 updates.ghub.logitechg.com
 # https://github.com/ZenPrivacy/zen-https-exclusions/issues/3
 steamserver.net
-# https://github.com/ZenPrivacy/zen-desktop/issues/623
-reddit.com
