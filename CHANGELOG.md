@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.19.2
+
+### What's New
+- __Faster request matching__
+  Optimised a bottleneck in the request matching engine that accounted for 10-15% of overall CPU usage. Browsing should feel a little snappier across the board.
+- __macOS network permissions__
+  Improved compatibility with the "Require an administrator password to access system-wide settings" option in macOS. Zen now correctly elevates privileged commands instead of failing.
+- __macOS login item naming__
+  Fixed macOS login items displaying the developer name instead of the app name – thanks to @ganeshmshetty!
+
+### New Contributors
+- @ganeshmshetty made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/627
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.19.1...v0.19.2
+
 ## v0.19.1
 
 ### What's New
