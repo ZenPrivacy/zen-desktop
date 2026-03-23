@@ -72,6 +72,18 @@
     "success": "Debug data copied to clipboard",
     "error": "Failed to export debug data: {{error}}"
   },
+  "externalProxy": {
+    "label": "External proxy",
+    "description": "Route unblocked traffic through an external HTTP or SOCKS5 proxy.",
+    "enabled": "Enabled",
+    "protocol": "Protocol",
+    "host": "Host",
+    "port": "Port",
+    "username": "Username",
+    "password": "Password",
+    "optionalPlaceholder": "Optional",
+    "saveError": "Failed to save external proxy settings: {{error}}"
+  },
   "filterLists": {
     "delete": "Delete",
     "more": "More",

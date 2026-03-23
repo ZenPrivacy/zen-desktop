@@ -216,7 +216,17 @@ func (a *App) StartProxy() (err error) {
 	}
 	a.whitelistSrv = whitelistSrv
 
-	a.proxy, err = proxy.NewProxy(filter, certGenerator, a.config.GetPort())
+	var proxyOpts []proxy.ProxyOption
+	if epc := a.config.GetExternalProxy(); epc != nil && epc.Enabled {
+		proxyOpts = append(proxyOpts, proxy.WithExternalProxy(proxy.ExternalProxyConfig{
+			Protocol: epc.Protocol,
+			Host:     epc.Host,
+			Port:     epc.Port,
+			Username: epc.Username,
+			Password: epc.Password,
+		}))
+	}
+	a.proxy, err = proxy.NewProxy(filter, certGenerator, a.config.GetPort(), proxyOpts...)
 	if err != nil {
 		return fmt.Errorf("create proxy: %v", err)
 	}

@@ -15,6 +15,7 @@ import { AutostartSwitch } from './AutostartSwitch';
 import { AutoupdateSwitch } from './AutoupdateSwitch';
 import { ExportDebugDataButton } from './ExportDebugDataButton';
 import { ExportLogsButton } from './ExportLogsButton';
+import { ExternalProxyInput } from './ExternalProxyInput';
 import { IgnoredHostsInput } from './IgnoredHostsInput';
 import { LocaleSelector } from './LocaleSelector';
 import { PortInput } from './PortInput';
@@ -73,6 +74,7 @@ export function SettingsManager() {
           <PortInput />
           <AssetPortInput />
           <IgnoredHostsInput />
+          <ExternalProxyInput />
           <UninstallCADialog proxyState={proxyState} />
         </div>
       </div>
