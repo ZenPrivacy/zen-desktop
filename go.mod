@@ -3,13 +3,13 @@ module github.com/ZenPrivacy/zen-desktop
 // Note: Always set the patch version when updating the Go version.
 // Omitting the patch version may cause some Go commands to fail.
 // For more details, see: https://go.dev/doc/toolchain#version
-go 1.26.0
+go 1.26.1
 
 require (
 	github.com/ZenPrivacy/zen-core v1.5.1
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/wailsapp/wails/v2 v2.10.2
+	github.com/wailsapp/wails/v2 v2.11.0 // Use one minor version behind latest for stability, unless there are urgently needed features/bugfixes
 	golang.org/x/sys v0.38.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	howett.net/plist v1.0.1
@@ -56,7 +56,7 @@ require (
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/wailsapp/go-webview2 v1.0.19 // indirect
+	github.com/wailsapp/go-webview2 v1.0.22 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
