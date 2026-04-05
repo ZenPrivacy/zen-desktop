@@ -4,11 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { GetFilterLists, RemoveFilterList, ToggleFilterList } from '../../wailsjs/go/cfg/Config';
-// eslint-disable-next-line import/order
 import { cfg } from '../../wailsjs/go/models';
-
-import './index.css';
-
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AppToaster } from '../common/toaster';
 import { useProxyState } from '../context/ProxyStateContext';
@@ -17,6 +13,8 @@ import { CreateFilterList } from './CreateFilterList';
 import { ExportFilterList } from './ExportFilterList';
 import { ImportFilterList } from './ImportFilterList';
 import { FilterListType } from './types';
+
+import './index.css';
 
 const NO_DOOMSCROLL_URL = 'https://github.com/ZenPrivacy/filter-lists/tree/master/no-doomscroll';
 
@@ -54,7 +52,7 @@ export function FilterLists() {
               text={
                 <>
                   {t(`filterTypes.${item}`)}
-                  <span className="bp5-text-muted filter-lists__select-count">
+                  <span className="bp6-text-muted filter-lists__select-count">
                     ({state.filterLists.filter((filterList) => filterList.type === item && filterList.enabled).length}/
                     {state.filterLists.filter((filterList) => filterList.type === item).length})
                   </span>
@@ -175,7 +173,7 @@ export function FilterListItem({
         </Tag>
       ) : null}
 
-      <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
+      <div className="bp6-text-muted filter-lists__list-url">{filterList.url}</div>
       {showButtons && (
         <div className="filter-lists__list-buttons">
           <Tooltip

@@ -12,8 +12,8 @@ export function FilterListsScreen({ filterLists }: FilterListsScreenProps) {
 
   return (
     <div className="intro-screen">
-      <h3 className="bp5-heading intro-heading">{t('intro.filterLists.title')}</h3>
-      <p className="bp5-running-text intro-description">
+      <h3 className="bp6-heading intro-heading">{t('intro.filterLists.title')}</h3>
+      <p className="bp6-running-text intro-description">
         <Trans
           i18nKey="intro.filterLists.description"
           components={{
@@ -21,7 +21,7 @@ export function FilterListsScreen({ filterLists }: FilterListsScreenProps) {
           }}
         />
       </p>
-      <p className="bp5-running-text intro-description">{t('intro.filterLists.recommendation')}</p>
+      <p className="bp6-running-text intro-description">{t('intro.filterLists.recommendation')}</p>
       <div className="filter-lists">
         {filterLists.map((l) => (
           <FilterListItem key={l.url} filterList={l} showDelete={false} showButtons={false} />

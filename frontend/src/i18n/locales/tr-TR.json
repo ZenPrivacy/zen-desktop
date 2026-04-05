@@ -1,184 +1,183 @@
 {
-    "app": {
-        "proxy": {
-            "description": "Proxy aktif değil. Etkinleştirmek için aşağıdaki butona tıklayın.",
-            "inactive": "Engellenen istekleri görmek için proxy'yi etkinleştirin"
-        },
-        "tabs": {
-            "filterLists": "Filtre listeleri",
-            "home": "Ana sayfa",
-            "rules": "Kurallar",
-            "settings": "Ayarlar"
-        },
-        "update": {
-            "restartFailed": "Uygulama yeniden başlatılamadı: {{error}}",
-            "updateAvailable": "Zen'in yeni bir sürümü mevcut.",
-            "restart": "Yeniden başlat"
-        }
+  "app": {
+    "proxy": {
+      "description": "Proxy aktif değil. Etkinleştirmek için aşağıdaki butona tıklayın.",
+      "inactive": "Engellenen istekleri görmek için proxy'yi etkinleştirin"
     },
-    "intro": {
-        "welcome": {
-            "title": "Zen'e Hoş Geldiniz!",
-            "description": "Dilinizi seçin:"
-        },
-        "filterLists": {
-            "title": "Filtre listeleri",
-            "description": "Reklam engelleme ve gizlilik koruması için Zen, <strong>filtre listeleri</strong> kullanır. Bunları uygulamada daha sonra da ayarlayabilirsiniz.",
-            "recommendation": "Yerel ayarınıza göre aşağıdaki filtre listelerini etkinleştirmenizi öneririz:"
-        },
-        "settings": {
-            "title": "Ayarlar",
-            "description": "Aşağıdaki ayarları inceleyin:",
-            "settingsNote": "Bu ayarları uygulamada istediğiniz zaman değiştirebilirsiniz."
-        },
-        "connect": {
-            "title": "Her şey hazır!",
-            "description": "Başlamaya hazırsınız. Zen'in kapsamlı ağ korumasını etkinleştirmek için \"Başlat\"a basın.",
-            "caNote": "İlk başlatmada Zen, yerel bir kök CA sertifikası yüklemenizi isteyebilir. Bu, HTTPS filtrelemeyi etkinleştirir ve Zen'in tüm sitelerdeki reklam ve izleyicileri engellemesini sağlar. Her şey yerel olarak gerçekleşir – <strong>hiçbir veri cihazınızdan çıkmaz</strong>.<br />Teknik detaylar için GitHub sayfamıza bakın.",
-            "socialText": "İsterseniz sosyal medya hesaplarımıza göz atın:",
-            "donateText": "Ve bağış yapmayı düşünün:"
-        },
-        "buttons": {
-            "skip": "Tanıtımı atla",
-            "next": "İleri"
-        }
+    "tabs": {
+      "filterLists": "Filtre listeleri",
+      "home": "Ana sayfa",
+      "rules": "Kurallar",
+      "settings": "Ayarlar"
     },
-    "autoStartSwitch": {
-        "description": "Oturum açtığınızda Zen'i otomatik başlat",
-        "disableError": "Otomatik başlatma devre dışı bırakılamadı: {{error}}",
-        "enableError": "Otomatik başlatma etkinleştirilemedi: {{error}}",
-        "label": "Otomatik başlatma"
+    "update": {
+      "restart": "Yeniden başlat",
+      "restartFailed": "Uygulama yeniden başlatılamadı: {{error}}",
+      "updateAvailable": "Zen'in yeni bir sürümü mevcut."
+    }
+  },
+  "assetPortInput": {
+    "description": "Script ve stil enjeksiyonu için kullanılan dahili varlık sunucusunun portu.",
+    "helper": "1024'ün altında bir port kullanmak yükseltilmiş ayrıcalıklar gerektirebilir.",
+    "label": "Varlık sunucusu portu",
+    "setError": "Varlık sunucusu portu ayarlanamadı: {{error}}"
+  },
+  "autoStartSwitch": {
+    "description": "Oturum açtığınızda Zen'i otomatik başlat",
+    "disableError": "Otomatik başlatma devre dışı bırakılamadı: {{error}}",
+    "enableError": "Otomatik başlatma etkinleştirilemedi: {{error}}",
+    "label": "Otomatik başlatma"
+  },
+  "common": {
+    "stopProxyToAddFilter": "Yeni filtre listesi eklemek için proxy'yi durdurun",
+    "stopProxyToDeleteFilter": "Bu filtre listesini silmek için proxy'yi durdurun",
+    "stopProxyToEditRules": "Özel kuralları düzenlemek için proxy'yi durdurun",
+    "stopProxyToModify": "Bu ayarı değiştirmek için proxy'yi durdurun",
+    "stopProxyToToggleFilter": "Bu filtre listesini etkinleştirmek/devre dışı bırakmak için proxy'yi durdurun"
+  },
+  "createFilterList": {
+    "addError": "Filtre listesi eklenemedi: {{error}}",
+    "addList": "Filtre listesi ekle",
+    "trustedListsWarning": "Güvenilen listeler, <code>trusted-</code> scriptlet'ler ve JavaScript kuralları gibi güçlü engelleme özellikleri kullanabilir; ancak kötü niyetli bir tarafça ele geçirilirse <strong>gizlilik ve güvenliği tehlikeye atabilir</strong>. Bu seçeneği yalnızca güvendiğiniz kaynaklardan gelen listeler için etkinleştirin."
+  },
+  "donate": "Bağış yap",
+  "exportDebugDataButton": {
+    "error": "Hata ayıklama verileri dışa aktarılamadı: {{error}}",
+    "label": "Hata ayıklama verilerini dışa aktar",
+    "success": "Hata ayıklama verileri panoya kopyalandı",
+    "tooltip": "Hata ayıklama bilgilerini panoya kopyala"
+  },
+  "exportFilterList": {
+    "errorMessage": "Filtre listeleri dışa aktarılamadı: {{error}}",
+    "export": "Dışa aktar",
+    "successMessage": "Özel filtre listeleri başarıyla dışa aktarıldı"
+  },
+  "exportLogsButton": {
+    "label": "Günlükleri dışa aktar",
+    "openError": "Günlük dizini açılamadı: {{error}}",
+    "tooltip": "Günlük dizinini aç"
+  },
+  "filterLists": {
+    "copied": "Kopyalandı",
+    "copy": "Bağlantıyı kopyala",
+    "delete": "Kaldır",
+    "goTo": "Tarayıcıda aç",
+    "more": "Daha fazla",
+    "removeError": "Filtre listesi kaldırılamadı: {{error}}",
+    "toggleError": "Filtre listesi değiştirilemedi: {{error}}",
+    "trusted": "Güvenilen",
+    "whatIsThis": "Bu nedir"
+  },
+  "filterTypes": {
+    "ads": "Reklamlar",
+    "custom": "Özel",
+    "digitalWellbeing": "Dijital sağlık",
+    "general": "Genel",
+    "malware": "Kötü amaçlı yazılım",
+    "privacy": "Gizlilik",
+    "regional": "Bölgesel"
+  },
+  "ignoredHostsInput": {
+    "description": "Proxy'den hariç tutulacak hostlar. Sertifika sabitleme kullanan veya proxy tarafından bozulan servisler için kullanın.",
+    "helper": "Her satıra bir host girin.",
+    "label": "Yoksayılan hostlar"
+  },
+  "importFilterList": {
+    "errorMessage": "Filtre listeleri içe aktarılamadı: {{error}}",
+    "import": "İçe aktar",
+    "successMessage": "Özel filtre listeleri başarıyla içe aktarıldı"
+  },
+  "intro": {
+    "buttons": {
+      "next": "İleri",
+      "skip": "Tanıtımı atla"
     },
-    "createFilterList": {
-        "addError": "Filtre listesi eklenemedi: {{error}}",
-        "addList": "Filtre listesi ekle",
-        "example": "Örnek filtre listesi",
-        "trustedListsWarning": "Güvenilen listeler, <code>trusted-</code> scriptlet'ler ve JavaScript kuralları gibi güçlü engelleme özellikleri kullanabilir; ancak kötü niyetli bir tarafça ele geçirilirse <strong>gizlilik ve güvenliği tehlikeye atabilir</strong>. Bu seçeneği yalnızca güvendiğiniz kaynaklardan gelen listeler için etkinleştirin."
-    },
-    "donate": "Bağış yap",
-    "exportFilterList": {
-        "errorMessage": "Filtre listeleri dışa aktarılamadı: {{error}}",
-        "export": "Dışa aktar",
-        "successMessage": "Özel filtre listeleri başarıyla dışa aktarıldı"
-    },
-    "exportLogsButton": {
-        "label": "Günlükleri dışa aktar",
-        "openError": "Günlük dizini açılamadı: {{error}}",
-        "tooltip": "Günlük dizinini aç"
-    },
-    "exportDebugDataButton": {
-        "label": "Hata ayıklama verilerini dışa aktar",
-        "tooltip": "Hata ayıklama bilgilerini panoya kopyala",
-        "success": "Hata ayıklama verileri panoya kopyalandı",
-        "error": "Hata ayıklama verileri dışa aktarılamadı: {{error}}"
+    "connect": {
+      "caNote": "İlk başlatmada Zen, yerel bir kök CA sertifikası yüklemenizi isteyebilir. Bu, HTTPS filtrelemeyi etkinleştirir ve Zen'in tüm sitelerdeki reklam ve izleyicileri engellemesini sağlar. Her şey yerel olarak gerçekleşir – <strong>hiçbir veri cihazınızdan çıkmaz</strong>.<br />Teknik detaylar için GitHub sayfamıza bakın.",
+      "description": "Başlamaya hazırsınız. Zen'in kapsamlı ağ korumasını etkinleştirmek için \"Başlat\"a basın.",
+      "donateText": "Ve bağış yapmayı düşünün:",
+      "socialText": "İsterseniz sosyal medya hesaplarımıza göz atın:",
+      "title": "Her şey hazır!"
     },
     "filterLists": {
-        "delete": "Kaldır",
-        "more": "Daha fazla",
-        "removeError": "Filtre listesi kaldırılamadı: {{error}}",
-        "toggleError": "Filtre listesi değiştirilemedi: {{error}}",
-        "trusted": "Güvenilen",
-        "copy": "Bağlantıyı kopyala",
-        "copied": "Kopyalandı",
-        "goTo": "Tarayıcıda aç",
-        "whatIsThis": "Bu nedir"
-    },
-    "filterTypes": {
-        "ads": "Reklamlar",
-        "custom": "Özel",
-        "digitalWellbeing": "Dijital sağlık",
-        "general": "Genel",
-        "malware": "Kötü amaçlı yazılım",
-        "privacy": "Gizlilik",
-        "regional": "Bölgesel"
-    },
-    "ignoredHostsInput": {
-        "description": "Proxy'den hariç tutulacak hostlar. Sertifika sabitleme kullanan veya proxy tarafından bozulan servisler için kullanın.",
-        "helper": "Her satıra bir host girin.",
-        "label": "Yoksayılan hostlar"
-    },
-    "importFilterList": {
-        "errorMessage": "Filtre listeleri içe aktarılamadı: {{error}}",
-        "import": "İçe aktar",
-        "successMessage": "Özel filtre listeleri başarıyla içe aktarıldı"
-    },
-    "rules": {
-        "help": "Yardım",
-        "placeholder": "Özel kurallarınızı buraya ekleyin..."
-    },
-    "portInput": {
-        "description": "Proxy sunucusunun dinleyeceği port (rastgele için 0).",
-        "helper": "1024'ün altında bir port kullanmak yükseltilmiş ayrıcalıklar gerektirebilir.",
-        "label": "Port"
-    },
-    "assetPortInput": {
-        "description": "Script ve stil enjeksiyonu için kullanılan dahili varlık sunucusunun portu.",
-        "helper": "1024'ün altında bir port kullanmak yükseltilmiş ayrıcalıklar gerektirebilir.",
-        "label": "Varlık sunucusu portu",
-        "setError": "Varlık sunucusu portu ayarlanamadı: {{error}}"
-    },
-    "requestLog": {
-        "emptyState": "Engellenen istekleri görmek için gezinmeye başlayın.",
-        "filterName": "Filtre adı",
-        "method": "Yöntem",
-        "redirectedTo": "Yönlendirilen",
-        "referer": "Yönlendiren",
-        "rule": "Kural",
-        "url": "URL"
+      "description": "Reklam engelleme ve gizlilik koruması için Zen, <strong>filtre listeleri</strong> kullanır. Bunları uygulamada daha sonra da ayarlayabilirsiniz.",
+      "recommendation": "Yerel ayarınıza göre aşağıdaki filtre listelerini etkinleştirmenizi öneririz:",
+      "title": "Filtre listeleri"
     },
     "settings": {
-        "about": {
-            "changelog": "değişiklik günlüğü",
-            "tagline": "Kapsamlı Reklam Engelleyici ve Gizlilik Korumanız",
-            "version": "Sürüm"
-        },
-        "ca": {
-            "confirmTitle": "CA'yı kaldırmak istediğinizden emin misiniz?",
-            "errorMessage": "CA kaldırılamadı: {{error}}",
-            "reasons": {
-                "malfunctioning": "CA kurulumunuzun arızalandığından şüpheleniyorsunuz. Bu sorun, HTTPS web sitelerini ziyaret ederken tarayıcı hatası olarak veya diğer uygulamaların internete bağlanamaması şeklinde kendini gösterebilir.",
-                "uninstall": "Zen'i tamamen kaldırmak istiyorsunuz."
-            },
-            "reinstallInfo": "Zen'i tekrar başlatırsanız yeni bir CA yüklenecektir.",
-            "stopProxyTooltip": "CA'yı kaldırmak için proxy'yi durdurun",
-            "successMessage": "CA başarıyla kaldırıldı",
-            "uninstallButton": "CA'yı kaldır",
-            "uninstallConfirm": "Kaldır",
-            "usefulIf": "Bu şu durumlarda faydalı olabilir"
-        },
-        "language": {
-            "helper": "Tercih ettiğiniz dili seçin",
-            "label": "Dil"
-        },
-        "sections": {
-            "advanced": "Gelişmiş",
-            "app": "Uygulama"
-        },
-        "theme": {
-            "chooseTheme": "Tema seçin",
-            "dark": "Koyu",
-            "light": "Açık",
-            "system": "Sistem temasını takip et"
-        },
-        "updates": {
-            "automaticUpdates": "Güncellemeleri otomatik indir",
-            "description": "Etkinleştirildiğinde Zen otomatik olarak güncellemeleri kontrol eder",
-            "disableError": "Otomatik güncellemeler devre dışı bırakılamadı: {{error}}",
-            "enableError": "Otomatik güncellemeler etkinleştirilemedi: {{error}}"
-        }
+      "description": "Aşağıdaki ayarları inceleyin:",
+      "settingsNote": "Bu ayarları uygulamada istediğiniz zaman değiştirebilirsiniz.",
+      "title": "Ayarlar"
     },
-    "startStopButton": {
-        "start": "Başlat",
-        "startError": "Proxy başlatılamadı: {{error}}",
-        "stop": "Durdur",
-        "stopError": "Proxy durdurulamadı: {{error}}",
-        "unsupportedDEGuide": "Otomatik sistem proxy yapılandırması şu anda yalnızca GNOME ve KDE'de desteklenmektedir.<br />Proxy'yi uygulama bazında ayarlamak için lütfen <guide-link>bu kılavuzu</guide-link> takip edin."
-    },
-    "common": {
-        "stopProxyToModify": "Bu ayarı değiştirmek için proxy'yi durdurun",
-        "stopProxyToAddFilter": "Yeni filtre listesi eklemek için proxy'yi durdurun",
-        "stopProxyToDeleteFilter": "Bu filtre listesini silmek için proxy'yi durdurun",
-        "stopProxyToToggleFilter": "Bu filtre listesini etkinleştirmek/devre dışı bırakmak için proxy'yi durdurun",
-        "stopProxyToEditRules": "Özel kuralları düzenlemek için proxy'yi durdurun"
+    "welcome": {
+      "description": "Dilinizi seçin:",
+      "title": "Zen'e Hoş Geldiniz!"
     }
+  },
+  "portInput": {
+    "description": "Proxy sunucusunun dinleyeceği port (rastgele için 0).",
+    "helper": "1024'ün altında bir port kullanmak yükseltilmiş ayrıcalıklar gerektirebilir.",
+    "label": "Port"
+  },
+  "requestLog": {
+    "emptyState": "Engellenen istekleri görmek için gezinmeye başlayın.",
+    "filterName": "Filtre adı",
+    "method": "Yöntem",
+    "redirectedTo": "Yönlendirilen",
+    "referer": "Yönlendiren",
+    "rule": "Kural",
+    "url": "URL"
+  },
+  "rules": {
+    "help": "Yardım",
+    "placeholder": "Özel kurallarınızı buraya ekleyin..."
+  },
+  "settings": {
+    "about": {
+      "changelog": "değişiklik günlüğü",
+      "tagline": "Kapsamlı Reklam Engelleyici ve Gizlilik Korumanız",
+      "version": "Sürüm"
+    },
+    "ca": {
+      "confirmTitle": "CA'yı kaldırmak istediğinizden emin misiniz?",
+      "errorMessage": "CA kaldırılamadı: {{error}}",
+      "reasons": {
+        "malfunctioning": "CA kurulumunuzun arızalandığından şüpheleniyorsunuz. Bu sorun, HTTPS web sitelerini ziyaret ederken tarayıcı hatası olarak veya diğer uygulamaların internete bağlanamaması şeklinde kendini gösterebilir.",
+        "uninstall": "Zen'i tamamen kaldırmak istiyorsunuz."
+      },
+      "reinstallInfo": "Zen'i tekrar başlatırsanız yeni bir CA yüklenecektir.",
+      "stopProxyTooltip": "CA'yı kaldırmak için proxy'yi durdurun",
+      "successMessage": "CA başarıyla kaldırıldı",
+      "uninstallButton": "CA'yı kaldır",
+      "uninstallConfirm": "Kaldır",
+      "usefulIf": "Bu şu durumlarda faydalı olabilir"
+    },
+    "language": {
+      "helper": "Tercih ettiğiniz dili seçin",
+      "label": "Dil"
+    },
+    "sections": {
+      "advanced": "Gelişmiş",
+      "app": "Uygulama"
+    },
+    "theme": {
+      "chooseTheme": "Tema seçin",
+      "dark": "Koyu",
+      "light": "Açık",
+      "system": "Sistem temasını takip et"
+    },
+    "updates": {
+      "automaticUpdates": "Güncellemeleri otomatik indir",
+      "description": "Etkinleştirildiğinde Zen otomatik olarak güncellemeleri kontrol eder",
+      "disableError": "Otomatik güncellemeler devre dışı bırakılamadı: {{error}}",
+      "enableError": "Otomatik güncellemeler etkinleştirilemedi: {{error}}"
+    }
+  },
+  "startStopButton": {
+    "start": "Başlat",
+    "startError": "Proxy başlatılamadı: {{error}}",
+    "stop": "Durdur",
+    "stopError": "Proxy durdurulamadı: {{error}}",
+    "unsupportedDEGuide": "Otomatik sistem proxy yapılandırması şu anda yalnızca GNOME ve KDE'de desteklenmektedir.<br />Proxy'yi uygulama bazında ayarlamak için lütfen <guide-link>bu kılavuzu</guide-link> takip edin."
+  }
 }

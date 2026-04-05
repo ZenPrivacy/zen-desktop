@@ -11,37 +11,16 @@
       "settings": "Settings"
     },
     "update": {
+      "restart": "Restart",
       "restartFailed": "Failed to restart app: {{error}}",
-      "updateAvailable": "A new version of Zen is available.",
-      "restart": "Restart"
+      "updateAvailable": "A new version of Zen is available."
     }
   },
-  "intro": {
-    "welcome": {
-      "title": "Welcome to Zen!",
-      "description": "Select your language:"
-    },
-    "filterLists": {
-      "title": "Filter lists",
-      "description": "To enable ad-blocking and privacy protection, Zen uses <strong>filter lists</strong>. You can also set them up later in the app.",
-      "recommendation": "Based on your locale, we recommend enabling the following filter lists:"
-    },
-    "settings": {
-      "title": "Settings",
-      "description": "Review the settings below:",
-      "settingsNote": "You can also change these at any time in the app."
-    },
-    "connect": {
-      "title": "All set!",
-      "description": "You're ready to go. Press \"Start\" to enable Zen's comprehensive network protection.",
-      "caNote": "On first start, Zen may prompt you to install a local root CA certificate. This enables HTTPS filtering so Zen can block ads and trackers on all sites. Everything happens locally – <strong>no data ever leaves your device</strong>.<br />See our GitHub for full technical details.",
-      "socialText": "If you'd like, check out our socials:",
-      "donateText": "And consider donating on:"
-    },
-    "buttons": {
-      "skip": "Skip introduction",
-      "next": "Next"
-    }
+  "assetPortInput": {
+    "description": "The port used by the internal asset server for injecting scripts and styles.",
+    "helper": "Using a port below 1024 may require elevated privileges.",
+    "label": "Asset server port",
+    "setError": "Failed to set asset server port: {{error}}"
   },
   "autoStartSwitch": {
     "description": "Start Zen automatically when you log in",
@@ -49,13 +28,25 @@
     "enableError": "Failed to enable autostart: {{error}}",
     "label": "Autostart"
   },
+  "common": {
+    "stopProxyToAddFilter": "Stop the proxy to add a new filter list",
+    "stopProxyToDeleteFilter": "Stop the proxy to delete this filter list",
+    "stopProxyToEditRules": "Stop the proxy to modify custom rules",
+    "stopProxyToModify": "Stop the proxy to modify this setting",
+    "stopProxyToToggleFilter": "Stop the proxy to enable/disable this filter list"
+  },
   "createFilterList": {
     "addError": "Failed to add filter list: {{error}}",
     "addList": "Add filter list",
-    "example": "Example filter list",
     "trustedListsWarning": "Trusted lists can use powerful blocking capabilities, such as <code>trusted-</code> scriptlets and JavaScript rules but <strong>may disrupt privacy and security</strong> if hijacked by a malicious party. Only enable this option for lists from sources you trust."
   },
   "donate": "Donate",
+  "exportDebugDataButton": {
+    "error": "Failed to export debug data: {{error}}",
+    "label": "Export debug data",
+    "success": "Debug data copied to clipboard",
+    "tooltip": "Copy debug information to clipboard"
+  },
   "exportFilterList": {
     "errorMessage": "Failed to export filter lists: {{error}}",
     "export": "Export",
@@ -66,21 +57,15 @@
     "openError": "Failed to open logs directory: {{error}}",
     "tooltip": "Open logs directory"
   },
-  "exportDebugDataButton": {
-    "label": "Export debug data",
-    "tooltip": "Copy debug information to clipboard",
-    "success": "Debug data copied to clipboard",
-    "error": "Failed to export debug data: {{error}}"
-  },
   "filterLists": {
+    "copied": "Copied",
+    "copy": "Copy link",
     "delete": "Delete",
+    "goTo": "Open in browser",
     "more": "More",
     "removeError": "Failed to remove filter list: {{error}}",
     "toggleError": "Failed to toggle filter list: {{error}}",
     "trusted": "Trusted",
-    "copy": "Copy link",
-    "copied": "Copied",
-    "goTo": "Open in browser",
     "whatIsThis": "What is this"
   },
   "filterTypes": {
@@ -102,20 +87,37 @@
     "import": "Import",
     "successMessage": "Custom filter lists imported successfully"
   },
-  "rules": {
-    "help": "Help",
-    "placeholder": "Add your custom rules here..."
+  "intro": {
+    "buttons": {
+      "next": "Next",
+      "skip": "Skip introduction"
+    },
+    "connect": {
+      "caNote": "On first start, Zen may prompt you to install a local root CA certificate. This enables HTTPS filtering so Zen can block ads and trackers on all sites. Everything happens locally – <strong>no data ever leaves your device</strong>.<br />See our GitHub for full technical details.",
+      "description": "You're ready to go. Press \"Start\" to enable Zen's comprehensive network protection.",
+      "donateText": "And consider donating on:",
+      "socialText": "If you'd like, check out our socials:",
+      "title": "All set!"
+    },
+    "filterLists": {
+      "description": "To enable ad-blocking and privacy protection, Zen uses <strong>filter lists</strong>. You can also set them up later in the app.",
+      "recommendation": "Based on your locale, we recommend enabling the following filter lists:",
+      "title": "Filter lists"
+    },
+    "settings": {
+      "description": "Review the settings below:",
+      "settingsNote": "You can also change these at any time in the app.",
+      "title": "Settings"
+    },
+    "welcome": {
+      "description": "Select your language:",
+      "title": "Welcome to Zen!"
+    }
   },
   "portInput": {
     "description": "The port the proxy server will listen on (0 for random).",
     "helper": "Using a port below 1024 may require elevated privileges.",
     "label": "Port"
-  },
-  "assetPortInput": {
-    "description": "The port used by the internal asset server for injecting scripts and styles.",
-    "helper": "Using a port below 1024 may require elevated privileges.",
-    "label": "Asset server port",
-    "setError": "Failed to set asset server port: {{error}}"
   },
   "requestLog": {
     "emptyState": "Start browsing to see blocked requests.",
@@ -125,6 +127,10 @@
     "referer": "Referer",
     "rule": "Rule",
     "url": "URL"
+  },
+  "rules": {
+    "help": "Help",
+    "placeholder": "Add your custom rules here..."
   },
   "settings": {
     "about": {
@@ -173,12 +179,5 @@
     "stop": "Stop",
     "stopError": "Failed to stop proxy: {{error}}",
     "unsupportedDEGuide": "Automatic system proxy configuration is currently only supported on GNOME and KDE.<br />Please follow <guide-link>this guide</guide-link> to set the proxy on a per-app basis."
-  },
-  "common": {
-    "stopProxyToModify": "Stop the proxy to modify this setting",
-    "stopProxyToAddFilter": "Stop the proxy to add a new filter list",
-    "stopProxyToDeleteFilter": "Stop the proxy to delete this filter list",
-    "stopProxyToToggleFilter": "Stop the proxy to enable/disable this filter list",
-    "stopProxyToEditRules": "Stop the proxy to modify custom rules"
   }
 }

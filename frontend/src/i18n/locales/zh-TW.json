@@ -11,37 +11,16 @@
       "settings": "設定"
     },
     "update": {
+      "restart": "重新啟動",
       "restartFailed": "重新啟動應用程式失敗：{{error}}",
-      "updateAvailable": "Zen 有新版本可用。",
-      "restart": "重新啟動"
+      "updateAvailable": "Zen 有新版本可用。"
     }
   },
-  "intro": {
-    "welcome": {
-      "title": "歡迎使用 Zen！",
-      "description": "選擇您的語言："
-    },
-    "filterLists": {
-      "title": "過濾清單",
-      "description": "為了啟用廣告攔截和隱私保護，Zen 使用<strong>過濾清單</strong>。您也可以稍後在應用程式中設定。",
-      "recommendation": "根據您的地區設定，我們建議啟用以下過濾清單："
-    },
-    "settings": {
-      "title": "設定",
-      "description": "請檢視以下設定：",
-      "settingsNote": "您也可以隨時在應用程式中變更這些設定。"
-    },
-    "connect": {
-      "title": "準備就緒！",
-      "description": "您已準備好開始使用。按下「啟動」以啟用 Zen 的全面網路保護。",
-      "caNote": "首次啟動時，Zen 可能會提示您安裝本機 Root CA 憑證。這可啟用 HTTPS 過濾，讓 Zen 能夠在所有網站上攔截廣告和追蹤器。所有處理都在本機進行 – <strong>資料絕不會離開您的裝置</strong>。<br />完整技術細節請參閱我們的 GitHub。",
-      "socialText": "如果您願意，可以查看我們的社群媒體：",
-      "donateText": "並考慮在以下平台贊助："
-    },
-    "buttons": {
-      "skip": "跳過介紹",
-      "next": "下一步"
-    }
+  "assetPortInput": {
+    "description": "內部資源伺服器用於注入腳本和樣式的連接埠。",
+    "helper": "使用 1024 以下的連接埠可能需要系統管理員權限。",
+    "label": "資源伺服器連接埠",
+    "setError": "設定資源伺服器連接埠失敗：{{error}}"
   },
   "autoStartSwitch": {
     "description": "登入時自動啟動 Zen",
@@ -49,13 +28,25 @@
     "enableError": "啟用自動啟動失敗：{{error}}",
     "label": "自動啟動"
   },
+  "common": {
+    "stopProxyToAddFilter": "請停止代理伺服器以新增過濾清單",
+    "stopProxyToDeleteFilter": "請停止代理伺服器以刪除此過濾清單",
+    "stopProxyToEditRules": "請停止代理伺服器以修改自訂規則",
+    "stopProxyToModify": "請停止代理伺服器以修改此設定",
+    "stopProxyToToggleFilter": "請停止代理伺服器以啟用/停用此過濾清單"
+  },
   "createFilterList": {
     "addError": "新增過濾清單失敗：{{error}}",
     "addList": "新增過濾清單",
-    "example": "範例過濾清單",
     "trustedListsWarning": "信任清單可以使用強大的攔截功能，例如 <code>trusted-</code> 腳本片段和 JavaScript 規則，但<strong>若被惡意方劫持，可能會破壞隱私和安全</strong>。僅對您信任的來源啟用此選項。"
   },
   "donate": "贊助",
+  "exportDebugDataButton": {
+    "error": "匯出除錯資料失敗：{{error}}",
+    "label": "匯出除錯資料",
+    "success": "除錯資料已複製到剪貼簿",
+    "tooltip": "複製除錯資訊到剪貼簿"
+  },
   "exportFilterList": {
     "errorMessage": "匯出過濾清單失敗：{{error}}",
     "export": "匯出",
@@ -66,21 +57,15 @@
     "openError": "開啟記錄檔目錄失敗：{{error}}",
     "tooltip": "開啟記錄檔目錄"
   },
-  "exportDebugDataButton": {
-    "label": "匯出除錯資料",
-    "tooltip": "複製除錯資訊到剪貼簿",
-    "success": "除錯資料已複製到剪貼簿",
-    "error": "匯出除錯資料失敗：{{error}}"
-  },
   "filterLists": {
+    "copied": "已複製",
+    "copy": "複製連結",
     "delete": "刪除",
+    "goTo": "在瀏覽器中開啟",
     "more": "更多",
     "removeError": "移除過濾清單失敗：{{error}}",
     "toggleError": "切換過濾清單失敗：{{error}}",
     "trusted": "信任",
-    "copy": "複製連結",
-    "copied": "已複製",
-    "goTo": "在瀏覽器中開啟",
     "whatIsThis": "這是什麼"
   },
   "filterTypes": {
@@ -102,20 +87,37 @@
     "import": "匯入",
     "successMessage": "自訂過濾清單匯入成功"
   },
-  "rules": {
-    "help": "說明",
-    "placeholder": "在此新增您的自訂規則..."
+  "intro": {
+    "buttons": {
+      "next": "下一步",
+      "skip": "跳過介紹"
+    },
+    "connect": {
+      "caNote": "首次啟動時，Zen 可能會提示您安裝本機 Root CA 憑證。這可啟用 HTTPS 過濾，讓 Zen 能夠在所有網站上攔截廣告和追蹤器。所有處理都在本機進行 – <strong>資料絕不會離開您的裝置</strong>。<br />完整技術細節請參閱我們的 GitHub。",
+      "description": "您已準備好開始使用。按下「啟動」以啟用 Zen 的全面網路保護。",
+      "donateText": "並考慮在以下平台贊助：",
+      "socialText": "如果您願意，可以查看我們的社群媒體：",
+      "title": "準備就緒！"
+    },
+    "filterLists": {
+      "description": "為了啟用廣告攔截和隱私保護，Zen 使用<strong>過濾清單</strong>。您也可以稍後在應用程式中設定。",
+      "recommendation": "根據您的地區設定，我們建議啟用以下過濾清單：",
+      "title": "過濾清單"
+    },
+    "settings": {
+      "description": "請檢視以下設定：",
+      "settingsNote": "您也可以隨時在應用程式中變更這些設定。",
+      "title": "設定"
+    },
+    "welcome": {
+      "description": "選擇您的語言：",
+      "title": "歡迎使用 Zen！"
+    }
   },
   "portInput": {
     "description": "代理伺服器監聽的連接埠（0 為隨機）。",
     "helper": "使用 1024 以下的連接埠可能需要系統管理員權限。",
     "label": "連接埠"
-  },
-  "assetPortInput": {
-    "description": "內部資源伺服器用於注入腳本和樣式的連接埠。",
-    "helper": "使用 1024 以下的連接埠可能需要系統管理員權限。",
-    "label": "資源伺服器連接埠",
-    "setError": "設定資源伺服器連接埠失敗：{{error}}"
   },
   "requestLog": {
     "emptyState": "開始瀏覽以檢視被攔截的請求。",
@@ -125,6 +127,10 @@
     "referer": "來源",
     "rule": "規則",
     "url": "網址"
+  },
+  "rules": {
+    "help": "說明",
+    "placeholder": "在此新增您的自訂規則..."
   },
   "settings": {
     "about": {
@@ -173,12 +179,5 @@
     "stop": "停止",
     "stopError": "停止代理伺服器失敗：{{error}}",
     "unsupportedDEGuide": "目前僅支援 GNOME 和 KDE 的系統代理伺服器自動設定。<br />請按照 <guide-link>此指南</guide-link> 按應用程式設定代理伺服器。"
-  },
-  "common": {
-    "stopProxyToModify": "請停止代理伺服器以修改此設定",
-    "stopProxyToAddFilter": "請停止代理伺服器以新增過濾清單",
-    "stopProxyToDeleteFilter": "請停止代理伺服器以刪除此過濾清單",
-    "stopProxyToToggleFilter": "請停止代理伺服器以啟用/停用此過濾清單",
-    "stopProxyToEditRules": "請停止代理伺服器以修改自訂規則"
   }
 }

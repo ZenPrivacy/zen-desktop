@@ -29,7 +29,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const cancel = EventsOn('app:update', (action: any) => {
+    const cancel = EventsOn('app:update', (action: { kind: string }) => {
       if (action.kind === 'updateAvailable') {
         AppToaster.show({
           message: t('app.update.updateAvailable'),
@@ -53,7 +53,7 @@ function App() {
     });
 
     return cancel;
-  }, []);
+  }, [t]);
 
   const { proxyState } = useProxyState();
   const [activeTab, setActiveTab] = useState<'home' | 'filterLists' | 'rules' | 'settings'>('home');
@@ -66,7 +66,7 @@ function App() {
   useProxyHotkey(showIntro);
 
   return (
-    <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp5-dark' : ''}>
+    <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp6-dark' : ''}>
       <AppHeader />
 
       {showIntro ? (

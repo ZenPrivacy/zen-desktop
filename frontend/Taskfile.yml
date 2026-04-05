@@ -2,14 +2,24 @@ version: '3'
 
 tasks:
   lint:
-    desc: Runs eslint.
+    desc: Runs linter.
     dir: frontend
     cmd: npm run lint
 
-  lint-fix:
-    desc: Runs eslint --fix (automatically fixes applicable issues).
+  lint:fix:
+    desc: Automatically fixes applicable linting issues.
     dir: frontend
-    cmd: npm run lint -- --fix
+    cmd: npm run lint:fix
+
+  fmt:
+    desc: Runs code formatting check.
+    dir: frontend
+    cmd: npm run fmt
+
+  fmt:fix:
+    desc: Automatically fixes applicable code formatting issues.
+    dir: frontend
+    cmd: npm run fmt:fix
 
   install:
     desc: Installs the complete set of dependencies.

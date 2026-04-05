@@ -11,37 +11,16 @@
       "settings": "Einstellungen"
     },
     "update": {
+      "restart": "Neustarten",
       "restartFailed": "App kann nicht neu gestartet werden: {{error}}",
-      "updateAvailable": "Eine neue Version von Zen ist verfügbar.",
-      "restart": "Neustarten"
+      "updateAvailable": "Eine neue Version von Zen ist verfügbar."
     }
   },
-  "intro": {
-    "welcome": {
-      "title": "Willkommen bei Zen!",
-      "description": "Wählen Sie Ihre Sprache:"
-    },
-    "filterLists": {
-      "title": "Filterlisten",
-      "description": "Um Werbeblockierung und Datenschutz zu aktivieren, verwendet Zen <strong>Filterlisten</strong>. Sie können diese auch später in der App einrichten.",
-      "recommendation": "Basierend auf Ihrer Region empfehlen wir, die folgenden Filterlisten zu aktivieren:"
-    },
-    "settings": {
-      "title": "Einstellungen",
-      "description": "Bitte überprüfen Sie die folgenden Einstellungen:",
-      "settingsNote": "Sie können diese Einstellungen jederzeit in der App ändern."
-    },
-    "connect": {
-      "title": "Alles bereit!",
-      "description": "Alles ist eingerichtet. Drücken Sie \"Start\", um Zens umfassenden Netzwerkschutz zu aktivieren.",
-      "caNote": "Beim ersten Start fordert Zen Sie möglicherweise auf, ein lokales Root-CA-Zertifikat zu installieren. Dies ermöglicht HTTPS-Filterung, damit Zen Werbung und Tracker auf allen Websites blockieren kann. Alles geschieht lokal – <strong>keine Daten verlassen jemals Ihr Gerät</strong>.<br />Technische Details finden Sie auf unserem GitHub.",
-      "socialText": "Wenn Sie möchten, schauen Sie sich unsere sozialen Medien an:",
-      "donateText": "Und erwägen Sie eine Spende auf:"
-    },
-    "buttons": {
-      "skip": "Einführung überspringen",
-      "next": "Weiter"
-    }
+  "assetPortInput": {
+    "description": "Der Port, der vom internen Asset-Server zum Einfügen von Skripten und Stilen verwendet wird.",
+    "helper": "Die Verwendung eines Ports unter 1024 kann erhöhte Rechte erfordern.",
+    "label": "Asset-Server-Port",
+    "setError": "Asset-Server-Port kann nicht festgelegt werden: {{error}}"
   },
   "autoStartSwitch": {
     "description": "Zen beim Systemstart starten",
@@ -49,13 +28,25 @@
     "enableError": "Autostart kann nicht aktiviert werden: {{error}}",
     "label": "Autostart"
   },
+  "common": {
+    "stopProxyToAddFilter": "Stoppen Sie den Proxy, um eine neue Filterliste hinzuzufügen",
+    "stopProxyToDeleteFilter": "Stoppen Sie den Proxy, um diese Filterliste zu löschen",
+    "stopProxyToEditRules": "Stoppen Sie den Proxy, um benutzerdefinierte Regeln zu ändern",
+    "stopProxyToModify": "Stoppen Sie den Proxy, um diese Einstellung zu ändern",
+    "stopProxyToToggleFilter": "Stoppen Sie den Proxy, um diese Filterliste zu aktivieren/deaktivieren"
+  },
   "createFilterList": {
     "addError": "Filterliste kann nicht hinzugefügt werden: {{error}}",
     "addList": "Filterliste hinzufügen",
-    "example": "Beispiel-Filterliste",
     "trustedListsWarning": "Vertraute Listen können leistungsstarke Blockierfunktionen wie <code>trusted-</code> Scriptlets und JavaScript-Regeln verwenden, <strong>können jedoch den Datenschutz und die Sicherheit beeinträchtigen</strong>, wenn sie von einer böswilligen Partei missbraucht werden. Aktivieren Sie diese Option nur für Listen aus Quellen, denen Sie vertrauen."
   },
   "donate": "Spenden",
+  "exportDebugDataButton": {
+    "error": "",
+    "label": "",
+    "success": "",
+    "tooltip": ""
+  },
   "exportFilterList": {
     "errorMessage": "Filterliste kann nicht exportiert werden: {{error}}",
     "export": "Exportieren",
@@ -67,7 +58,10 @@
     "tooltip": "Protokollverzeichnis öffnen"
   },
   "filterLists": {
+    "copied": "",
+    "copy": "",
     "delete": "Löschen",
+    "goTo": "",
     "more": "Mehr",
     "removeError": "Filterliste kann nicht entfernt werden: {{error}}",
     "toggleError": "Filterliste kann nicht umgeschaltet werden: {{error}}",
@@ -93,20 +87,37 @@
     "import": "Importieren",
     "successMessage": "Benutzerdefinierte Filterlisten erfolgreich importiert"
   },
-  "rules": {
-    "help": "Hilfe",
-    "placeholder": "Fügen Sie hier Ihre eigenen Regeln hinzu..."
+  "intro": {
+    "buttons": {
+      "next": "Weiter",
+      "skip": "Einführung überspringen"
+    },
+    "connect": {
+      "caNote": "Beim ersten Start fordert Zen Sie möglicherweise auf, ein lokales Root-CA-Zertifikat zu installieren. Dies ermöglicht HTTPS-Filterung, damit Zen Werbung und Tracker auf allen Websites blockieren kann. Alles geschieht lokal – <strong>keine Daten verlassen jemals Ihr Gerät</strong>.<br />Technische Details finden Sie auf unserem GitHub.",
+      "description": "Alles ist eingerichtet. Drücken Sie \"Start\", um Zens umfassenden Netzwerkschutz zu aktivieren.",
+      "donateText": "Und erwägen Sie eine Spende auf:",
+      "socialText": "Wenn Sie möchten, schauen Sie sich unsere sozialen Medien an:",
+      "title": "Alles bereit!"
+    },
+    "filterLists": {
+      "description": "Um Werbeblockierung und Datenschutz zu aktivieren, verwendet Zen <strong>Filterlisten</strong>. Sie können diese auch später in der App einrichten.",
+      "recommendation": "Basierend auf Ihrer Region empfehlen wir, die folgenden Filterlisten zu aktivieren:",
+      "title": "Filterlisten"
+    },
+    "settings": {
+      "description": "Bitte überprüfen Sie die folgenden Einstellungen:",
+      "settingsNote": "Sie können diese Einstellungen jederzeit in der App ändern.",
+      "title": "Einstellungen"
+    },
+    "welcome": {
+      "description": "Wählen Sie Ihre Sprache:",
+      "title": "Willkommen bei Zen!"
+    }
   },
   "portInput": {
     "description": "Der Port, auf dem der Proxy-Server lauscht (0 für zufällig).",
     "helper": "Die Verwendung eines Ports unter 1024 kann erhöhte Rechte erfordern.",
     "label": "Port"
-  },
-  "assetPortInput": {
-    "description": "Der Port, der vom internen Asset-Server zum Einfügen von Skripten und Stilen verwendet wird.",
-    "helper": "Die Verwendung eines Ports unter 1024 kann erhöhte Rechte erfordern.",
-    "label": "Asset-Server-Port",
-    "setError": "Asset-Server-Port kann nicht festgelegt werden: {{error}}"
   },
   "requestLog": {
     "emptyState": "Beginnen Sie mit dem Surfen, um blockierte Anfragen zu sehen.",
@@ -116,6 +127,10 @@
     "referer": "Referer",
     "rule": "Regel",
     "url": "URL"
+  },
+  "rules": {
+    "help": "Hilfe",
+    "placeholder": "Fügen Sie hier Ihre eigenen Regeln hinzu..."
   },
   "settings": {
     "about": {
@@ -164,12 +179,5 @@
     "stop": "Stoppen",
     "stopError": "Proxy kann nicht gestoppt werden: {{error}}",
     "unsupportedDEGuide": "Die automatische System-Proxy-Konfiguration wird derzeit nur unter GNOME und KDE unterstützt.<br />Bitte folgen Sie <guide-link>dieser Anleitung</guide-link>, um den Proxy pro Anwendung festzulegen."
-  },
-  "common": {
-    "stopProxyToModify": "Stoppen Sie den Proxy, um diese Einstellung zu ändern",
-    "stopProxyToAddFilter": "Stoppen Sie den Proxy, um eine neue Filterliste hinzuzufügen",
-    "stopProxyToDeleteFilter": "Stoppen Sie den Proxy, um diese Filterliste zu löschen",
-    "stopProxyToToggleFilter": "Stoppen Sie den Proxy, um diese Filterliste zu aktivieren/deaktivieren",
-    "stopProxyToEditRules": "Stoppen Sie den Proxy, um benutzerdefinierte Regeln zu ändern"
   }
 }

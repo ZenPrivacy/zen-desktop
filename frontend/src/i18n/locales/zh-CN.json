@@ -11,37 +11,16 @@
       "settings": "设置"
     },
     "update": {
+      "restart": "重启",
       "restartFailed": "重新启动应用失败: {{error}}",
-      "updateAvailable": "Zen 有新版本可用。",
-      "restart": "重启"
+      "updateAvailable": "Zen 有新版本可用。"
     }
   },
-  "intro": {
-    "welcome": {
-      "title": "欢迎使用 Zen！",
-      "description": "选择您的语言："
-    },
-    "filterLists": {
-      "title": "过滤列表",
-      "description": "为了启用广告拦截和隐私保护，Zen 使用了<strong>过滤列表</strong>。您也可以稍后在应用中进行设置。",
-      "recommendation": "根据您的地区，我们建议启用以下过滤列表："
-    },
-    "settings": {
-      "title": "设置",
-      "description": "请查看以下设置：",
-      "settingsNote": "您也可以随时在应用中更改这些设置。"
-    },
-    "connect": {
-      "title": "一切就绪！",
-      "description": "您已准备就绪。点击“开始”以启用 Zen 的全面网络保护。",
-      "caNote": "首次启动时，Zen 可能会提示您安装本地根 CA 证书。这将启用 HTTPS 过滤，使 Zen 能够在所有网站上拦截广告和跟踪器。所有操作均在本地进行——<strong>您的数据永不会离开您的设备</strong>。<br />详细技术信息请查看我们的 GitHub。",
-      "socialText": "如果您愿意，可以关注我们的社交媒体：",
-      "donateText": "并考虑在以下平台捐赠："
-    },
-    "buttons": {
-      "skip": "跳过介绍",
-      "next": "下一步"
-    }
+  "assetPortInput": {
+    "description": "内部资源服务器用于注入脚本和样式的端口。",
+    "helper": "使用 1024 以下的端口可能需要管理员权限。",
+    "label": "资源服务器端口",
+    "setError": "设置资源服务器端口失败：{{error}}"
   },
   "autoStartSwitch": {
     "description": "登录时自动启动 Zen",
@@ -49,13 +28,25 @@
     "enableError": "启用自动启动失败：{{error}}",
     "label": "自动启动"
   },
+  "common": {
+    "stopProxyToAddFilter": "请停止代理以添加新过滤列表",
+    "stopProxyToDeleteFilter": "请停止代理以删除此过滤列表",
+    "stopProxyToEditRules": "请停止代理以修改自定义规则",
+    "stopProxyToModify": "请停止代理以修改此设置",
+    "stopProxyToToggleFilter": "请停止代理以启用/禁用此过滤列表"
+  },
   "createFilterList": {
     "addError": "添加过滤列表失败：{{error}}",
     "addList": "添加过滤列表",
-    "example": "示例过滤列表",
     "trustedListsWarning": "受信任列表可以使用强大的拦截功能，例如 <code>trusted-</code> 脚本片段和 JavaScript 规则，但<strong>若被恶意方劫持，可能会破坏隐私和安全</strong>。仅对您信任的来源启用此选项。"
   },
   "donate": "捐赠",
+  "exportDebugDataButton": {
+    "error": "",
+    "label": "",
+    "success": "",
+    "tooltip": ""
+  },
   "exportFilterList": {
     "errorMessage": "导出过滤列表失败：{{error}}",
     "export": "导出",
@@ -67,7 +58,10 @@
     "tooltip": "打开日志目录"
   },
   "filterLists": {
+    "copied": "",
+    "copy": "",
     "delete": "删除",
+    "goTo": "",
     "more": "更多",
     "removeError": "移除过滤列表失败：{{error}}",
     "toggleError": "切换过滤列表失败：{{error}}",
@@ -93,20 +87,37 @@
     "import": "导入",
     "successMessage": "自定义过滤列表导入成功"
   },
-  "rules": {
-    "help": "帮助",
-    "placeholder": "在此添加您的自定义规则..."
+  "intro": {
+    "buttons": {
+      "next": "下一步",
+      "skip": "跳过介绍"
+    },
+    "connect": {
+      "caNote": "首次启动时，Zen 可能会提示您安装本地根 CA 证书。这将启用 HTTPS 过滤，使 Zen 能够在所有网站上拦截广告和跟踪器。所有操作均在本地进行——<strong>您的数据永不会离开您的设备</strong>。<br />详细技术信息请查看我们的 GitHub。",
+      "description": "您已准备就绪。点击“开始”以启用 Zen 的全面网络保护。",
+      "donateText": "并考虑在以下平台捐赠：",
+      "socialText": "如果您愿意，可以关注我们的社交媒体：",
+      "title": "一切就绪！"
+    },
+    "filterLists": {
+      "description": "为了启用广告拦截和隐私保护，Zen 使用了<strong>过滤列表</strong>。您也可以稍后在应用中进行设置。",
+      "recommendation": "根据您的地区，我们建议启用以下过滤列表：",
+      "title": "过滤列表"
+    },
+    "settings": {
+      "description": "请查看以下设置：",
+      "settingsNote": "您也可以随时在应用中更改这些设置。",
+      "title": "设置"
+    },
+    "welcome": {
+      "description": "选择您的语言：",
+      "title": "欢迎使用 Zen！"
+    }
   },
   "portInput": {
     "description": "代理服务器监听的端口（0 为随机）。",
     "helper": "使用 1024 以下的端口可能需要管理员权限。",
     "label": "端口"
-  },
-  "assetPortInput": {
-    "description": "内部资源服务器用于注入脚本和样式的端口。",
-    "helper": "使用 1024 以下的端口可能需要管理员权限。",
-    "label": "资源服务器端口",
-    "setError": "设置资源服务器端口失败：{{error}}"
   },
   "requestLog": {
     "emptyState": "开始浏览以查看被拦截的请求。",
@@ -116,6 +127,10 @@
     "referer": "来源",
     "rule": "规则",
     "url": "网址"
+  },
+  "rules": {
+    "help": "帮助",
+    "placeholder": "在此添加您的自定义规则..."
   },
   "settings": {
     "about": {
@@ -164,12 +179,5 @@
     "stop": "停止",
     "stopError": "停止代理失败：{{error}}",
     "unsupportedDEGuide": "目前仅支持 GNOME 和 KDE 的系统代理自动配置。<br />请按照 <guide-link>此指南</guide-link> 按应用设置代理。"
-  },
-  "common": {
-    "stopProxyToModify": "请停止代理以修改此设置",
-    "stopProxyToAddFilter": "请停止代理以添加新过滤列表",
-    "stopProxyToDeleteFilter": "请停止代理以删除此过滤列表",
-    "stopProxyToToggleFilter": "请停止代理以启用/禁用此过滤列表",
-    "stopProxyToEditRules": "请停止代理以修改自定义规则"
   }
 }

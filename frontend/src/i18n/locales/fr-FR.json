@@ -16,6 +16,12 @@
       "updateAvailable": "Mise à jour disponible"
     }
   },
+  "assetPortInput": {
+    "description": "Le port utilisé par le serveur d'assets interne pour injecter des scripts et des styles.",
+    "helper": "Utiliser un port inférieur à 1024 nécessitera des privilèges administrateur.",
+    "label": "Port du serveur d'assets",
+    "setError": "Échec de la définition du port du serveur d'assets : {{error}}"
+  },
   "autoStartSwitch": {
     "description": "Démarrer Zen automatiquement lors de la connexion",
     "disableError": "Échec de la désactivation du démarrage automatique : {{error}}",
@@ -32,7 +38,6 @@
   "createFilterList": {
     "addError": "Échec de l'ajout de la liste de filtres : {{error}}",
     "addList": "Ajouter une liste de filtres",
-    "example": "Exemple de liste de filtres",
     "trustedListsWarning": "Les listes de confiance peuvent utiliser des capacités de blocage puissantes, telles que les scriptlets <code>trusted-</code> et les règles JavaScript, mais <strong>peuvent perturber la confidentialité et la sécurité</strong> si elles sont détournées par un acteur malveillant. N'activez cette option que pour les listes provenant de sources auxquelles vous faites confiance."
   },
   "donate": "Faire un don",
@@ -109,20 +114,10 @@
       "title": "Bienvenue dans Zen !"
     }
   },
-  "rules": {
-    "help": "Aide",
-    "placeholder": "Ajoutez vos règles personnalisées ici..."
-  },
   "portInput": {
     "description": "Port sur lequel le serveur proxy écoutera (0 pour aléatoire).",
     "helper": "Utiliser un port inférieur à 1024 nécessitera des privilèges administrateur.",
     "label": "Port"
-  },
-  "assetPortInput": {
-    "description": "Le port utilisé par le serveur d'assets interne pour injecter des scripts et des styles.",
-    "helper": "Utiliser un port inférieur à 1024 nécessitera des privilèges administrateur.",
-    "label": "Port du serveur d'assets",
-    "setError": "Échec de la définition du port du serveur d'assets : {{error}}"
   },
   "requestLog": {
     "emptyState": "Commencez à naviguer pour voir des requêtes bloquées.",
@@ -132,6 +127,10 @@
     "referer": "Source",
     "rule": "Règle",
     "url": "URL"
+  },
+  "rules": {
+    "help": "Aide",
+    "placeholder": "Ajoutez vos règles personnalisées ici..."
   },
   "settings": {
     "about": {

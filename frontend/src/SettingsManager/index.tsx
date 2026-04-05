@@ -77,7 +77,7 @@ export function SettingsManager() {
         </div>
       </div>
 
-      <div className="settings-manager__about bp5-text-muted">
+      <div className="settings-manager__about bp6-text-muted">
         <div>
           <strong>Zen</strong>
         </div>

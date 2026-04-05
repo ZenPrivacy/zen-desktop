@@ -2,41 +2,45 @@
   "name": "frontend",
   "private": true,
   "engines": {
-    "node": ">=20.11.1"
+    "node": ">=24.14.1"
   },
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx",
-    "extract-translations": "npx i18next-parser"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "fmt": "prettier . --check",
+    "fmt:fix": "prettier . --write",
+    "extract-translations": "npx i18next-cli extract"
   },
   "dependencies": {
-    "@blueprintjs/core": "5.19.0",
-    "@blueprintjs/icons": "5.22.0",
-    "@blueprintjs/select": "5.3.20",
-    "i18next": "^22.5.1",
-    "is-emoji-supported": "^0.0.5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-i18next": "^12.3.1",
-    "use-debounce": "^10.0.0"
+    "@blueprintjs/core": "6.11.3",
+    "@blueprintjs/icons": "6.8.0",
+    "@blueprintjs/select": "6.1.8",
+    "@types/react": "18.3.28",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "6.0.1",
+    "i18next": "26.0.3",
+    "is-emoji-supported": "0.0.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-i18next": "17.0.2",
+    "typescript": "6.0.2",
+    "use-debounce": "10.1.1",
+    "vite": "8.0.3"
   },
   "devDependencies": {
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
-    "@typescript-eslint/eslint-plugin": "^6.6.0",
-    "@typescript-eslint/parser": "^6.6.0",
-    "@vitejs/plugin-react": "^2.2.0",
-    "eslint": "^8.48.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-airbnb-typescript": "^17.1.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.1",
-    "i18next-parser": "^9.3.0",
-    "prettier": "^3.0.3",
-    "typescript": "^4.6.4",
-    "vite": "^3.2.11"
+    "@eslint/js": "9.39.4",
+    "eslint": "9.39.4",
+    "eslint-import-resolver-typescript": "4.4.4",
+    "eslint-plugin-import-x": "4.16.2",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.0.1",
+    "globals": "17.4.0",
+    "i18next-cli": "1.51.6",
+    "prettier": "3.8.1",
+    "typescript-eslint": "8.58.0"
   }
 }
