@@ -12,8 +12,4 @@ export default defineConfig({
     transComponents: ['Trans'],
     sort: true,
   },
-  types: {
-    input: ['locales/{{language}}/{{namespace}}.json'],
-    output: 'src/types/i18next.d.ts',
-  },
 });
