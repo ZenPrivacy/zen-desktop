@@ -9,6 +9,7 @@ import frFR from './locales/fr-FR.json';
 import itIT from './locales/it-IT.json';
 import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
+import trTR from './locales/tr-TR.json';
 import zhCN from './locales/zh-CN.json';
 import zhTW from './locales/zh-TW.json';
 
@@ -19,6 +20,8 @@ export const SUPPORTED_LOCALES = [
   'de-DE',
   'it',
   'it-IT',
+  'tr',
+  'tr-TR',
   'kk',
   'kk-KZ',
   'ru',
@@ -45,6 +48,7 @@ export const LOCALE_LABELS: LocaleItem[] = [
   { value: 'zh-CN', label: '中文（简体）' },
   { value: 'zh-TW', label: '中文（繁體）' },
   { value: 'it-IT', label: 'Italiano' },
+  { value: 'tr-TR', label: 'Türkçe' },
   { value: 'fr-FR', label: 'Français' },
 ];
 
@@ -98,6 +102,8 @@ export async function initI18n() {
       'zh-TW': { translation: zhTW },
       it: { translation: itIT },
       'it-IT': { translation: itIT },
+      tr: { translation: trTR },
+      'tr-TR': { translation: trTR },
       fr: { translation: frFR },
       'fr-FR': { translation: frFR },
     },
