@@ -2,8 +2,8 @@ export namespace cfg {
 	
 	export enum UpdatePolicyType {
 	    AUTOMATIC = "automatic",
-	    PROMPT = "prompt",
 	    DISABLED = "disabled",
+	    PROMPT = "prompt",
 	}
 	export class FilterList {
 	    name: string;

@@ -9,13 +9,14 @@ require (
 	github.com/ZenPrivacy/zen-core v1.5.1
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/wailsapp/wails/v2 v2.11.0 // Use one minor version behind latest for stability, unless there are urgently needed features/bugfixes
+	github.com/wailsapp/wails/v2 v2.12.0 // Use one minor version behind latest for stability, unless there are urgently needed features/bugfixes
 	golang.org/x/sys v0.38.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-	howett.net/plist v1.0.1
+	howett.net/plist v1.0.2-0.20250314012144-ee69052608d9
 )
 
 require (
+	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/getlantern/byteexec v0.0.0-20220903142956-e6ed20032cfd // indirect
