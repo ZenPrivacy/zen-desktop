@@ -108,6 +108,10 @@
       "description": "Review the settings below:",
       "settingsNote": "You can also change these at any time in the app.",
       "title": "Settings"
+    },
+    "welcome": {
+      "description": "Select your language:",
+      "title": "Welcome to Zen!"
     }
   },
   "portInput": {

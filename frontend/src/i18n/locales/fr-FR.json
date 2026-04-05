@@ -108,6 +108,10 @@
       "description": "Examinez les paramètres ci-dessous ",
       "settingsNote": "Vous pouvez également les modifier à tout moment dans l'application.",
       "title": "Paramètres"
+    },
+    "welcome": {
+      "description": "Sélectionnez votre langue :",
+      "title": "Bienvenue dans Zen !"
     }
   },
   "portInput": {

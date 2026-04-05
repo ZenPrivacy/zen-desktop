@@ -108,6 +108,10 @@
       "description": "Aşağıdaki ayarları inceleyin:",
       "settingsNote": "Bu ayarları uygulamada istediğiniz zaman değiştirebilirsiniz.",
       "title": "Ayarlar"
+    },
+    "welcome": {
+      "description": "Dilinizi seçin:",
+      "title": "Zen'e Hoş Geldiniz!"
     }
   },
   "portInput": {

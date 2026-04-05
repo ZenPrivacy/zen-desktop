@@ -108,6 +108,10 @@
       "description": "请查看以下设置：",
       "settingsNote": "您也可以随时在应用中更改这些设置。",
       "title": "设置"
+    },
+    "welcome": {
+      "description": "选择您的语言：",
+      "title": "欢迎使用 Zen！"
     }
   },
   "portInput": {

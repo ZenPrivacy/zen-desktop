@@ -108,6 +108,10 @@
       "description": "Verifica le impostazioni seguenti:",
       "settingsNote": "Puoi modificarle in qualsiasi momento nell’app.",
       "title": "Impostazioni"
+    },
+    "welcome": {
+      "description": "Seleziona la tua lingua:",
+      "title": "Benvenuto in Zen!"
     }
   },
   "portInput": {
