@@ -10,16 +10,16 @@ import './index.css';
 export function WelcomeScreen() {
   const [locale, setLocale] = useState(getCurrentLocale);
 
-  const tFixed = getFixedT(locale);
+  const t = getFixedT(locale);
 
   return (
     <div className="intro-screen">
       <div>
         <h2 className="welcome-slide bp6-heading intro-heading" key={`welcome-${locale}`}>
-          👋 {tFixed('intro.welcome.title')}
+          👋 {t('intro.welcome.title')}
         </h2>
         <p className="welcome-slide intro-description" key={`desc-${locale}`}>
-          {tFixed('intro.welcome.description')}
+          {t('intro.welcome.description')}
         </p>
       </div>
       <LocaleList
