@@ -11,37 +11,16 @@
       "settings": "Impostazioni"
     },
     "update": {
+      "restart": "Riavvia",
       "restartFailed": "Impossibile riavviare l'app: {{error}}",
-      "updateAvailable": "È disponibile una nuova versione di Zen.",
-      "restart": "Riavvia"
+      "updateAvailable": "È disponibile una nuova versione di Zen."
     }
   },
-  "intro": {
-    "welcome": {
-      "title": "Benvenuto in Zen!",
-      "description": "Seleziona la tua lingua:"
-    },
-    "filterLists": {
-      "title": "Liste di filtri",
-      "description": "Per abilitare il blocco delle pubblicità e la protezione della privacy, Zen utilizza <strong>liste di filtri</strong>. Puoi configurarle anche in seguito nell’app.",
-      "recommendation": "In base alla tua posizione, ti consigliamo di abilitare le seguenti liste di filtri:"
-    },
-    "settings": {
-      "title": "Impostazioni",
-      "description": "Verifica le impostazioni seguenti:",
-      "settingsNote": "Puoi modificarle in qualsiasi momento nell’app."
-    },
-    "connect": {
-      "title": "Tutto pronto!",
-      "description": "Sei pronto per partire. Premi \"Avvia\" per attivare la protezione completa della rete di Zen.",
-      "caNote": "Al primo avvio, Zen potrebbe chiederti di installare un certificato root CA locale. Questo consente il filtraggio HTTPS in modo che Zen possa bloccare pubblicità e tracker su tutti i siti. Tutto avviene localmente – <strong>nessun dato lascia mai il tuo dispositivo</strong>.<br />Per i dettagli tecnici completi, consulta il nostro GitHub.",
-      "socialText": "Se vuoi, dai un’occhiata ai nostri social:",
-      "donateText": "E considera una donazione su:"
-    },
-    "buttons": {
-      "skip": "Salta l’introduzione",
-      "next": "Avanti"
-    }
+  "assetPortInput": {
+    "description": "La porta utilizzata dal server asset interno per iniettare script e stili.",
+    "helper": "L'uso di una porta inferiore a 1024 potrebbe richiedere privilegi elevati.",
+    "label": "Porta del server asset",
+    "setError": "Impossibile impostare la porta del server asset: {{error}}"
   },
   "autoStartSwitch": {
     "description": "Avvia Zen automaticamente al login",
@@ -49,13 +28,25 @@
     "enableError": "Impossibile attivare l’avvio automatico: {{error}}",
     "label": "Avvio automatico"
   },
+  "common": {
+    "stopProxyToAddFilter": "Ferma il proxy per aggiungere una nuova lista di filtri",
+    "stopProxyToDeleteFilter": "Ferma il proxy per eliminare questa lista di filtri",
+    "stopProxyToEditRules": "Ferma il proxy per modificare le regole personalizzate",
+    "stopProxyToModify": "Ferma il proxy per modificare questa impostazione",
+    "stopProxyToToggleFilter": "Ferma il proxy per abilitare/disabilitare questa lista di filtri"
+  },
   "createFilterList": {
     "addError": "Impossibile aggiungere la lista di filtri: {{error}}",
     "addList": "Aggiungi lista di filtri",
-    "example": "Esempio di lista di filtri",
     "trustedListsWarning": "Le liste attendibili possono utilizzare potenti capacità di blocco, come scriptlet <code>trusted-</code> e regole JavaScript ma <strong>potrebbero compromettere la privacy e la sicurezza</strong> se compromesse da terzi malevoli. Abilita questa opzione solo per liste provenienti da fonti affidabili."
   },
   "donate": "Dona",
+  "exportDebugDataButton": {
+    "error": "Impossibile esportare i dati di debug: {{error}}",
+    "label": "Esporta dati di debug",
+    "success": "Dati di debug copiati negli appunti",
+    "tooltip": "Copia le informazioni di debug negli appunti"
+  },
   "exportFilterList": {
     "errorMessage": "Impossibile esportare le liste di filtri: {{error}}",
     "export": "Esporta",
@@ -66,21 +57,15 @@
     "openError": "Impossibile aprire la cartella dei log: {{error}}",
     "tooltip": "Apri la cartella dei log"
   },
-  "exportDebugDataButton": {
-    "label": "Esporta dati di debug",
-    "tooltip": "Copia le informazioni di debug negli appunti",
-    "success": "Dati di debug copiati negli appunti",
-    "error": "Impossibile esportare i dati di debug: {{error}}"
-  },
   "filterLists": {
+    "copied": "Copiato",
+    "copy": "Copia link",
     "delete": "Elimina",
+    "goTo": "Apri nel browser",
     "more": "Altro",
     "removeError": "Impossibile rimuovere la lista di filtri: {{error}}",
     "toggleError": "Impossibile attivare/disattivare la lista di filtri: {{error}}",
     "trusted": "Attendibile",
-    "copy": "Copia link",
-    "copied": "Copiato",
-    "goTo": "Apri nel browser",
     "whatIsThis": "Che cos'è"
   },
   "filterTypes": {
@@ -102,20 +87,33 @@
     "import": "Importa",
     "successMessage": "Liste di filtri personalizzate importate con successo"
   },
-  "rules": {
-    "help": "Aiuto",
-    "placeholder": "Aggiungi qui le tue regole personalizzate..."
+  "intro": {
+    "buttons": {
+      "next": "Avanti",
+      "skip": "Salta l’introduzione"
+    },
+    "connect": {
+      "caNote": "Al primo avvio, Zen potrebbe chiederti di installare un certificato root CA locale. Questo consente il filtraggio HTTPS in modo che Zen possa bloccare pubblicità e tracker su tutti i siti. Tutto avviene localmente – <strong>nessun dato lascia mai il tuo dispositivo</strong>.<br />Per i dettagli tecnici completi, consulta il nostro GitHub.",
+      "description": "Sei pronto per partire. Premi \"Avvia\" per attivare la protezione completa della rete di Zen.",
+      "donateText": "E considera una donazione su:",
+      "socialText": "Se vuoi, dai un’occhiata ai nostri social:",
+      "title": "Tutto pronto!"
+    },
+    "filterLists": {
+      "description": "Per abilitare il blocco delle pubblicità e la protezione della privacy, Zen utilizza <strong>liste di filtri</strong>. Puoi configurarle anche in seguito nell’app.",
+      "recommendation": "In base alla tua posizione, ti consigliamo di abilitare le seguenti liste di filtri:",
+      "title": "Liste di filtri"
+    },
+    "settings": {
+      "description": "Verifica le impostazioni seguenti:",
+      "settingsNote": "Puoi modificarle in qualsiasi momento nell’app.",
+      "title": "Impostazioni"
+    }
   },
   "portInput": {
     "description": "La porta su cui il server proxy ascolterà (0 per casuale).",
     "helper": "L'uso di una porta inferiore a 1024 potrebbe richiedere privilegi elevati.",
     "label": "Porta"
-  },
-  "assetPortInput": {
-    "description": "La porta utilizzata dal server asset interno per iniettare script e stili.",
-    "helper": "L'uso di una porta inferiore a 1024 potrebbe richiedere privilegi elevati.",
-    "label": "Porta del server asset",
-    "setError": "Impossibile impostare la porta del server asset: {{error}}"
   },
   "requestLog": {
     "emptyState": "Inizia a navigare per vedere le richieste bloccate.",
@@ -125,6 +123,10 @@
     "referer": "Referer",
     "rule": "Regola",
     "url": "URL"
+  },
+  "rules": {
+    "help": "Aiuto",
+    "placeholder": "Aggiungi qui le tue regole personalizzate..."
   },
   "settings": {
     "about": {
@@ -173,12 +175,5 @@
     "stop": "Ferma",
     "stopError": "Impossibile fermare il proxy: {{error}}",
     "unsupportedDEGuide": "La configurazione automatica del proxy di sistema è attualmente supportata solo su GNOME e KDE.<br />Segui <guide-link>questa guida</guide-link> per impostare il proxy per singola app."
-  },
-  "common": {
-    "stopProxyToModify": "Ferma il proxy per modificare questa impostazione",
-    "stopProxyToAddFilter": "Ferma il proxy per aggiungere una nuova lista di filtri",
-    "stopProxyToDeleteFilter": "Ferma il proxy per eliminare questa lista di filtri",
-    "stopProxyToToggleFilter": "Ferma il proxy per abilitare/disabilitare questa lista di filtri",
-    "stopProxyToEditRules": "Ferma il proxy per modificare le regole personalizzate"
   }
 }
