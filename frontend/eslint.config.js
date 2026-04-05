@@ -40,6 +40,8 @@ export default defineConfig(
       ],
       'import-x/prefer-default-export': 'off',
       'import-x/no-relative-packages': 'off',
+      'import-x/no-named-as-default': 'off',
+      'import-x/no-named-as-default-member': 'off',
       '@typescript-eslint/no-use-before-define': 'off',
       '@typescript-eslint/no-shadow': 'off',
       'react/no-unstable-nested-components': 'off',

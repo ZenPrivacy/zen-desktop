@@ -84,7 +84,7 @@ export function StartStopButton() {
     });
 
     return cancel;
-  }, [t]);
+  }, [t, setProxyState]);
 
   return (
     <Button

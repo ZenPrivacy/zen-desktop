@@ -12,7 +12,6 @@ export interface BrowserLinkProps {
  */
 export function BrowserLink({ href, children }: BrowserLinkProps) {
   return (
-    /* eslint-disable-next-line jsx-a11y/anchor-is-valid */
     <a
       onClick={() => BrowserOpenURL(href)}
       tabIndex={0}

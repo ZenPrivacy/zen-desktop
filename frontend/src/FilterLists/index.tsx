@@ -4,11 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { GetFilterLists, RemoveFilterList, ToggleFilterList } from '../../wailsjs/go/cfg/Config';
-// eslint-disable-next-line import/order
 import { cfg } from '../../wailsjs/go/models';
-
-import './index.css';
-
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { AppToaster } from '../common/toaster';
 import { useProxyState } from '../context/ProxyStateContext';
@@ -17,6 +13,8 @@ import { CreateFilterList } from './CreateFilterList';
 import { ExportFilterList } from './ExportFilterList';
 import { ImportFilterList } from './ImportFilterList';
 import { FilterListType } from './types';
+
+import './index.css';
 
 const NO_DOOMSCROLL_URL = 'https://github.com/ZenPrivacy/filter-lists/tree/master/no-doomscroll';
 

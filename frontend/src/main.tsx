@@ -1,5 +1,5 @@
 import { isEmojiSupported } from 'is-emoji-supported';
-import React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from './App';
@@ -33,10 +33,11 @@ async function bootstrap() {
   await initI18n();
 
   const container = document.getElementById('root');
-  const root = createRoot(container!);
+  if (!container) throw new Error('Root element not found');
+  const root = createRoot(container);
 
   root.render(
-    <React.StrictMode>
+    <StrictMode>
       <ErrorBoundary>
         <ProxyStateProvider>
           <ThemeProvider>
@@ -44,7 +45,7 @@ async function bootstrap() {
           </ThemeProvider>
         </ProxyStateProvider>
       </ErrorBoundary>
-    </React.StrictMode>,
+    </StrictMode>,
   );
 }
 

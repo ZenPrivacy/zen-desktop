@@ -94,8 +94,8 @@ export function CreateFilterList({ onAdd }: { onAdd: () => void }) {
               });
             }
             setLoading(false);
-            urlRef.current!.value = '';
-            nameRef.current!.value = '';
+            if (urlRef.current) urlRef.current.value = '';
+            if (nameRef.current) nameRef.current.value = '';
             setTrusted(false);
             onAdd();
           }}

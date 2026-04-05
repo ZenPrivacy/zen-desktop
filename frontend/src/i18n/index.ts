@@ -58,7 +58,9 @@ LOCALE_LABELS.sort((a, b) => localeLabelsCollator.compare(a.label, b.label));
 
 export function detectSystemLocale(): SupportedLocale {
   const browserLang = navigator.language;
-  const detected = SUPPORTED_LOCALES.includes(browserLang as any) ? (browserLang as SupportedLocale) : FALLBACK_LOCALE;
+  const detected = (SUPPORTED_LOCALES as readonly string[]).includes(browserLang)
+    ? (browserLang as SupportedLocale)
+    : FALLBACK_LOCALE;
 
   return detected;
 }

@@ -1,5 +1,5 @@
 import { FormGroup, Switch } from '@blueprintjs/core';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { GetUpdatePolicy, SetUpdatePolicy } from '../../../wailsjs/go/cfg/Config';
@@ -21,38 +21,35 @@ export function AutoupdateSwitch() {
     })();
   }, []);
 
-  const disable = useCallback(() => {
-    (async () => {
-      setState((state) => ({ ...state, loading: true }));
-      try {
-        await SetUpdatePolicy(cfg.UpdatePolicyType.DISABLED);
-      } catch (err) {
-        AppToaster.show({
-          message: t('settings.updates.disableError', { error: err }),
-          intent: 'danger',
-        });
-        setState((state) => ({ ...state, loading: false }));
-        return;
-      }
-      setState((state) => ({ ...state, enabled: false, loading: false }));
-    })();
-  }, []);
-  const enable = useCallback(() => {
-    (async () => {
-      setState((state) => ({ ...state, loading: true }));
-      try {
-        await SetUpdatePolicy(cfg.UpdatePolicyType.AUTOMATIC);
-      } catch (err) {
-        AppToaster.show({
-          message: t('settings.updates.enableError', { error: err }),
-          intent: 'danger',
-        });
-        setState((state) => ({ ...state, loading: false }));
-        return;
-      }
-      setState((state) => ({ ...state, enabled: true, loading: false }));
-    })();
-  }, []);
+  async function disable() {
+    setState((state) => ({ ...state, loading: true }));
+    try {
+      await SetUpdatePolicy(cfg.UpdatePolicyType.DISABLED);
+    } catch (err) {
+      AppToaster.show({
+        message: t('settings.updates.disableError', { error: err }),
+        intent: 'danger',
+      });
+      setState((state) => ({ ...state, loading: false }));
+      return;
+    }
+    setState((state) => ({ ...state, enabled: false, loading: false }));
+  }
+
+  async function enable() {
+    setState((state) => ({ ...state, loading: true }));
+    try {
+      await SetUpdatePolicy(cfg.UpdatePolicyType.AUTOMATIC);
+    } catch (err) {
+      AppToaster.show({
+        message: t('settings.updates.enableError', { error: err }),
+        intent: 'danger',
+      });
+      setState((state) => ({ ...state, loading: false }));
+      return;
+    }
+    setState((state) => ({ ...state, enabled: true, loading: false }));
+  }
 
   return (
     <FormGroup label={t('settings.updates.automaticUpdates')} helperText={t('settings.updates.description')}>

@@ -2,7 +2,6 @@ import { CardList, Card, Tag, Collapse, HTMLTable, Intent } from '@blueprintjs/c
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// eslint-disable-next-line import/no-relative-packages
 import { EventsOn } from '../../wailsjs/runtime';
 import { getCurrentLocale } from '../i18n';
 import './index.css';
