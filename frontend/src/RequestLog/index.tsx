@@ -92,7 +92,7 @@ function RequestLogCard({ log }: { log: FilterAction }) {
         <Tag minimal intent={tagIntent}>
           {hostname}
         </Tag>
-        <div className="bp5-text-muted">
+        <div className="bp6-text-muted">
           {log.createdAt.toLocaleTimeString(getCurrentLocale(), { timeStyle: 'short' })}
         </div>
       </Card>

@@ -16,9 +16,9 @@
     "extract-translations": "npx i18next-cli extract"
   },
   "dependencies": {
-    "@blueprintjs/core": "5.19.0",
-    "@blueprintjs/icons": "5.22.0",
-    "@blueprintjs/select": "5.3.20",
+    "@blueprintjs/core": "6.11.3",
+    "@blueprintjs/icons": "6.8.0",
+    "@blueprintjs/select": "6.1.8",
     "i18next": "26.0.3",
     "is-emoji-supported": "^0.0.5",
     "react": "^18.2.0",

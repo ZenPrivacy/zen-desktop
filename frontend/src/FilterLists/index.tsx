@@ -52,7 +52,7 @@ export function FilterLists() {
               text={
                 <>
                   {t(`filterTypes.${item}`)}
-                  <span className="bp5-text-muted filter-lists__select-count">
+                  <span className="bp6-text-muted filter-lists__select-count">
                     ({state.filterLists.filter((filterList) => filterList.type === item && filterList.enabled).length}/
                     {state.filterLists.filter((filterList) => filterList.type === item).length})
                   </span>
@@ -173,7 +173,7 @@ export function FilterListItem({
         </Tag>
       ) : null}
 
-      <div className="bp5-text-muted filter-lists__list-url">{filterList.url}</div>
+      <div className="bp6-text-muted filter-lists__list-url">{filterList.url}</div>
       {showButtons && (
         <div className="filter-lists__list-buttons">
           <Tooltip

@@ -66,7 +66,7 @@ function App() {
   useProxyHotkey(showIntro);
 
   return (
-    <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp5-dark' : ''}>
+    <div id="app" className={effectiveTheme === ThemeType.DARK ? 'bp6-dark' : ''}>
       <AppHeader />
 
       {showIntro ? (

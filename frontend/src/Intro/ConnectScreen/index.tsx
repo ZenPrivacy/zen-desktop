@@ -16,9 +16,9 @@ export function ConnectScreen() {
 
   return (
     <div className="intro-screen">
-      <h3 className="bp5-heading intro-heading">{t('intro.connect.title')}</h3>
-      <p className="intro-description bp5-running-text">{t('intro.connect.description')}</p>
-      <p className="intro-description bp5-running-text">
+      <h3 className="bp6-heading intro-heading">{t('intro.connect.title')}</h3>
+      <p className="intro-description bp6-running-text">{t('intro.connect.description')}</p>
+      <p className="intro-description bp6-running-text">
         <Trans
           i18nKey="intro.connect.caNote"
           components={{
@@ -29,7 +29,7 @@ export function ConnectScreen() {
       </p>
 
       <Card elevation={1} className="connect-card">
-        <p className="bp5-heading">
+        <p className="bp6-heading">
           <strong>{t('intro.connect.socialText')}</strong>
         </p>
 

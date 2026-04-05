@@ -15,7 +15,7 @@ export function WelcomeScreen() {
   return (
     <div className="intro-screen">
       <div>
-        <h2 className="welcome-slide bp5-heading intro-heading" key={`welcome-${locale}`}>
+        <h2 className="welcome-slide bp6-heading intro-heading" key={`welcome-${locale}`}>
           👋 {tFixed('intro.welcome.title')}
         </h2>
         <p className="welcome-slide intro-description" key={`desc-${locale}`}>

@@ -20,7 +20,7 @@ export function SettingsScreen() {
 
   return (
     <div className="intro-screen">
-      <h3 className="bp5-heading intro-heading">{t('intro.settings.title')}</h3>
+      <h3 className="bp6-heading intro-heading">{t('intro.settings.title')}</h3>
       <p className="intro-description">{t('intro.settings.description')}</p>
 
       <Card elevation={1} className="settings-card">
