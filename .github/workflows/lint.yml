@@ -61,5 +61,7 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
         working-directory: frontend
+      - name: Run frontend formatting check
+        run: task frontend:fmt
       - name: Run frontend linter
         run: task frontend:lint
