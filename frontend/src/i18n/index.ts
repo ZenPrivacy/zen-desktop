@@ -7,9 +7,9 @@ import deDE from './locales/de-DE.json';
 import enUS from './locales/en-US.json';
 import frFR from './locales/fr-FR.json';
 import itIT from './locales/it-IT.json';
-import trTR from "./locales/tr-TR.json";
 import kkKZ from './locales/kk-KZ.json';
 import ruRU from './locales/ru-RU.json';
+import trTR from './locales/tr-TR.json';
 import zhCN from './locales/zh-CN.json';
 import zhTW from './locales/zh-TW.json';
 
