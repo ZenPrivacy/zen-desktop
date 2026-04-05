@@ -2,7 +2,7 @@
   "name": "frontend",
   "private": true,
   "engines": {
-    "node": ">=20.11.1"
+    "node": ">=24.14.1"
   },
   "type": "module",
   "scripts": {
