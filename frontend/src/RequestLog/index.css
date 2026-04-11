@@ -34,33 +34,72 @@
   line-break: anywhere;
 }
 
+.request-log__card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
 .request-log__card__details__section {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
 }
 
 .request-log__card__details__section-title {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
-.request-log__card__details__process-grid {
+.request-log__card__details__section + .request-log__card__details__section {
+  border-top: 1px solid rgba(127, 127, 127, 0.2);
+  padding-top: 0.875rem;
+}
+
+.request-log__card__details__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.request-log__card__details__group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.request-log__card__details__process-grid p {
-  margin: 0;
+.request-log__card__details__field {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  column-gap: 0.35rem;
+  row-gap: 0.2rem;
+}
+
+.request-log__card__details__label {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.request-log__card__details__field--tag > .request-log__card__details__value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.request-log__card__details__field--process-summary > .request-log__card__details__value {
+  width: 100%;
+}
+
+.request-log__card__details__field--text > .request-log__card__details__value {
+  min-width: 0;
+  flex: 1;
 }
 
 .request-log__card__details__process-name-tag {
   max-width: 100%;
   vertical-align: middle;
-}
-
-.request-log__card__details__process-path span {
-  display: inline-block;
-  line-break: anywhere;
 }
 
 .request-log__card__details__rules {

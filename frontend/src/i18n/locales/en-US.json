@@ -127,9 +127,11 @@
     "processId": "PID",
     "processName": "Name",
     "processPath": "Path",
+    "request": "Request",
     "redirectedTo": "Redirected to",
     "referer": "Referer",
     "rule": "Rule",
+    "rules": "Rules",
     "url": "URL"
   },
   "rules": {
