@@ -6,10 +6,16 @@ import { getCurrentLocale } from '@/i18n';
 import { EventsOn } from 'wails/runtime';
 import './index.css';
 
-type Rule = {
-  FilterName: string;
-  RawRule: string;
-};
+interface Rule {
+  filterName: string;
+  rawRule: string;
+}
+
+interface Process {
+  id: number;
+  name: string;
+  diskPath: string;
+}
 
 enum FilterActionKind {
   Block = 'block',
@@ -17,7 +23,7 @@ enum FilterActionKind {
   Modify = 'modify',
 }
 
-type FilterAction = {
+interface FilterAction {
   id: string;
   kind: FilterActionKind;
   method: string;
@@ -25,8 +31,9 @@ type FilterAction = {
   to: string;
   referer: string;
   rules: Rule[];
+  process: Process;
   createdAt: Date;
-};
+}
 
 export function RequestLog() {
   const { t } = useTranslation();
@@ -86,19 +93,28 @@ function RequestLogCard({ log }: { log: FilterAction }) {
     default:
       tagIntent = Intent.NONE;
   }
+
+  const hasProcessId = log.process.id > 0;
+  const hasProcessPath = Boolean(log.process.diskPath);
+
   return (
     <>
       <Card key={log.id} className="request-log__card" interactive onClick={() => setIsOpen(!isOpen)}>
-        <Tag minimal intent={tagIntent}>
-          {hostname}
-        </Tag>
+        <div className="request-log__card__summary">
+          <Tag minimal intent={tagIntent}>
+            {hostname}
+          </Tag>
+          <Tag minimal className="request-log__card__process-tag" title={log.process.name}>
+            {log.process.name}
+          </Tag>
+        </div>
         <div className="bp6-text-muted">
           {log.createdAt.toLocaleTimeString(getCurrentLocale(), { timeStyle: 'short' })}
         </div>
       </Card>
 
       <Collapse isOpen={isOpen}>
-        <Card className="request-log__card__details">
+        <Card className="request-log__card__details" compact>
           <p className="request-log__card__details__value">
             <strong>{t('requestLog.method')}: </strong>
             <Tag minimal intent="primary">
@@ -121,6 +137,29 @@ function RequestLogCard({ log }: { log: FilterAction }) {
               {log.referer}
             </p>
           )}
+          <div className="request-log__card__details__section">
+            <h4 className="request-log__card__details__section-title">{t('requestLog.process')}</h4>
+            <div className="request-log__card__details__process-grid">
+              {hasProcessId && (
+                <p className="request-log__card__details__value">
+                  <strong>{t('requestLog.processId')}: </strong>
+                  <Tag minimal>{log.process.id}</Tag>
+                </p>
+              )}
+              <p className="request-log__card__details__value">
+                <strong>{t('requestLog.processName')}: </strong>
+                <Tag minimal className="request-log__card__details__process-name-tag" title={log.process.name}>
+                  {log.process.name}
+                </Tag>
+              </p>
+              {hasProcessPath && (
+                <p className="request-log__card__details__value request-log__card__details__process-path">
+                  <strong>{t('requestLog.processPath')}: </strong>
+                  <span>{log.process.diskPath}</span>
+                </p>
+              )}
+            </div>
+          </div>
           <HTMLTable bordered compact striped className="request-log__card__details__rules">
             <thead>
               <tr>
@@ -130,9 +169,9 @@ function RequestLogCard({ log }: { log: FilterAction }) {
             </thead>
             <tbody>
               {log.rules.map((rule) => (
-                <tr key={rule.RawRule}>
-                  <td>{rule.FilterName}</td>
-                  <td>{rule.RawRule}</td>
+                <tr key={rule.rawRule}>
+                  <td>{rule.filterName}</td>
+                  <td>{rule.rawRule}</td>
                 </tr>
               ))}
             </tbody>

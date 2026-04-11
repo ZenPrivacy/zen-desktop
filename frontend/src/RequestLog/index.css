@@ -1,15 +1,70 @@
-.request-log__card {
-  display: flex;
-  justify-content: space-between;
-}
-
 .request-log__empty {
   margin-top: 0.5rem;
   font-weight: bold;
 }
 
+.request-log__card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.request-log__card > .bp6-text-muted {
+  flex-shrink: 0;
+}
+
+.request-log__card__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.request-log__card__process-tag {
+  margin-left: auto;
+  max-width: 10em !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .request-log__card__details__value {
   line-break: anywhere;
+}
+
+.request-log__card__details__section {
+  margin-bottom: 1rem;
+}
+
+.request-log__card__details__section-title {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.request-log__card__details__process-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.request-log__card__details__process-grid p {
+  margin: 0;
+}
+
+.request-log__card__details__process-name-tag {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.request-log__card__details__process-path span {
+  display: inline-block;
+  line-break: anywhere;
+}
+
+.request-log__card__details__rules {
+  width: 100%;
 }
 
 .request-log__card__details__rules td {
