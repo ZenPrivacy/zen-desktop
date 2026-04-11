@@ -19,6 +19,11 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 )
 
+const (
+	windowWidth  = 450
+	windowHeight = 670
+)
+
 //go:embed all:frontend/dist
 var assets embed.FS
 
@@ -58,8 +63,8 @@ func main() {
 
 	err = wails.Run(&options.App{
 		Title:         constants.AppName,
-		Width:         420,
-		Height:        650,
+		Width:         windowWidth,
+		Height:        windowHeight,
 		DisableResize: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,

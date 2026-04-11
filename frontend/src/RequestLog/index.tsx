@@ -1,4 +1,4 @@
-import { CardList, Card, Tag, Collapse, HTMLTable, Intent } from '@blueprintjs/core';
+import { CardList, Card, Tag, Collapse, Intent, CompoundTag, HTMLTable } from '@blueprintjs/core';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,10 +6,16 @@ import { getCurrentLocale } from '@/i18n';
 import { EventsOn } from 'wails/runtime';
 import './index.css';
 
-type Rule = {
-  FilterName: string;
-  RawRule: string;
-};
+interface Rule {
+  filterName: string;
+  rawRule: string;
+}
+
+interface Process {
+  id: number;
+  name: string;
+  diskPath: string;
+}
 
 enum FilterActionKind {
   Block = 'block',
@@ -17,7 +23,7 @@ enum FilterActionKind {
   Modify = 'modify',
 }
 
-type FilterAction = {
+interface FilterAction {
   id: string;
   kind: FilterActionKind;
   method: string;
@@ -25,8 +31,9 @@ type FilterAction = {
   to: string;
   referer: string;
   rules: Rule[];
+  process: Process;
   createdAt: Date;
-};
+}
 
 export function RequestLog() {
   const { t } = useTranslation();
@@ -86,57 +93,110 @@ function RequestLogCard({ log }: { log: FilterAction }) {
     default:
       tagIntent = Intent.NONE;
   }
+
+  const hasProcessId = log.process.id > 0;
+  const hasProcessPath = Boolean(log.process.diskPath);
+
   return (
     <>
       <Card key={log.id} className="request-log__card" interactive onClick={() => setIsOpen(!isOpen)}>
-        <Tag minimal intent={tagIntent}>
-          {hostname}
-        </Tag>
+        <div className="request-log__card__summary">
+          <Tag minimal intent={tagIntent}>
+            {hostname}
+          </Tag>
+          <Tag minimal className="request-log__card__process-tag" title={log.process.name}>
+            {log.process.name}
+          </Tag>
+        </div>
         <div className="bp6-text-muted">
           {log.createdAt.toLocaleTimeString(getCurrentLocale(), { timeStyle: 'short' })}
         </div>
       </Card>
 
       <Collapse isOpen={isOpen}>
-        <Card className="request-log__card__details">
-          <p className="request-log__card__details__value">
-            <strong>{t('requestLog.method')}: </strong>
-            <Tag minimal intent="primary">
-              {log.method}
-            </Tag>
-          </p>
-          <p className="request-log__card__details__value">
-            <strong>{t('requestLog.url')}: </strong>
-            {log.url}
-          </p>
-          {log.kind === FilterActionKind.Redirect && (
-            <p className="request-log__card__details__value">
-              <strong>{t('requestLog.redirectedTo')}: </strong>
-              {log.to}
-            </p>
-          )}
-          {log.referer && (
-            <p className="request-log__card__details__value">
-              <strong>{t('requestLog.referer')}: </strong>
-              {log.referer}
-            </p>
-          )}
-          <HTMLTable bordered compact striped className="request-log__card__details__rules">
-            <thead>
-              <tr>
-                <th>{t('requestLog.filterName')}</th>
-                <th>{t('requestLog.rule')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {log.rules.map((rule) => (
-                <tr key={rule.RawRule}>
-                  <td>{rule.FilterName}</td>
-                  <td>{rule.RawRule}</td>
+        <Card className="request-log__card__details" compact>
+          <div className="request-log__card__details__section">
+            <div className="request-log__card__details__section-header">
+              <div className="request-log__card__details__section-title">{t('requestLog.request')}</div>
+            </div>
+            <div className="request-log__card__details__group">
+              <div className="request-log__card__details__field request-log__card__details__field--tag">
+                <div className="request-log__card__details__value">
+                  <CompoundTag leftContent={t('requestLog.method')} minimal>
+                    {log.method}
+                  </CompoundTag>
+                </div>
+              </div>
+              <div className="request-log__card__details__field request-log__card__details__field--text">
+                <div className="request-log__card__details__label">{t('requestLog.url')}:</div>
+                <div className="request-log__card__details__value">{log.url}</div>
+              </div>
+              {log.kind === FilterActionKind.Redirect && (
+                <div className="request-log__card__details__field request-log__card__details__field--text">
+                  <div className="request-log__card__details__label">{t('requestLog.redirectedTo')}:</div>
+                  <div className="request-log__card__details__value">{log.to}</div>
+                </div>
+              )}
+              {log.referer && (
+                <div className="request-log__card__details__field request-log__card__details__field--text">
+                  <div className="request-log__card__details__label">{t('requestLog.referer')}:</div>
+                  <div className="request-log__card__details__value">{log.referer}</div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="request-log__card__details__section">
+            <div className="request-log__card__details__section-header">
+              <div className="request-log__card__details__section-title">{t('requestLog.process')}</div>
+            </div>
+            <div className="request-log__card__details__group">
+              <div className="request-log__card__details__field request-log__card__details__field--tag request-log__card__details__field--process-summary">
+                <div className="request-log__card__details__value">
+                  {hasProcessId && (
+                    <CompoundTag leftContent={t('requestLog.processId')} minimal>
+                      {log.process.id}
+                    </CompoundTag>
+                  )}
+                  <CompoundTag
+                    leftContent={t('requestLog.processName')}
+                    minimal
+                    className="request-log__card__details__process-name-tag"
+                    title={log.process.name}
+                  >
+                    {log.process.name}
+                  </CompoundTag>
+                </div>
+              </div>
+              {hasProcessPath && (
+                <div className="request-log__card__details__field request-log__card__details__field--text">
+                  <div className="request-log__card__details__label">{t('requestLog.processPath')}:</div>
+                  <div className="request-log__card__details__value">{log.process.diskPath}</div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="request-log__card__details__section">
+            <div className="request-log__card__details__section-header">
+              <div className="request-log__card__details__section-title">{t('requestLog.rules')}</div>
+              <Tag minimal>{log.rules.length}</Tag>
+            </div>
+            <HTMLTable bordered compact striped className="request-log__card__details__rules">
+              <thead>
+                <tr>
+                  <th>{t('requestLog.filterName')}</th>
+                  <th>{t('requestLog.rule')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </HTMLTable>
+              </thead>
+              <tbody>
+                {log.rules.map((rule) => (
+                  <tr key={rule.rawRule}>
+                    <td>{rule.filterName}</td>
+                    <td>{rule.rawRule}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </HTMLTable>
+          </div>
         </Card>
       </Collapse>
     </>
