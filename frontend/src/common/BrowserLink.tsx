@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
+import { BrowserOpenURL } from 'wails/runtime/runtime';
 
 export interface BrowserLinkProps {
   href: string;

@@ -2,9 +2,9 @@ import { FormGroup, Switch } from '@blueprintjs/core';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { GetUpdatePolicy, SetUpdatePolicy } from '../../../wailsjs/go/cfg/Config';
-import { cfg } from '../../../wailsjs/go/models';
-import { AppToaster } from '../../common/toaster';
+import { AppToaster } from '@/common/toaster';
+import { GetUpdatePolicy, SetUpdatePolicy } from 'wails/go/cfg/Config';
+import { cfg } from 'wails/go/models';
 
 export function AutoupdateSwitch() {
   const { t } = useTranslation();

@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 
 import './index.css';
-import { GetRules, SetRules } from '../../wailsjs/go/cfg/Config';
-import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
-import { useProxyState } from '../context/ProxyStateContext';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { GetRules, SetRules } from 'wails/go/cfg/Config';
+import { BrowserOpenURL } from 'wails/runtime/runtime';
 
 const HELP_URL = 'https://github.com/ZenPrivacy/zen-desktop/blob/master/docs/external/how-to-rules.md';
 

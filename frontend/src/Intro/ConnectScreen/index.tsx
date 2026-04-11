@@ -1,13 +1,13 @@
 import { Button, Card, Divider } from '@blueprintjs/core';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime';
-import BlueSkyLogo from '../../assets/icons/bluesky.svg';
-import DiscordIcon from '../../assets/icons/discord.svg';
-import GithubIcon from '../../assets/icons/github.svg';
-import OpenCollectiveIcon from '../../assets/icons/osc.svg';
-import RedditIcon from '../../assets/icons/reddit.svg';
-import { SOCIAL_LINKS } from '../../constants/urls';
+import BlueSkyLogo from '@/assets/icons/bluesky.svg';
+import DiscordIcon from '@/assets/icons/discord.svg';
+import GithubIcon from '@/assets/icons/github.svg';
+import OpenCollectiveIcon from '@/assets/icons/osc.svg';
+import RedditIcon from '@/assets/icons/reddit.svg';
+import { SOCIAL_LINKS } from '@/constants/urls';
+import { BrowserOpenURL } from 'wails/runtime/runtime';
 
 import './index.css';
 

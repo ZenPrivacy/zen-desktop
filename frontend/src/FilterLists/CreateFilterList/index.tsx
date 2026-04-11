@@ -3,10 +3,10 @@ import { InfoSign } from '@blueprintjs/icons';
 import { useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { AddFilterList } from '../../../wailsjs/go/cfg/Config';
-import { AppToaster } from '../../common/toaster';
-import { useProxyState } from '../../context/ProxyStateContext';
-import { FilterListType } from '../types';
+import { AppToaster } from '@/common/toaster';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { FilterListType } from '@/FilterLists/types';
+import { AddFilterList } from 'wails/go/cfg/Config';
 import './index.css';
 
 export function CreateFilterList({ onAdd }: { onAdd: () => void }) {

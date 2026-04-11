@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { GetAssetPort, SetAssetPort } from '../../wailsjs/go/cfg/Config';
-import { AppToaster } from '../common/toaster';
-import { useProxyState } from '../context/ProxyStateContext';
+import { AppToaster } from '@/common/toaster';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { GetAssetPort, SetAssetPort } from 'wails/go/cfg/Config';
 
 export function AssetPortInput() {
   const { t } = useTranslation();

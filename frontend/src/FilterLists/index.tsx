@@ -3,11 +3,11 @@ import { Select } from '@blueprintjs/select';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { GetFilterLists, RemoveFilterList, ToggleFilterList } from '../../wailsjs/go/cfg/Config';
-import { cfg } from '../../wailsjs/go/models';
-import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
-import { AppToaster } from '../common/toaster';
-import { useProxyState } from '../context/ProxyStateContext';
+import { AppToaster } from '@/common/toaster';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { GetFilterLists, RemoveFilterList, ToggleFilterList } from 'wails/go/cfg/Config';
+import { cfg } from 'wails/go/models';
+import { BrowserOpenURL } from 'wails/runtime/runtime';
 
 import { CreateFilterList } from './CreateFilterList';
 import { ExportFilterList } from './ExportFilterList';

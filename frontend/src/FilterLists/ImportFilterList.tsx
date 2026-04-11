@@ -2,8 +2,8 @@ import { MenuItem } from '@blueprintjs/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ImportCustomFilterLists } from '../../wailsjs/go/app/App';
-import { AppToaster } from '../common/toaster';
+import { AppToaster } from '@/common/toaster';
+import { ImportCustomFilterLists } from 'wails/go/app/App';
 
 export function ImportFilterList({ onAdd }: { onAdd: () => void }) {
   const { t } = useTranslation();

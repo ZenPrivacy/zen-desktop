@@ -1,5 +1,7 @@
 import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import importAlias from '@dword-design/eslint-plugin-import-alias';
 import importX from 'eslint-plugin-import-x';
 import pluginReact from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -17,6 +19,7 @@ export default defineConfig(
   reactHooks.configs.flat['recommended-latest'],
   importX.flatConfigs.recommended,
   importX.flatConfigs.typescript,
+  importAlias.configs.recommended,
   {
     languageOptions: {
       globals: { ...globals.browser },
@@ -27,7 +30,11 @@ export default defineConfig(
     },
     settings: {
       react: { version: 'detect' },
-      'import-x/resolver': { typescript: true },
+      'import-x/resolver-next': [
+        createTypeScriptImportResolver({
+          project: './tsconfig.json',
+        }),
+      ],
     },
     rules: {
       'import-x/order': [
@@ -47,6 +54,15 @@ export default defineConfig(
       'react/no-unstable-nested-components': 'off',
       'react/require-default-props': 'off',
       'no-console': 'off',
+      '@dword-design/import-alias/prefer-alias': [
+        'error',
+        {
+          alias: {
+            '@': './src',
+            wails: './wailsjs',
+          },
+        },
+      ],
     },
   },
 );

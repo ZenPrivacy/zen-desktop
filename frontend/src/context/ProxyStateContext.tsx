@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react';
 
-import { ProxyState } from '../types';
+import { ProxyState } from '@/types';
 
 type ProxyStateContextType = {
   proxyState: ProxyState;

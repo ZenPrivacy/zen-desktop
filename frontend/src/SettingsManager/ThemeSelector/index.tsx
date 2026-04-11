@@ -1,7 +1,7 @@
 import { Radio, RadioGroup, FormGroup } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
-import { ThemeType, useTheme } from '../../common/ThemeManager';
+import { ThemeType, useTheme } from '@/common/ThemeManager';
 
 export function ThemeSelector() {
   const { t } = useTranslation();

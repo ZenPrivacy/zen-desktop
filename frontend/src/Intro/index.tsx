@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import './index.css';
-import { GetFilterListsByLocales } from '../../wailsjs/go/cfg/Config';
-import { cfg } from '../../wailsjs/go/models';
-import { StartStopButton } from '../components/StartStopButton';
-import { useProxyState } from '../context/ProxyStateContext';
+import { StartStopButton } from '@/components/StartStopButton';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { GetFilterListsByLocales } from 'wails/go/cfg/Config';
+import { cfg } from 'wails/go/models';
 
 import { ConnectScreen } from './ConnectScreen';
 import { FilterListsScreen } from './FilterListsScreen';

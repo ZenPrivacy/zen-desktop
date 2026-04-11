@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { GetPort, SetPort } from '../../wailsjs/go/cfg/Config';
-import { useProxyState } from '../context/ProxyStateContext';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { GetPort, SetPort } from 'wails/go/cfg/Config';
 
 export function PortInput() {
   const { t } = useTranslation();

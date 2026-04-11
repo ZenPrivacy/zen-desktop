@@ -2,11 +2,11 @@ import { Button } from '@blueprintjs/core';
 import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { StartProxy, StopProxy } from '../../../wailsjs/go/app/App';
-import { EventsOn } from '../../../wailsjs/runtime/runtime';
-import { BrowserLink } from '../../common/BrowserLink';
-import { AppToaster } from '../../common/toaster';
-import { useProxyState } from '../../context/ProxyStateContext';
+import { BrowserLink } from '@/common/BrowserLink';
+import { AppToaster } from '@/common/toaster';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { StartProxy, StopProxy } from 'wails/go/app/App';
+import { EventsOn } from 'wails/runtime/runtime';
 
 import './index.css';
 

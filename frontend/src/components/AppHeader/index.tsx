@@ -1,4 +1,4 @@
-import { DonateButton } from '../../DonateButton';
+import { DonateButton } from '@/DonateButton';
 import './index.css';
 
 export function AppHeader() {

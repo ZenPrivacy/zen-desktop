@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import './index.css';
 
-import { IsNoSelfUpdate } from '../../wailsjs/go/app/App';
-import { GetVersion } from '../../wailsjs/go/cfg/Config';
-import { BrowserOpenURL } from '../../wailsjs/runtime';
-import { BrowserLink } from '../common/BrowserLink';
-import { useProxyState } from '../context/ProxyStateContext';
+import { BrowserLink } from '@/common/BrowserLink';
+import { useProxyState } from '@/context/ProxyStateContext';
+import { IsNoSelfUpdate } from 'wails/go/app/App';
+import { GetVersion } from 'wails/go/cfg/Config';
+import { BrowserOpenURL } from 'wails/runtime';
 
 import { AssetPortInput } from './AssetPortInput';
 import { AutostartSwitch } from './AutostartSwitch';

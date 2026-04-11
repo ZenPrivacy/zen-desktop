@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, ReactNode, useMemo } from 'react';
 
-import { WindowSetDarkTheme, WindowSetLightTheme, WindowSetSystemDefaultTheme } from '../../wailsjs/runtime/runtime';
+import { WindowSetDarkTheme, WindowSetLightTheme, WindowSetSystemDefaultTheme } from 'wails/runtime/runtime';
 
 export enum ThemeType {
   SYSTEM = 'system',

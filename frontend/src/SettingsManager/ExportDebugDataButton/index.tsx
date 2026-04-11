@@ -2,9 +2,9 @@ import { Button, Tooltip } from '@blueprintjs/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ExportDebugData } from '../../../wailsjs/go/cfg/Config';
-import { ClipboardSetText } from '../../../wailsjs/runtime';
-import { AppToaster } from '../../common/toaster';
+import { AppToaster } from '@/common/toaster';
+import { ExportDebugData } from 'wails/go/cfg/Config';
+import { ClipboardSetText } from 'wails/runtime';
 
 export function ExportDebugDataButton() {
   const [loading, setLoading] = useState(false);

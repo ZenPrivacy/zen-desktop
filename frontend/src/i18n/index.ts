@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import { GetLocale, SetLocale } from '../../wailsjs/go/cfg/Config';
+import { GetLocale, SetLocale } from 'wails/go/cfg/Config';
 
 import deDE from './locales/de-DE.json';
 import enUS from './locales/en-US.json';

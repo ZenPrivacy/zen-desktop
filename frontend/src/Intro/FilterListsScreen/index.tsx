@@ -1,7 +1,7 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import { cfg } from '../../../wailsjs/go/models';
-import { FilterListItem } from '../../FilterLists';
+import { FilterListItem } from '@/FilterLists';
+import { cfg } from 'wails/go/models';
 
 interface FilterListsScreenProps {
   filterLists: cfg.FilterList[];
