@@ -11,7 +11,8 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "wails/*": ["./wailsjs/*"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,

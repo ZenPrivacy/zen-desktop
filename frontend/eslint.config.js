@@ -59,6 +59,7 @@ export default defineConfig(
         {
           alias: {
             '@': './src',
+            wails: './wailsjs',
           },
         },
       ],
