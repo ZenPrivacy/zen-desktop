@@ -19,6 +19,11 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 )
 
+const (
+	windowWidth  = 450
+	windowHeight = 670
+)
+
 //go:embed all:frontend/dist
 var assets embed.FS
 
