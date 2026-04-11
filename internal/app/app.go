@@ -39,7 +39,7 @@ type App struct {
 	startupDone        chan struct{}
 	startOnDomReady    bool
 	config             *cfg.Config
-	eventsHandler      *eventsHandler
+	frontendEvents     *frontendEvents
 	proxy              *proxy.Proxy
 	proxyOn            bool
 	systemProxyManager *sysproxy.Manager
@@ -102,11 +102,11 @@ func (a *App) commonStartup(ctx context.Context) {
 	}
 
 	a.systrayMgr = systrayMgr
-	a.eventsHandler = newEventsHandler(ctx)
+	a.frontendEvents = newFrontendEvents(ctx)
 	a.config.RunMigrations()
 	a.systrayMgr.Init(ctx)
 
-	su, err := selfupdate.NewSelfUpdater(a.config, a.eventsHandler)
+	su, err := selfupdate.NewSelfUpdater(a.config, a.frontendEvents)
 	if err != nil {
 		log.Printf("failed to initialize self-updater: %v", err)
 	} else if su != nil {
@@ -167,12 +167,12 @@ func (a *App) StartProxy() (err error) {
 
 	log.Println("starting proxy")
 
-	a.eventsHandler.OnProxyStarting()
+	a.frontendEvents.OnProxyStarting()
 	defer func() {
 		if err != nil {
-			a.eventsHandler.OnProxyStartError(err)
+			a.frontendEvents.OnProxyStartError(err)
 		} else {
-			a.eventsHandler.OnProxyStarted()
+			a.frontendEvents.OnProxyStarted()
 		}
 	}()
 
@@ -205,7 +205,7 @@ func (a *App) StartProxy() (err error) {
 		}
 	}()
 
-	filter, err := filter.NewFilter(networkRules, assetInjector, a.filterListStore, a.eventsHandler, whitelistSrv)
+	filter, err := filter.NewFilter(networkRules, assetInjector, a.filterListStore, a.frontendEvents, whitelistSrv)
 	if err != nil {
 		return fmt.Errorf("create filter: %v", err)
 	}
@@ -232,7 +232,7 @@ func (a *App) StartProxy() (err error) {
 
 	if err := a.systemProxyManager.Set(port, a.config.GetIgnoredHosts()); err != nil {
 		if errors.Is(err, sysproxy.ErrUnsupportedDesktopEnvironment) {
-			a.eventsHandler.OnUnsupportedDE(err)
+			a.frontendEvents.OnUnsupportedDE(err)
 		} else {
 			if stopErr := a.proxy.Stop(); stopErr != nil {
 				return fmt.Errorf("stop proxy: %v, set system proxy: %v", stopErr, err)
@@ -264,12 +264,12 @@ func (a *App) StopProxy() (err error) {
 
 	log.Println("stopping proxy")
 
-	a.eventsHandler.OnProxyStopping()
+	a.frontendEvents.OnProxyStopping()
 	defer func() {
 		if err != nil {
-			a.eventsHandler.OnProxyStopError(err)
+			a.frontendEvents.OnProxyStopError(err)
 		} else {
-			a.eventsHandler.OnProxyStopped()
+			a.frontendEvents.OnProxyStopped()
 		}
 	}()
 
