@@ -4,9 +4,9 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import './index.css';
 
-import { UninstallCA } from '../../../wailsjs/go/app/App';
-import { AppToaster } from '../../common/toaster';
-import { ProxyState } from '../../types';
+import { AppToaster } from '@/common/toaster';
+import { ProxyState } from '@/types';
+import { UninstallCA } from 'wails/go/app/App';
 
 export interface UninstallCADialogProps {
   proxyState: ProxyState;

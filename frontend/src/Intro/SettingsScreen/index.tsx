@@ -2,9 +2,9 @@ import { Callout, Card, Divider } from '@blueprintjs/core';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { IsNoSelfUpdate } from '../../../wailsjs/go/app/App';
-import { AutostartSwitch } from '../../SettingsManager/AutostartSwitch';
-import { AutoupdateSwitch } from '../../SettingsManager/AutoupdateSwitch';
+import { AutostartSwitch } from '@/SettingsManager/AutostartSwitch';
+import { AutoupdateSwitch } from '@/SettingsManager/AutoupdateSwitch';
+import { IsNoSelfUpdate } from 'wails/go/app/App';
 
 import './index.css';
 

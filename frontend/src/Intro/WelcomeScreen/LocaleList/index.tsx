@@ -1,6 +1,6 @@
 import { Card, Radio } from '@blueprintjs/core';
 
-import { LOCALE_LABELS, SupportedLocale } from '../../../i18n';
+import { LOCALE_LABELS, SupportedLocale } from '@/i18n';
 
 import './index.css';
 

@@ -1,7 +1,7 @@
 import { getFixedT } from 'i18next';
 import { useState } from 'react';
 
-import { changeLocale, getCurrentLocale } from '../../i18n';
+import { changeLocale, getCurrentLocale } from '@/i18n';
 
 import { LocaleList } from './LocaleList';
 

@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import './App.css';
 
-import { RestartApplication } from '../wailsjs/go/app/App';
-import { GetFirstLaunch } from '../wailsjs/go/cfg/Config';
-import { EventsOn } from '../wailsjs/runtime/runtime';
+import { RestartApplication } from 'wails/go/app/App';
+import { GetFirstLaunch } from 'wails/go/cfg/Config';
+import { EventsOn } from 'wails/runtime/runtime';
 
 import { ThemeType, useTheme } from './common/ThemeManager';
 import { AppToaster } from './common/toaster';

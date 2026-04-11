@@ -1,7 +1,7 @@
 import { Button, Icon } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
-import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
+import { BrowserOpenURL } from 'wails/runtime/runtime';
 
 import './index.css';
 

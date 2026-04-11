@@ -2,8 +2,8 @@ import { CardList, Card, Tag, Collapse, HTMLTable, Intent } from '@blueprintjs/c
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { EventsOn } from '../../wailsjs/runtime';
-import { getCurrentLocale } from '../i18n';
+import { getCurrentLocale } from '@/i18n';
+import { EventsOn } from 'wails/runtime';
 import './index.css';
 
 type Rule = {

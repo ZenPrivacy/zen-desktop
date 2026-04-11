@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { StartProxy, StopProxy } from '../wailsjs/go/app/App';
+import { StartProxy, StopProxy } from 'wails/go/app/App';
 
 import { useProxyState } from './context/ProxyStateContext';
 
