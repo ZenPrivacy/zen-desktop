@@ -9,7 +9,7 @@
 }
 
 .rules__textarea {
-  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
   height: 100% !important;
 }

@@ -7,7 +7,7 @@ import { ThemeProvider } from './common/ThemeManager';
 import { ProxyStateProvider } from './context/ProxyStateContext';
 import ErrorBoundary from './ErrorBoundary';
 import { initI18n } from './i18n';
-import './style.css';
+import './styles/style.css';
 
 (function polyfillCountryFlagEmojis() {
   if (!isEmojiSupported('😊') || isEmojiSupported('🇨🇭')) {
