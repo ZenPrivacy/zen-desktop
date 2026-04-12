@@ -153,7 +153,7 @@ function RequestLogCard({ log }: { log: FilterAction }) {
               <div className="request-log__card__details__field request-log__card__details__field--tag request-log__card__details__field--process-summary">
                 <div className="request-log__card__details__value">
                   {hasProcessId && (
-                    <CompoundTag leftContent={t('requestLog.processId')} minimal>
+                    <CompoundTag leftContent="PID" minimal>
                       {log.process.id}
                     </CompoundTag>
                   )}
