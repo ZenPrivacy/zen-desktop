@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.20.0
+
+### What's new
+- **Process info in request logs**
+  Request logs now show information about processes which initiated the request. This makes it easier to trace activity and understand which applications are responsible for specific traffic.
+- **Merhaba!**
+  Zen now speaks Turkish, thanks to @Wek1d! Want to contribute a new language or improve an existing one? Check out our contributing guidelines.
+- More minor improvements.
+
+### New contributors
+- @Wek1d made their first contribution in https://github.com/ZenPrivacy/zen-desktop/pull/641
+
+**Full changelog**: https://github.com/ZenPrivacy/zen-desktop/compare/v0.19.2...v0.20.0
+
 ## v0.19.2
 
 ### What's New
