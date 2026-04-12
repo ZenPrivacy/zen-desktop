@@ -16,7 +16,7 @@ import { FilterListType } from './types';
 
 import './index.css';
 
-const NO_DOOMSCROLL_URL = 'https://github.com/ZenPrivacy/filter-lists/tree/master/no-doomscroll';
+const NO_DOOMSCROLL_URL = 'https://github.com/ZenPrivacy/filter-lists/blob/master/no-doomscroll/readme.md';
 
 export function FilterLists() {
   const { t } = useTranslation();
