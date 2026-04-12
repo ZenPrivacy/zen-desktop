@@ -123,9 +123,14 @@
     "emptyState": "開始瀏覽以檢視被攔截的請求。",
     "filterName": "過濾器名稱",
     "method": "方法",
+    "process": "程序",
+    "processName": "名稱",
+    "processPath": "路徑",
     "redirectedTo": "重新導向至",
     "referer": "來源",
+    "request": "請求",
     "rule": "規則",
+    "rules": "規則",
     "url": "網址"
   },
   "rules": {

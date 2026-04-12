@@ -123,9 +123,14 @@
     "emptyState": "Engellenen istekleri görmek için gezinmeye başlayın.",
     "filterName": "Filtre adı",
     "method": "Yöntem",
+    "process": "İşlem",
+    "processName": "Ad",
+    "processPath": "Yol",
     "redirectedTo": "Yönlendirilen",
     "referer": "Yönlendiren",
+    "request": "İstek",
     "rule": "Kural",
+    "rules": "Kurallar",
     "url": "URL"
   },
   "rules": {

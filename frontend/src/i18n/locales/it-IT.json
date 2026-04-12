@@ -123,9 +123,14 @@
     "emptyState": "Inizia a navigare per vedere le richieste bloccate.",
     "filterName": "Nome filtro",
     "method": "Metodo",
+    "process": "Processo",
+    "processName": "Nome",
+    "processPath": "Percorso",
     "redirectedTo": "Reindirizzato a",
     "referer": "Referer",
+    "request": "Richiesta",
     "rule": "Regola",
+    "rules": "Regole",
     "url": "URL"
   },
   "rules": {

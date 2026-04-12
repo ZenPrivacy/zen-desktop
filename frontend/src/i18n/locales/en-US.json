@@ -124,12 +124,11 @@
     "filterName": "Filter name",
     "method": "Method",
     "process": "Process",
-    "processId": "PID",
     "processName": "Name",
     "processPath": "Path",
-    "request": "Request",
     "redirectedTo": "Redirected to",
     "referer": "Referer",
+    "request": "Request",
     "rule": "Rule",
     "rules": "Rules",
     "url": "URL"
