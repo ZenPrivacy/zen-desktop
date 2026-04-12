@@ -42,10 +42,10 @@
   },
   "donate": "Spenden",
   "exportDebugDataButton": {
-    "error": "",
-    "label": "",
-    "success": "",
-    "tooltip": ""
+    "error": "Debug-Daten konnten nicht exportiert werden: {{error}}",
+    "label": "Debug-Daten exportieren",
+    "success": "Debug-Daten in die Zwischenablage kopiert",
+    "tooltip": "Debug-Informationen in die Zwischenablage kopieren"
   },
   "exportFilterList": {
     "errorMessage": "Filterliste kann nicht exportiert werden: {{error}}",
@@ -58,10 +58,10 @@
     "tooltip": "Protokollverzeichnis öffnen"
   },
   "filterLists": {
-    "copied": "",
-    "copy": "",
+    "copied": "Kopiert",
+    "copy": "Link kopieren",
     "delete": "Löschen",
-    "goTo": "",
+    "goTo": "Im Browser öffnen",
     "more": "Mehr",
     "removeError": "Filterliste kann nicht entfernt werden: {{error}}",
     "toggleError": "Filterliste kann nicht umgeschaltet werden: {{error}}",
@@ -123,9 +123,14 @@
     "emptyState": "Beginnen Sie mit dem Surfen, um blockierte Anfragen zu sehen.",
     "filterName": "Filtername",
     "method": "Methode",
+    "process": "Prozess",
+    "processName": "Name",
+    "processPath": "Pfad",
     "redirectedTo": "Weitergeleitet zu",
     "referer": "Referer",
+    "request": "Anfrage",
     "rule": "Regel",
+    "rules": "Regeln",
     "url": "URL"
   },
   "rules": {

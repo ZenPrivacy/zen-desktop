@@ -123,9 +123,14 @@
     "emptyState": "Commencez à naviguer pour voir des requêtes bloquées.",
     "filterName": "Nom du filtre",
     "method": "Méthode",
+    "process": "Processus",
+    "processName": "Nom",
+    "processPath": "Chemin",
     "redirectedTo": "Redirigé vers",
     "referer": "Source",
+    "request": "Requête",
     "rule": "Règle",
+    "rules": "Règles",
     "url": "URL"
   },
   "rules": {

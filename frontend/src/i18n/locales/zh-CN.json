@@ -42,10 +42,10 @@
   },
   "donate": "捐赠",
   "exportDebugDataButton": {
-    "error": "",
-    "label": "",
-    "success": "",
-    "tooltip": ""
+    "error": "导出调试数据失败：{{error}}",
+    "label": "导出调试数据",
+    "success": "调试数据已复制到剪贴板",
+    "tooltip": "将调试信息复制到剪贴板"
   },
   "exportFilterList": {
     "errorMessage": "导出过滤列表失败：{{error}}",
@@ -58,10 +58,10 @@
     "tooltip": "打开日志目录"
   },
   "filterLists": {
-    "copied": "",
-    "copy": "",
+    "copied": "已复制",
+    "copy": "复制链接",
     "delete": "删除",
-    "goTo": "",
+    "goTo": "在浏览器中打开",
     "more": "更多",
     "removeError": "移除过滤列表失败：{{error}}",
     "toggleError": "切换过滤列表失败：{{error}}",
@@ -123,9 +123,14 @@
     "emptyState": "开始浏览以查看被拦截的请求。",
     "filterName": "过滤器名称",
     "method": "方法",
+    "process": "进程",
+    "processName": "名称",
+    "processPath": "路径",
     "redirectedTo": "重定向到",
     "referer": "来源",
+    "request": "请求",
     "rule": "规则",
+    "rules": "规则",
     "url": "网址"
   },
   "rules": {
