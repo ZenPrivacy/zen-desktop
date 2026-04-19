@@ -7,7 +7,7 @@
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "Irbis & Zen contributors",
+    "name": "Irbis and Zen contributors",
     "email": "contact@irbis.sh"
   },
   "info": {
