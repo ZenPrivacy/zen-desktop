@@ -1,6 +1,6 @@
 # Zen Privacy Policy
 
-Last updated: April 09 2026
+Last updated: April 19, 2026
 
 This privacy policy applies to Zen – a free, open-source desktop ad-blocker and privacy guard.
 
@@ -68,3 +68,11 @@ You can:
 * Delete all logs and cache files at any time.
 * Remove the installed certificate using the built-in **"Uninstall CA"** button in the settings, or manually via your system's certificate manager.
 * Uninstall Zen completely, whenever you want.
+
+---
+
+## Questions? Feedback?
+
+If you have a question, concern, or suggestion – privacy-related or not – email us at [contact@irbis.sh](mailto:contact@irbis.sh) or drop by our [Discord server](https://discord.gg/zGeQVatAUm).
+
+Zen is built by a small, independent team that deeply cares about privacy. We're always happy to hear from you.
