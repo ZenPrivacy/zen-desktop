@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ZenPrivacy/zen-desktop/internal/constants"
+	"github.com/irbis-sh/zen-desktop/internal/constants"
 )
 
 const (

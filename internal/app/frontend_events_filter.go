@@ -1,8 +1,8 @@
 package app
 
 import (
-	nrule "github.com/ZenPrivacy/zen-core/networkrules/rule"
-	pprocess "github.com/ZenPrivacy/zen-core/process"
+	nrule "github.com/irbis-sh/zen-core/networkrules/rule"
+	pprocess "github.com/irbis-sh/zen-core/process"
 )
 
 type filterEventKind string

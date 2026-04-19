@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ZenPrivacy/zen-desktop/internal/cfg"
+	"github.com/irbis-sh/zen-desktop/internal/cfg"
 )
 
 // NoSelfUpdate is set to "true" for builds distributed to package managers to prevent auto-updating. It is typed as a string because the linker allows only setting string variables at compile time (see https://pkg.go.dev/cmd/link).
