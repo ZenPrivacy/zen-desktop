@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"slices"
 
-	"github.com/irbis-sh/zen-desktop/internal/autostart"
 	"github.com/blang/semver"
+	"github.com/irbis-sh/zen-desktop/internal/autostart"
 )
 
 type migration struct {
