@@ -53,15 +53,15 @@ tasks:
   pull-exclusions:
     desc: Pull the updates from the zen-https-exclusions repository.
     cmds:
-      - git subtree pull --prefix=internal/sysproxy/exclusions https://github.com/ZenPrivacy/zen-https-exclusions master --squash
+      - git subtree pull --prefix=internal/sysproxy/exclusions https://github.com/irbis-sh/zen-https-exclusions master --squash
 
   link-core:
     desc: Add local replace directive for zen-core in go.mod.
     cmds:
-      - go mod edit -replace=github.com/ZenPrivacy/zen-core=../core
+      - go mod edit -replace=github.com/irbis-sh/zen-core=../core
 
   unlink-core:
     desc: Remove local replace directive for zen-core from go.mod.
     cmds:
-      - go mod edit -dropreplace=github.com/ZenPrivacy/zen-core
+      - go mod edit -dropreplace=github.com/irbis-sh/zen-core
 
