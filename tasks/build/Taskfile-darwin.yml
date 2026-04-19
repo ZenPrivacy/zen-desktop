@@ -42,7 +42,7 @@ tasks:
   deps:
     desc: Install the dependencies required to create a production build.
     cmds:
-      - npm i -g create-dmg@^7.0.0
+      - npm i -g create-dmg@8.1.0
 
   app:
     desc: Build the .app application bundle. The .app file will be placed in the build/bin directory.
@@ -57,7 +57,7 @@ tasks:
   dmg:
     desc: Create a DMG installer for the application. The DMG file will be placed in the build/bin directory.
     cmds:
-      - create-dmg "{{default .DEFAULT_APP_FILENAME .APP_FILENAME}}" --overwrite
+      - create-dmg "{{default .DEFAULT_APP_FILENAME .APP_FILENAME}}" --overwrite --no-code-sign
       - mv Zen*.dmg build/bin/Zen.dmg # create-dmg creates the disk image in the current directory
       - echo "Built Zen.dmg"
     vars:
