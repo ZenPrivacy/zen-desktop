@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ZenPrivacy/zen-core/filter"
+	"github.com/irbis-sh/zen-core/filter"
 )
 
 const myRulesFilterName = "My rules"

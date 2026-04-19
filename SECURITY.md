@@ -2,11 +2,11 @@
 
 ## Supported Versions
 
-Only the [latest version](https://github.com/ZenPrivacy/zen-desktop/releases/latest) of the app is actively supported.
+Only the [latest version](https://github.com/irbis-sh/zen-desktop/releases/latest) of the app is actively supported.
 
 ## Reporting a Vulnerability
 
-If you've discovered a security issue in Zen, please disclose it privately and responsibly by emailing us at <security@zenprivacy.net>.
+If you've discovered a security issue in Zen, please disclose it privately and responsibly by emailing us at <security@irbis.sh>.
 
 In your report, please include:
 

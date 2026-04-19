@@ -1,4 +1,4 @@
-module github.com/ZenPrivacy/zen-desktop
+module github.com/irbis-sh/zen-desktop
 
 // Note: Always set the patch version when updating the Go version.
 // Omitting the patch version may cause some Go commands to fail.
@@ -6,9 +6,9 @@ module github.com/ZenPrivacy/zen-desktop
 go 1.26.1
 
 require (
-	github.com/ZenPrivacy/zen-core v1.6.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/irbis-sh/zen-core v1.6.1
 	github.com/wailsapp/wails/v2 v2.11.0 // Use one minor version behind latest for stability, unless there are urgently needed features/bugfixes
 	golang.org/x/sys v0.42.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1

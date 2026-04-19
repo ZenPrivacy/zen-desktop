@@ -1,6 +1,6 @@
 <p align="center">
   <picture>
-    <img src="https://github.com/ZenPrivacy/zen-desktop/blob/master/assets/appicon.png?raw=true" alt="Zen's Blue Shield Logo" width="150" />
+    <img src="https://github.com/irbis-sh/zen-desktop/blob/master/assets/appicon.png?raw=true" alt="Zen's Blue Shield Logo" width="150" />
   </picture>
 </p>
 
@@ -14,9 +14,9 @@ Edward Snowden, Permanent Record
 
 </blockquote>
 
-![GitHub License](https://img.shields.io/github/license/ZenPrivacy/zen-desktop)
-![GitHub release](https://img.shields.io/github/v/release/ZenPrivacy/zen-desktop)
-![GitHub download counter](https://img.shields.io/github/downloads/ZenPrivacy/zen-desktop/total)
+![GitHub License](https://img.shields.io/github/license/irbis-sh/zen-desktop)
+![GitHub release](https://img.shields.io/github/v/release/irbis-sh/zen-desktop)
+![GitHub download counter](https://img.shields.io/github/downloads/irbis-sh/zen-desktop/total)
 <a href="https://discord.gg/zGeQVatAUm">
   <img alt="Discord" src="https://img.shields.io/discord/1334633399490711685?logo=discord&logoColor=fff&label=Discord&color=5865F2"/>
 </a>
@@ -29,8 +29,8 @@ During the first run, Zen will prompt you to install a root certificate. This is
 
 ### Windows
 
-- x64: [💾 Installer](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen-amd64-installer.exe) | [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_windows_amd64.zip)
-- ARM64: [💾 Installer](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen-arm64-installer.exe) | [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_windows_arm64.zip)
+- x64: [💾 Installer](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen-amd64-installer.exe) | [📦 Portable](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen_windows_amd64.zip)
+- ARM64: [💾 Installer](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen-arm64-installer.exe) | [📦 Portable](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen_windows_arm64.zip)
 
 Unsure which version to download? Click on 'Start' and type 'View processor info'. The 'System type' field under 'Device specifications' will tell you which one you need.
 
@@ -44,8 +44,8 @@ winget install ZenPrivacy.ZenDesktop
 
 ### macOS
 
-- x64 (Intel): [💾 Installer](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen-amd64.dmg) | [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_darwin_amd64.tar.gz)
-- ARM64 (Apple Silicon): [💾 Installer](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen-arm64.dmg) | [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_darwin_arm64.tar.gz)
+- x64 (Intel): [💾 Installer](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen-amd64.dmg) | [📦 Portable](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen_darwin_amd64.tar.gz)
+- ARM64 (Apple Silicon): [💾 Installer](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen-arm64.dmg) | [📦 Portable](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen_darwin_arm64.tar.gz)
 
 Unsure which version to download? Learn at [Apple's website](https://support.apple.com/en-us/HT211814).
 
@@ -60,8 +60,8 @@ brew install --cask zen-privacy
 ### Linux
 
 - AUR: [👾 zen-adblocker-bin](https://aur.archlinux.org/packages/zen-adblocker-bin)
-- x64: [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_linux_amd64.tar.gz)
-- ARM64: [📦 Portable](https://github.com/ZenPrivacy/zen-desktop/releases/latest/download/Zen_linux_arm64.tar.gz)
+- x64: [📦 Portable](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen_linux_amd64.tar.gz)
+- ARM64: [📦 Portable](https://github.com/irbis-sh/zen-desktop/releases/latest/download/Zen_linux_arm64.tar.gz)
 
 On Linux, automatic proxy configuration is currently only supported on GNOME- and KDE-based desktop environments.
 
@@ -104,7 +104,7 @@ On Linux, automatic proxy configuration is currently only supported on GNOME- an
 
 ## Development
 
-Follow the [getting started guide](docs/internal/index.md#getting-started) to begin working on Zen development. If you have any questions, feel free to ask in the [Discussions](https://github.com/ZenPrivacy/zen-desktop/discussions/categories/q-a).
+Follow the [getting started guide](docs/internal/index.md#getting-started) to begin working on Zen development. If you have any questions, feel free to ask in the [Discussions](https://github.com/irbis-sh/zen-desktop/discussions/categories/q-a).
 
 ## Contributing
 
@@ -115,7 +115,7 @@ Zen needs your help! You can report bugs, suggest and implement features, improv
 Zen exists thanks to the support of many incredible people and organizations, including:
 
 - Our contributors
-  <a href="https://github.com/ZenPrivacy/zen-desktop/graphs/contributors">
+  <a href="https://github.com/irbis-sh/zen-desktop/graphs/contributors">
   <img src="https://opencollective.com/zen-privacy/contributors.svg?width=890&button=false" alt="Avatars of all GitHub contributors to Zen" />
   </a>
 
@@ -132,4 +132,4 @@ Zen exists thanks to the support of many incredible people and organizations, in
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/ZenPrivacy/zen-desktop/blob/master/LICENSE). Some code and assets included with Zen are licensed under different terms. For more information, see the [COPYING](https://github.com/ZenPrivacy/zen-desktop/blob/master/COPYING.md) file.
+This project is licensed under the [MIT License](https://github.com/irbis-sh/zen-desktop/blob/master/LICENSE). Some code and assets included with Zen are licensed under different terms. For more information, see the [COPYING](https://github.com/irbis-sh/zen-desktop/blob/master/COPYING.md) file.

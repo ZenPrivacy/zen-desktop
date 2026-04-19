@@ -5,7 +5,7 @@
 Zen, including its source code and all attached documentation, is licensed under the MIT License.
 
 ```
-Copyright (c) 2026 Zen contributors
+Copyright (c) 2026 Irbis & Zen contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ SOFTWARE.
 
 ## 3rd party code and assets
 
-Some code and other assets used in Zen are licensed under different terms. This section attempts to attribute some of them. If you believe that your work is used in Zen without proper attribution, please open an issue or contact us at [contact@zenprivacy.net](mailto:contact@zenprivacy.net).
+Some code and other assets used in Zen are licensed under different terms. This section attempts to attribute some of them. If you believe that your work is used in Zen without proper attribution, please open an issue or contact us at [contact@irbis.sh](mailto:contact@irbis.sh).
 
 ### Wails
 

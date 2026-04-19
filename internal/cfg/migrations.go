@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"slices"
 
-	"github.com/ZenPrivacy/zen-desktop/internal/autostart"
 	"github.com/blang/semver"
+	"github.com/irbis-sh/zen-desktop/internal/autostart"
 )
 
 type migration struct {
@@ -36,7 +36,7 @@ var migrations = []migration{
 		return nil
 	}},
 	{"v0.6.0", func(c *Config) error {
-		// https://github.com/ZenPrivacy/zen-desktop/issues/146
+		// https://github.com/irbis-sh/zen-desktop/issues/146
 		errStr := c.ToggleFilterList("https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_2_Base/filter.txt", true)
 		if errStr != "" {
 			return errors.New(errStr)
@@ -44,7 +44,7 @@ var migrations = []migration{
 		return nil
 	}},
 	{"v0.7.0", func(c *Config) error {
-		// https://github.com/ZenPrivacy/zen-desktop/issues/147#issuecomment-2521317897
+		// https://github.com/irbis-sh/zen-desktop/issues/147#issuecomment-2521317897
 		c.Lock()
 		defer c.Unlock()
 		for i, list := range c.Filter.FilterLists {
