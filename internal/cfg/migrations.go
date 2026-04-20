@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 
 	"github.com/blang/semver"
 	"github.com/irbis-sh/zen-desktop/internal/autostart"
@@ -338,6 +339,21 @@ var migrations = []migration{
 
 		if err := c.Save(); err != nil {
 			return fmt.Errorf("save config: %v", err)
+		}
+		return nil
+	}},
+	{"v0.21.0", func(c *Config) error {
+		c.Lock()
+		defer c.Unlock()
+
+		for i, fl := range c.Filter.FilterLists {
+			if strings.HasPrefix(fl.URL, "https://cdn.jsdelivr.net/gh/ZenPrivacy") {
+				c.Filter.FilterLists[i].URL = strings.Replace(fl.URL, "https://cdn.jsdelivr.net/gh/ZenPrivacy", "https://cdn.jsdelivr.net/gh/irbis-sh", 1)
+			}
+		}
+
+		if err := c.Save(); err != nil {
+			return fmt.Errorf("save: %v", err)
 		}
 		return nil
 	}},
