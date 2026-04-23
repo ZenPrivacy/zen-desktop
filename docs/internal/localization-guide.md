@@ -53,7 +53,7 @@ You'll need to modify two files:
 - Add an import for your translation file:
 
   ```typescript
-  import aaAA from './locales/aa-AA.json'; // Replace aa/AA with your locale code
+  import aaAA from './locales/aa-AA.json'; // Replace aa-AA with your locale code
   ```
 
 - Add your locale to the `SUPPORTED_LOCALES` array. Since a user's preferred locale [may not include a region code](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/language#value), include both the base language and the full locale code:
