@@ -11,7 +11,7 @@ This guide will help you contribute translations to Zen.
 
 ## Currently supported locales
 
-Currently supported locales can be found in the `SUPPORTED_LOCALES` array in the [`frontend/src/i18n/index.ts`](/frontend/src/i18n/index.ts#L9) file.
+Currently supported locales can be found in the `LOCALE_LABELS` array in [`frontend/src/i18n/index.ts`](/frontend/src/i18n/index.ts).
 
 ## Adding a new locale
 
@@ -42,7 +42,7 @@ Follow [these instructions](https://docs.github.com/en/pull-requests/collaborati
 
 You'll need to modify two files:
 
-1. In [`frontend/i18next-parser.config.js`](/frontend/i18next-parser.config.js#L9), add your locale code to the `locales` array:
+1. In [`frontend/i18next.config.ts`](/frontend/i18next.config.ts), add your locale code to the `locales` array:
 
   ```typescript
   locales: ['en-US', ..., 'your-locale-code'],
@@ -53,20 +53,20 @@ You'll need to modify two files:
 - Add an import for your translation file:
 
   ```typescript
-  import aaAA from "./locales/aa-AA.json"; // Replace aa/AA with your locale code
+  import aaAA from './locales/aa-AA.json'; // Replace aa-AA with your locale code
   ```
 
-- Add your locale to the `SUPPORTED_LOCALES` array:
+- Add your locale to the `SUPPORTED_LOCALES` array. Since a user's preferred locale [may not include a region code](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/language#value), include both the base language and the full locale code:
 
   ```typescript
   export const SUPPORTED_LOCALES = [
     ..., // Existing locales
     'aa',
-    'aaAA',
+    'aa-AA',
   ] as const;
   ```
 
-- Add a label for your locale to the `LOCALE_LABELS` variable:
+- Add a label for your locale to the `LOCALE_LABELS` array:
 
   ```typescript
   export const LOCALE_LABELS: LocaleItem[] = [
