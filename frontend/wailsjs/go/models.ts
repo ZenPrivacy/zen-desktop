@@ -1,4 +1,4 @@
-export namespace cfg {
+export namespace config {
 	
 	export enum UpdatePolicyType {
 	    AUTOMATIC = "automatic",

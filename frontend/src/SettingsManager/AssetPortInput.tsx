@@ -5,7 +5,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { AppToaster } from '@/common/toaster';
 import { useProxyState } from '@/context/ProxyStateContext';
-import { GetAssetPort, SetAssetPort } from 'wails/go/cfg/Config';
+import { GetAssetPort, SetAssetPort } from 'wails/go/config/Config';
 
 export function AssetPortInput() {
   const { t } = useTranslation();

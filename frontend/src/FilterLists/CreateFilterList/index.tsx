@@ -6,7 +6,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AppToaster } from '@/common/toaster';
 import { useProxyState } from '@/context/ProxyStateContext';
 import { FilterListType } from '@/FilterLists/types';
-import { AddFilterList } from 'wails/go/cfg/Config';
+import { AddFilterList } from 'wails/go/config/Config';
 import './index.css';
 
 export function CreateFilterList({ onAdd }: { onAdd: () => void }) {

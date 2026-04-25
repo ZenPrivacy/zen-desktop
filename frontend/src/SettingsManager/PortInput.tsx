@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { useProxyState } from '@/context/ProxyStateContext';
-import { GetPort, SetPort } from 'wails/go/cfg/Config';
+import { GetPort, SetPort } from 'wails/go/config/Config';
 
 export function PortInput() {
   const { t } = useTranslation();

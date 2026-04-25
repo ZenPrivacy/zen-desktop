@@ -7,7 +7,7 @@ import './index.css';
 import { BrowserLink } from '@/common/BrowserLink';
 import { useProxyState } from '@/context/ProxyStateContext';
 import { IsNoSelfUpdate } from 'wails/go/app/App';
-import { GetVersion } from 'wails/go/cfg/Config';
+import { GetVersion } from 'wails/go/config/Config';
 import { BrowserOpenURL } from 'wails/runtime';
 
 import { AssetPortInput } from './AssetPortInput';

@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import './index.css';
 import { StartStopButton } from '@/components/StartStopButton';
 import { useProxyState } from '@/context/ProxyStateContext';
-import { GetFilterListsByLocales } from 'wails/go/cfg/Config';
-import { cfg } from 'wails/go/models';
+import { GetFilterListsByLocales } from 'wails/go/config/Config';
+import { config } from 'wails/go/models';
 
 import { ConnectScreen } from './ConnectScreen';
 import { FilterListsScreen } from './FilterListsScreen';
@@ -21,7 +21,7 @@ export function Intro({ onClose }: IntroProps) {
   const { t } = useTranslation();
 
   const [currentScreen, setCurrentScreen] = useState(1);
-  const [filterLists, setFilterLists] = useState<cfg.FilterList[]>([]);
+  const [filterLists, setFilterLists] = useState<config.FilterList[]>([]);
   const [filterListsLoading, setFilterListsLoading] = useState(true);
 
   useEffect(() => {

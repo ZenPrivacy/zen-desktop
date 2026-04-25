@@ -5,7 +5,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import './index.css';
 import { useProxyState } from '@/context/ProxyStateContext';
-import { GetRules, SetRules } from 'wails/go/cfg/Config';
+import { GetRules, SetRules } from 'wails/go/config/Config';
 import { BrowserOpenURL } from 'wails/runtime/runtime';
 
 const HELP_URL = 'https://github.com/irbis-sh/zen-desktop/blob/master/docs/external/how-to-rules.md';

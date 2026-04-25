@@ -19,7 +19,7 @@ import (
 	"github.com/irbis-sh/zen-core/filterliststore"
 	"github.com/irbis-sh/zen-core/networkrules"
 	"github.com/irbis-sh/zen-core/proxy"
-	"github.com/irbis-sh/zen-desktop/internal/cfg"
+	"github.com/irbis-sh/zen-desktop/internal/config"
 	"github.com/irbis-sh/zen-desktop/internal/constants"
 	"github.com/irbis-sh/zen-desktop/internal/logger"
 	"github.com/irbis-sh/zen-desktop/internal/selfupdate"
@@ -38,7 +38,7 @@ type App struct {
 	// before frontend-bound methods can use them.
 	startupDone        chan struct{}
 	startOnDomReady    bool
-	config             *cfg.Config
+	config             *config.Config
 	frontendEvents     *frontendEvents
 	proxy              *proxy.Proxy
 	proxyOn            bool
@@ -53,20 +53,20 @@ type App struct {
 }
 
 // NewApp initializes the app.
-func NewApp(name string, config *cfg.Config, startOnDomReady bool) (*App, error) {
+func NewApp(name string, appConfig *config.Config, startOnDomReady bool) (*App, error) {
 	if name == "" {
 		return nil, errors.New("name is empty")
 	}
-	if config == nil {
+	if appConfig == nil {
 		return nil, errors.New("config is nil")
 	}
 
-	certStore, err := certstore.NewDiskCertStore(config, cfg.DataDir, constants.OrgName)
+	certStore, err := certstore.NewDiskCertStore(appConfig, config.DataDir, constants.OrgName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cert store: %v", err)
 	}
 
-	cacheDir, err := cfg.GetCacheDir()
+	cacheDir, err := config.GetCacheDir()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cache dir: %v", err)
 	}
@@ -75,12 +75,12 @@ func NewApp(name string, config *cfg.Config, startOnDomReady bool) (*App, error)
 		return nil, fmt.Errorf("failed to create filter list store: %v", err)
 	}
 
-	systemProxyManager := sysproxy.NewManager(config.GetPACPort())
+	systemProxyManager := sysproxy.NewManager(appConfig.GetPACPort())
 
 	return &App{
 		name:               name,
 		startupDone:        make(chan struct{}),
-		config:             config,
+		config:             appConfig,
 		certStore:          certStore,
 		startOnDomReady:    startOnDomReady,
 		systemProxyManager: systemProxyManager,
@@ -347,7 +347,7 @@ func (a *App) ExportCustomFilterLists() error {
 		return errors.New("no file selected")
 	}
 
-	customFilterLists := a.config.GetTargetTypeFilterLists(cfg.FilterListTypeCustom)
+	customFilterLists := a.config.GetTargetTypeFilterLists(config.FilterListTypeCustom)
 
 	if len(customFilterLists) == 0 {
 		return errors.New("no custom filter lists to export")
@@ -388,7 +388,7 @@ func (a *App) ImportCustomFilterLists() error {
 		return err
 	}
 
-	var filterLists []cfg.FilterList
+	var filterLists []config.FilterList
 	if err := json.Unmarshal(data, &filterLists); err != nil {
 		log.Printf("failed to unmarshal filter lists: %v", err)
 		return errors.New("incorrect filter lists format")

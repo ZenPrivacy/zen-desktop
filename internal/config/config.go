@@ -1,4 +1,4 @@
-package cfg
+package config
 
 import (
 	"embed"
@@ -163,7 +163,7 @@ func init() {
 	}
 }
 
-func NewConfig() (*Config, error) {
+func New() (*Config, error) {
 	c := &Config{}
 
 	configFile := filepath.Join(ConfigDir, "config.json")

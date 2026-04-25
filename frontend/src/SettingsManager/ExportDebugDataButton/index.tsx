@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppToaster } from '@/common/toaster';
-import { ExportDebugData } from 'wails/go/cfg/Config';
+import { ExportDebugData } from 'wails/go/config/Config';
 import { ClipboardSetText } from 'wails/runtime';
 
 export function ExportDebugDataButton() {
