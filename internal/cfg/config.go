@@ -403,8 +403,8 @@ func (c *Config) GetUpdatePolicy() UpdatePolicyType {
 	return c.UpdatePolicy
 }
 
-func (c *Config) SetUpdatePolicy(p UpdatePolicyType) {
-	_ = c.update(func() error {
+func (c *Config) SetUpdatePolicy(p UpdatePolicyType) error {
+	return c.update(func() error {
 		c.UpdatePolicy = p
 		return nil
 	})
@@ -417,8 +417,8 @@ func (c *Config) GetLocale() string {
 	return c.Locale
 }
 
-func (c *Config) SetLocale(l string) {
-	_ = c.update(func() error {
+func (c *Config) SetLocale(l string) error {
+	return c.update(func() error {
 		c.Locale = l
 		return nil
 	})
