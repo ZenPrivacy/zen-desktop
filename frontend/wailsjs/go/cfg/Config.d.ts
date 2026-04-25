@@ -47,8 +47,6 @@ export function RemoveFilterList(arg1:string):Promise<void>;
 
 export function RunMigrations():Promise<void>;
 
-export function Save():Promise<void>;
-
 export function SetAssetPort(arg1:number):Promise<void>;
 
 export function SetCAInstalled(arg1:boolean):Promise<void>;

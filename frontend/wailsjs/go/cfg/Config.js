@@ -90,10 +90,6 @@ export function RunMigrations() {
   return window['go']['cfg']['Config']['RunMigrations']();
 }
 
-export function Save() {
-  return window['go']['cfg']['Config']['Save']();
-}
-
 export function SetAssetPort(arg1) {
   return window['go']['cfg']['Config']['SetAssetPort'](arg1);
 }
