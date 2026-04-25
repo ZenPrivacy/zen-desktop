@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppToaster } from '@/common/toaster';
-import { GetUpdatePolicy, SetUpdatePolicy } from 'wails/go/cfg/Config';
-import { cfg } from 'wails/go/models';
+import { GetUpdatePolicy, SetUpdatePolicy } from 'wails/go/config/Config';
+import { config } from 'wails/go/models';
 
 export function AutoupdateSwitch() {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export function AutoupdateSwitch() {
     (async () => {
       const policy = await GetUpdatePolicy();
       setState({
-        enabled: policy === cfg.UpdatePolicyType.AUTOMATIC,
+        enabled: policy === config.UpdatePolicyType.AUTOMATIC,
       });
     })();
   }, []);
@@ -24,7 +24,7 @@ export function AutoupdateSwitch() {
   async function disable() {
     setState((state) => ({ ...state, loading: true }));
     try {
-      await SetUpdatePolicy(cfg.UpdatePolicyType.DISABLED);
+      await SetUpdatePolicy(config.UpdatePolicyType.DISABLED);
     } catch (err) {
       AppToaster.show({
         message: t('settings.updates.disableError', { error: err }),
@@ -39,7 +39,7 @@ export function AutoupdateSwitch() {
   async function enable() {
     setState((state) => ({ ...state, loading: true }));
     try {
-      await SetUpdatePolicy(cfg.UpdatePolicyType.AUTOMATIC);
+      await SetUpdatePolicy(config.UpdatePolicyType.AUTOMATIC);
     } catch (err) {
       AppToaster.show({
         message: t('settings.updates.enableError', { error: err }),

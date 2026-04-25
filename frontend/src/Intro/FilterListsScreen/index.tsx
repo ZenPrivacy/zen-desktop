@@ -1,10 +1,10 @@
 import { Trans, useTranslation } from 'react-i18next';
 
 import { FilterListItem } from '@/FilterLists';
-import { cfg } from 'wails/go/models';
+import { config } from 'wails/go/models';
 
 interface FilterListsScreenProps {
-  filterLists: cfg.FilterList[];
+  filterLists: config.FilterList[];
 }
 
 export function FilterListsScreen({ filterLists }: FilterListsScreenProps) {

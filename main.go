@@ -10,7 +10,7 @@ import (
 
 	"github.com/irbis-sh/zen-desktop/internal/app"
 	"github.com/irbis-sh/zen-desktop/internal/autostart"
-	"github.com/irbis-sh/zen-desktop/internal/cfg"
+	"github.com/irbis-sh/zen-desktop/internal/config"
 	"github.com/irbis-sh/zen-desktop/internal/constants"
 	"github.com/irbis-sh/zen-desktop/internal/logger"
 	"github.com/wailsapp/wails/v2"
@@ -37,14 +37,14 @@ func main() {
 	if err != nil {
 		log.Printf("failed to setup logger: %v", err)
 	}
-	log.Printf("initializing the app; version=%q", cfg.Version)
+	log.Printf("initializing the app; version=%q", config.Version)
 
-	config, err := cfg.NewConfig()
+	appConfig, err := config.New()
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	app, err := app.NewApp(constants.AppName, config, *startOnDomReady)
+	app, err := app.NewApp(constants.AppName, appConfig, *startOnDomReady)
 	if err != nil {
 		log.Fatalf("failed to create app: %v", err)
 	}
@@ -77,16 +77,16 @@ func main() {
 		},
 		Bind: []interface{}{
 			app,
-			config,
+			appConfig,
 			autostart,
 		},
 		EnumBind: []interface{}{
-			cfg.UpdatePolicyEnum,
+			config.UpdatePolicyEnum,
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
 				Title:   constants.AppName,
-				Message: fmt.Sprintf("Your Comprehensive Ad-Blocker and Privacy Guard\nVersion: %s\n© 2026 Zen contributors", cfg.Version),
+				Message: fmt.Sprintf("Your Comprehensive Ad-Blocker and Privacy Guard\nVersion: %s\n© 2026 Zen contributors", config.Version),
 			},
 		},
 		HideWindowOnClose: runtime.GOOS == "darwin" || runtime.GOOS == "windows",

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { useProxyState } from '@/context/ProxyStateContext';
-import { GetIgnoredHosts, SetIgnoredHosts } from 'wails/go/cfg/Config';
+import { GetIgnoredHosts, SetIgnoredHosts } from 'wails/go/config/Config';
 
 export function IgnoredHostsInput() {
   const { t } = useTranslation();

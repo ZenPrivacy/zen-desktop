@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import { AppToaster } from '@/common/toaster';
 import { useProxyState } from '@/context/ProxyStateContext';
-import { GetFilterLists, RemoveFilterList, ToggleFilterList } from 'wails/go/cfg/Config';
-import { cfg } from 'wails/go/models';
+import { GetFilterLists, RemoveFilterList, ToggleFilterList } from 'wails/go/config/Config';
+import { config } from 'wails/go/models';
 import { BrowserOpenURL } from 'wails/runtime/runtime';
 
 import { CreateFilterList } from './CreateFilterList';
@@ -21,7 +21,7 @@ const NO_DOOMSCROLL_URL = 'https://github.com/irbis-sh/filter-lists/blob/master/
 export function FilterLists() {
   const { t } = useTranslation();
   const [state, setState] = useState<{
-    filterLists: cfg.FilterList[];
+    filterLists: config.FilterList[];
     loading: boolean;
   }>({
     filterLists: [],
@@ -124,7 +124,7 @@ export function FilterListItem({
   onRemoved,
   onToggled,
 }: {
-  filterList: cfg.FilterList;
+  filterList: config.FilterList;
   showDelete?: boolean;
   showButtons?: boolean;
   onRemoved?: () => void;
@@ -150,12 +150,12 @@ export function FilterListItem({
               const initial = switchChecked;
               const { checked } = e.currentTarget;
               setSwitchChecked(checked);
-              const err = await ToggleFilterList(filterList.url, checked);
-              if (err) {
+              try {
+                await ToggleFilterList(filterList.url, checked);
+              } catch (err) {
                 setSwitchChecked(initial);
-                setSwitchLoading(false);
                 AppToaster.show({
-                  message: t('filterLists.toggleError', { error: err }),
+                  message: t('filterLists.toggleError', { error: String(err) }),
                   intent: 'danger',
                 });
               }
@@ -225,10 +225,11 @@ export function FilterListItem({
             loading={deleteLoading}
             onClick={async () => {
               setDeleteLoading(true);
-              const err = await RemoveFilterList(filterList.url);
-              if (err) {
+              try {
+                await RemoveFilterList(filterList.url);
+              } catch (err) {
                 AppToaster.show({
-                  message: t('filterLists.removeError', { error: err }),
+                  message: t('filterLists.removeError', { error: String(err) }),
                   intent: 'danger',
                 });
               }

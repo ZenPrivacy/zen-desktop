@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/irbis-sh/zen-desktop/internal/cfg"
+	"github.com/irbis-sh/zen-desktop/internal/config"
 )
 
 // NoSelfUpdate is set to "true" for builds distributed to package managers to prevent auto-updating. It is typed as a string because the linker allows only setting string variables at compile time (see https://pkg.go.dev/cmd/link).
@@ -51,7 +51,7 @@ type eventsEmitter interface {
 
 type SelfUpdater struct {
 	version       string
-	config        *cfg.Config
+	config        *config.Config
 	httpClient    httpClient
 	eventsEmitter eventsEmitter
 
@@ -60,24 +60,24 @@ type SelfUpdater struct {
 }
 
 // NewSelfUpdater returns nil if the app should not self-update.
-func NewSelfUpdater(config *cfg.Config, eventsEmitter eventsEmitter) (*SelfUpdater, error) {
+func NewSelfUpdater(appConfig *config.Config, eventsEmitter eventsEmitter) (*SelfUpdater, error) {
 	if NoSelfUpdate == "true" {
 		log.Printf("NoSelfUpdate=true; self-updates disabled")
 		return nil, nil
 	}
 
-	if config == nil {
+	if appConfig == nil {
 		return nil, errors.New("config is nil")
 	}
-	if cfg.Version == "" {
-		return nil, errors.New("cfg.Version is empty")
+	if config.Version == "" {
+		return nil, errors.New("config.Version is empty")
 	}
 	if eventsEmitter == nil {
 		return nil, errors.New("eventsEmitter is nil")
 	}
 
-	if cfg.Version == "development" {
-		log.Printf("cfg.Version=development; self-updates disabled")
+	if config.Version == "development" {
+		log.Printf("config.Version=development; self-updates disabled")
 		return nil, nil
 	}
 
@@ -86,8 +86,8 @@ func NewSelfUpdater(config *cfg.Config, eventsEmitter eventsEmitter) (*SelfUpdat
 	}
 
 	u := SelfUpdater{
-		version:       cfg.Version,
-		config:        config,
+		version:       config.Version,
+		config:        appConfig,
 		httpClient:    httpClient,
 		eventsEmitter: eventsEmitter,
 	}
@@ -98,7 +98,7 @@ func NewSelfUpdater(config *cfg.Config, eventsEmitter eventsEmitter) (*SelfUpdat
 func (su *SelfUpdater) RunScheduledUpdateChecks() {
 	check := func() bool {
 		policy := su.config.GetUpdatePolicy()
-		if policy != cfg.UpdatePolicyAutomatic {
+		if policy != config.UpdatePolicyAutomatic {
 			return false
 		}
 

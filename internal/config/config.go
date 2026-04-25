@@ -1,4 +1,4 @@
-package cfg
+package config
 
 import (
 	"embed"
@@ -68,7 +68,7 @@ type FilterList struct {
 // Although all fields are public, this is only for use by the JSON marshaller.
 // All access to the Config should be done through the exported methods.
 type Config struct {
-	sync.RWMutex
+	mu sync.RWMutex
 
 	Filter struct {
 		FilterLists []FilterList `json:"filterLists"`
@@ -102,8 +102,8 @@ type DebugData struct {
 }
 
 func (c *Config) ExportDebugData() (string, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	var enabledFilterListURLs []string
 	for _, filterList := range c.Filter.FilterLists {
 		if filterList.Enabled {
@@ -163,7 +163,7 @@ func init() {
 	}
 }
 
-func NewConfig() (*Config, error) {
+func New() (*Config, error) {
 	c := &Config{}
 
 	configFile := filepath.Join(ConfigDir, "config.json")
@@ -191,101 +191,65 @@ func NewConfig() (*Config, error) {
 	return c, nil
 }
 
-// Save saves the config to disk.
-// It is not thread-safe, and should only be called if the caller has
-// a lock on the config.
-func (c *Config) Save() error {
-	configData, err := json.Marshal(c)
-	if err != nil {
-		return fmt.Errorf("failed to marshal config: %w", err)
-	}
-	configFile := filepath.Join(ConfigDir, "config.json")
-	err = os.WriteFile(configFile, configData, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write config file: %w", err)
-	}
-	return nil
-}
-
 // GetFilterLists returns the list of enabled filter lists.
 func (c *Config) GetFilterLists() []FilterList {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Filter.FilterLists
 }
 
 // AddFilterList adds a new filter list to the list of enabled filter lists.
-func (c *Config) AddFilterList(list FilterList) string {
-	c.Lock()
-	defer c.Unlock()
-
-	for _, existingList := range c.Filter.FilterLists {
-		if existingList.URL == list.URL {
-			return fmt.Sprintf("filter list with the URL '%s' already exists", list.URL)
+func (c *Config) AddFilterList(list FilterList) error {
+	return c.update(func() error {
+		for _, existingList := range c.Filter.FilterLists {
+			if existingList.URL == list.URL {
+				return fmt.Errorf("filter list with the URL '%s' already exists", list.URL)
+			}
 		}
-	}
 
-	c.Filter.FilterLists = append(c.Filter.FilterLists, list)
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err.Error()
-	}
-	return ""
+		c.Filter.FilterLists = append(c.Filter.FilterLists, list)
+		return nil
+	})
 }
 
 func (c *Config) AddFilterLists(lists []FilterList) error {
-	c.Lock()
-	defer c.Unlock()
-
-	c.Filter.FilterLists = append(c.Filter.FilterLists, lists...)
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err
-	}
-	return nil
+	return c.update(func() error {
+		c.Filter.FilterLists = append(c.Filter.FilterLists, lists...)
+		return nil
+	})
 }
 
 // RemoveFilterList removes a filter list from the list of enabled filter lists.
-func (c *Config) RemoveFilterList(url string) string {
-	c.Lock()
-	defer c.Unlock()
-
-	for i, filterList := range c.Filter.FilterLists {
-		if filterList.URL == url {
-			c.Filter.FilterLists = append(c.Filter.FilterLists[:i], c.Filter.FilterLists[i+1:]...)
-			break
+func (c *Config) RemoveFilterList(url string) error {
+	return c.update(func() error {
+		for i, filterList := range c.Filter.FilterLists {
+			if filterList.URL == url {
+				c.Filter.FilterLists = append(c.Filter.FilterLists[:i], c.Filter.FilterLists[i+1:]...)
+				break
+			}
 		}
-	}
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err.Error()
-	}
-	return ""
+		return nil
+	})
 }
 
 // ToggleFilterList toggles the enabled state of a filter list.
-func (c *Config) ToggleFilterList(url string, enabled bool) string {
-	c.Lock()
-	defer c.Unlock()
-
-	for i, filterList := range c.Filter.FilterLists {
-		if filterList.URL == url {
-			c.Filter.FilterLists[i].Enabled = enabled
-			break
+func (c *Config) ToggleFilterList(url string, enabled bool) error {
+	return c.update(func() error {
+		for i, filterList := range c.Filter.FilterLists {
+			if filterList.URL == url {
+				c.Filter.FilterLists[i].Enabled = enabled
+				break
+			}
 		}
-	}
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err.Error()
-	}
-	return ""
+		return nil
+	})
 }
 
 // GetTargetTypeFilterLists returns the list of filter lists with particular type.
 func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterList {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	var filterLists []FilterList
 	for _, filterList := range c.Filter.FilterLists {
@@ -297,8 +261,8 @@ func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterLis
 }
 
 func (c *Config) GetFilterListsByLocales(searchLocales []string) []FilterList {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	if len(searchLocales) == 0 {
 		return nil
@@ -340,97 +304,78 @@ outer:
 }
 
 func (c *Config) GetRules() []string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Filter.Rules
 }
 
 func (c *Config) SetRules(rules []string) error {
-	c.Lock()
-	defer c.Unlock()
-
-	c.Filter.Rules = rules
-	if err := c.Save(); err != nil {
-		err = fmt.Errorf("failed to save config: %v", err)
-		log.Println(err)
-		return err
-	}
-	return nil
+	return c.update(func() error {
+		c.Filter.Rules = rules
+		return nil
+	})
 }
 
 // GetPort returns the port the proxy is set to listen on.
 func (c *Config) GetPort() int {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Proxy.Port
 }
 
 // SetPort sets the port the proxy is set to listen on.
-func (c *Config) SetPort(port int) string {
-	c.Lock()
-	defer c.Unlock()
-
-	c.Proxy.Port = port
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err.Error()
-	}
-	return ""
+func (c *Config) SetPort(port int) error {
+	return c.update(func() error {
+		c.Proxy.Port = port
+		return nil
+	})
 }
 
 // GetIgnoredHosts returns the list of ignored hosts.
 func (c *Config) GetIgnoredHosts() []string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Proxy.IgnoredHosts
 }
 
 // SetIgnoredHosts sets the list of ignored hosts.
 func (c *Config) SetIgnoredHosts(hosts []string) error {
-	c.Lock()
-	defer c.Unlock()
-
-	c.Proxy.IgnoredHosts = hosts
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err
-	}
-	return nil
+	return c.update(func() error {
+		c.Proxy.IgnoredHosts = hosts
+		return nil
+	})
 }
 
 // GetCAInstalled returns whether the CA is installed.
 func (c *Config) GetCAInstalled() bool {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Certmanager.CAInstalled
 }
 
 // SetCAInstalled sets whether the CA is installed.
 func (c *Config) SetCAInstalled(caInstalled bool) {
-	c.Lock()
-	defer c.Unlock()
-
-	c.Certmanager.CAInstalled = caInstalled
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-	}
+	_ = c.update(func() error {
+		c.Certmanager.CAInstalled = caInstalled
+		return nil
+	})
 }
 
 func (c *Config) GetPACPort() int {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Proxy.PACPort
 }
 
 // GetAssetPort returns the port the asset server is set to listen on.
 func (c *Config) GetAssetPort() int {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Filter.AssetPort
 }
@@ -441,15 +386,10 @@ func (c *Config) SetAssetPort(port int) error {
 		return fmt.Errorf("port must be between 1 and 65535")
 	}
 
-	c.Lock()
-	defer c.Unlock()
-
-	c.Filter.AssetPort = port
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-		return err
-	}
-	return nil
+	return c.update(func() error {
+		c.Filter.AssetPort = port
+		return nil
+	})
 }
 
 func (c *Config) GetVersion() string {
@@ -457,42 +397,36 @@ func (c *Config) GetVersion() string {
 }
 
 func (c *Config) GetUpdatePolicy() UpdatePolicyType {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.UpdatePolicy
 }
 
-func (c *Config) SetUpdatePolicy(p UpdatePolicyType) {
-	c.Lock()
-	defer c.Unlock()
-
-	c.UpdatePolicy = p
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-	}
+func (c *Config) SetUpdatePolicy(p UpdatePolicyType) error {
+	return c.update(func() error {
+		c.UpdatePolicy = p
+		return nil
+	})
 }
 
 func (c *Config) GetLocale() string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Locale
 }
 
-func (c *Config) SetLocale(l string) {
-	c.Lock()
-	defer c.Unlock()
-
-	c.Locale = l
-	if err := c.Save(); err != nil {
-		log.Printf("failed to save config: %v", err)
-	}
+func (c *Config) SetLocale(l string) error {
+	return c.update(func() error {
+		c.Locale = l
+		return nil
+	})
 }
 
 func (c *Config) GetFirstLaunch() bool {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.firstLaunch
 }
@@ -513,4 +447,40 @@ func GetCacheDir() (string, error) {
 		return "", err
 	}
 	return filepath.Join(base, appName, "filters"), nil
+}
+
+// update wraps config update operations. It acquires the config lock,
+// executes the provided callback, and then saves the config.
+//
+// Any error encountered is returned to the caller. The callback is expected
+// to modify the config and must not acquire the lock itself.
+func (c *Config) update(fn func() error) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if err := fn(); err != nil {
+		log.Printf("config update failed: %v", err)
+		return err
+	}
+	if err := c.saveLocked(); err != nil {
+		err = fmt.Errorf("save config: %w", err)
+		log.Printf("config update failed: %v", err)
+		return err
+	}
+	return nil
+}
+
+// saveLocked saves the config to disk.
+// The caller must hold c's write lock.
+func (c *Config) saveLocked() error {
+	configData, err := json.Marshal(c)
+	if err != nil {
+		return fmt.Errorf("marshal config: %w", err)
+	}
+	configFile := filepath.Join(ConfigDir, "config.json")
+	err = os.WriteFile(configFile, configData, 0644)
+	if err != nil {
+		return fmt.Errorf("write file: %w", err)
+	}
+	return nil
 }

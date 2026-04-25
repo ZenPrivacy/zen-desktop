@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import './App.css';
 
 import { RestartApplication } from 'wails/go/app/App';
-import { GetFirstLaunch } from 'wails/go/cfg/Config';
+import { GetFirstLaunch } from 'wails/go/config/Config';
 import { EventsOn } from 'wails/runtime/runtime';
 
 import { ThemeType, useTheme } from './common/ThemeManager';
