@@ -216,22 +216,22 @@ func (c *Config) GetFilterLists() []FilterList {
 }
 
 // AddFilterList adds a new filter list to the list of enabled filter lists.
-func (c *Config) AddFilterList(list FilterList) string {
+func (c *Config) AddFilterList(list FilterList) error {
 	c.Lock()
 	defer c.Unlock()
 
 	for _, existingList := range c.Filter.FilterLists {
 		if existingList.URL == list.URL {
-			return fmt.Sprintf("filter list with the URL '%s' already exists", list.URL)
+			return fmt.Errorf("filter list with the URL '%s' already exists", list.URL)
 		}
 	}
 
 	c.Filter.FilterLists = append(c.Filter.FilterLists, list)
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
-		return err.Error()
+		return err
 	}
-	return ""
+	return nil
 }
 
 func (c *Config) AddFilterLists(lists []FilterList) error {
@@ -247,7 +247,7 @@ func (c *Config) AddFilterLists(lists []FilterList) error {
 }
 
 // RemoveFilterList removes a filter list from the list of enabled filter lists.
-func (c *Config) RemoveFilterList(url string) string {
+func (c *Config) RemoveFilterList(url string) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -259,13 +259,13 @@ func (c *Config) RemoveFilterList(url string) string {
 	}
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
-		return err.Error()
+		return err
 	}
-	return ""
+	return nil
 }
 
 // ToggleFilterList toggles the enabled state of a filter list.
-func (c *Config) ToggleFilterList(url string, enabled bool) string {
+func (c *Config) ToggleFilterList(url string, enabled bool) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -277,9 +277,9 @@ func (c *Config) ToggleFilterList(url string, enabled bool) string {
 	}
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
-		return err.Error()
+		return err
 	}
-	return ""
+	return nil
 }
 
 // GetTargetTypeFilterLists returns the list of filter lists with particular type.
@@ -368,16 +368,16 @@ func (c *Config) GetPort() int {
 }
 
 // SetPort sets the port the proxy is set to listen on.
-func (c *Config) SetPort(port int) string {
+func (c *Config) SetPort(port int) error {
 	c.Lock()
 	defer c.Unlock()
 
 	c.Proxy.Port = port
 	if err := c.Save(); err != nil {
 		log.Printf("failed to save config: %v", err)
-		return err.Error()
+		return err
 	}
-	return ""
+	return nil
 }
 
 // GetIgnoredHosts returns the list of ignored hosts.

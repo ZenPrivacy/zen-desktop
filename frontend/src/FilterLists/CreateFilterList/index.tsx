@@ -79,17 +79,18 @@ export function CreateFilterList({ onAdd }: { onAdd: () => void }) {
             const name = nameRef.current?.value || url;
 
             setLoading(true);
-            const err = await AddFilterList({
-              url,
-              name,
-              type: FilterListType.CUSTOM,
-              enabled: true,
-              trusted,
-              locales: [], // FIX: this is a dirty fix, rewrite by making AddFilterList accept a custom struct.
-            });
-            if (err) {
+            try {
+              await AddFilterList({
+                url,
+                name,
+                type: FilterListType.CUSTOM,
+                enabled: true,
+                trusted,
+                locales: [], // FIX: this is a dirty fix, rewrite by making AddFilterList accept a custom struct.
+              });
+            } catch (err) {
               AppToaster.show({
-                message: t('createFilterList.addError', { error: err }),
+                message: t('createFilterList.addError', { error: String(err) }),
                 intent: 'danger',
               });
             }

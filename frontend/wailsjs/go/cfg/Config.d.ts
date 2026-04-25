@@ -3,7 +3,7 @@
 import {cfg} from '../models';
 import {sync} from '../models';
 
-export function AddFilterList(arg1:cfg.FilterList):Promise<string>;
+export function AddFilterList(arg1:cfg.FilterList):Promise<void>;
 
 export function AddFilterLists(arg1:Array<cfg.FilterList>):Promise<void>;
 
@@ -43,7 +43,7 @@ export function RLocker():Promise<sync.Locker>;
 
 export function RUnlock():Promise<void>;
 
-export function RemoveFilterList(arg1:string):Promise<string>;
+export function RemoveFilterList(arg1:string):Promise<void>;
 
 export function RunMigrations():Promise<void>;
 
@@ -57,13 +57,13 @@ export function SetIgnoredHosts(arg1:Array<string>):Promise<void>;
 
 export function SetLocale(arg1:string):Promise<void>;
 
-export function SetPort(arg1:number):Promise<string>;
+export function SetPort(arg1:number):Promise<void>;
 
 export function SetRules(arg1:Array<string>):Promise<void>;
 
 export function SetUpdatePolicy(arg1:cfg.UpdatePolicyType):Promise<void>;
 
-export function ToggleFilterList(arg1:string,arg2:boolean):Promise<string>;
+export function ToggleFilterList(arg1:string,arg2:boolean):Promise<void>;
 
 export function TryLock():Promise<boolean>;
 

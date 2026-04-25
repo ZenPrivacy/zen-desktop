@@ -150,12 +150,12 @@ export function FilterListItem({
               const initial = switchChecked;
               const { checked } = e.currentTarget;
               setSwitchChecked(checked);
-              const err = await ToggleFilterList(filterList.url, checked);
-              if (err) {
+              try {
+                await ToggleFilterList(filterList.url, checked);
+              } catch (err) {
                 setSwitchChecked(initial);
-                setSwitchLoading(false);
                 AppToaster.show({
-                  message: t('filterLists.toggleError', { error: err }),
+                  message: t('filterLists.toggleError', { error: String(err) }),
                   intent: 'danger',
                 });
               }
@@ -225,10 +225,11 @@ export function FilterListItem({
             loading={deleteLoading}
             onClick={async () => {
               setDeleteLoading(true);
-              const err = await RemoveFilterList(filterList.url);
-              if (err) {
+              try {
+                await RemoveFilterList(filterList.url);
+              } catch (err) {
                 AppToaster.show({
-                  message: t('filterLists.removeError', { error: err }),
+                  message: t('filterLists.removeError', { error: String(err) }),
                   intent: 'danger',
                 });
               }

@@ -1,7 +1,6 @@
 package cfg
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -24,23 +23,20 @@ type migration struct {
 // Do not reorder existing entries - migrations run sequentially from first to last.
 var migrations = []migration{
 	{"v0.3.0", func(c *Config) error {
-		errStr := c.AddFilterList(FilterList{
+		if err := c.AddFilterList(FilterList{
 			Name:    "DandelionSprout's URL Shortener",
 			Type:    "privacy",
 			URL:     "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/LegitimateURLShortener.txt",
 			Enabled: true,
-		})
-		if errStr != "" {
-			err := errors.New(errStr)
+		}); err != nil {
 			return err
 		}
 		return nil
 	}},
 	{"v0.6.0", func(c *Config) error {
 		// https://github.com/irbis-sh/zen-desktop/issues/146
-		errStr := c.ToggleFilterList("https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_2_Base/filter.txt", true)
-		if errStr != "" {
-			return errors.New(errStr)
+		if err := c.ToggleFilterList("https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_2_Base/filter.txt", true); err != nil {
+			return err
 		}
 		return nil
 	}},
@@ -100,14 +96,13 @@ var migrations = []migration{
 		if err := c.Save(); err != nil {
 			return fmt.Errorf("save config: %v", err)
 		}
-		errStr := c.AddFilterList(FilterList{
+		if err := c.AddFilterList(FilterList{
 			Name:    "Zen - Ads",
 			Type:    "ads",
 			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/ads/ads.txt",
 			Enabled: true,
-		})
-		if errStr != "" {
-			return fmt.Errorf("add \"Zen - Ads\" filter list: %s", errStr)
+		}); err != nil {
+			return fmt.Errorf("add \"Zen - Ads\" filter list: %w", err)
 		}
 		return nil
 	}},
@@ -126,14 +121,13 @@ var migrations = []migration{
 		if err := c.Save(); err != nil {
 			return fmt.Errorf("save config: %v", err)
 		}
-		errStr := c.AddFilterList(FilterList{
+		if err := c.AddFilterList(FilterList{
 			Name:    "Zen - Privacy",
 			Type:    "privacy",
 			URL:     "https://raw.githubusercontent.com/ZenPrivacy/filter-lists/master/privacy/privacy.txt",
 			Enabled: true,
-		})
-		if errStr != "" {
-			return fmt.Errorf("add \"Zen - Privacy\" filter list: %s", errStr)
+		}); err != nil {
+			return fmt.Errorf("add \"Zen - Privacy\" filter list: %w", err)
 		}
 		return nil
 	}},
@@ -256,9 +250,8 @@ var migrations = []migration{
 			},
 		}
 		for _, list := range lists {
-			errStr := c.AddFilterList(list)
-			if errStr != "" {
-				return fmt.Errorf("add no-doomscroll list %q: %s", list.Name, errStr)
+			if err := c.AddFilterList(list); err != nil {
+				return fmt.Errorf("add no-doomscroll list %q: %w", list.Name, err)
 			}
 		}
 		return nil
