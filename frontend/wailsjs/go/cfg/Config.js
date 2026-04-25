@@ -66,22 +66,6 @@ export function GetVersion() {
   return window['go']['cfg']['Config']['GetVersion']();
 }
 
-export function Lock() {
-  return window['go']['cfg']['Config']['Lock']();
-}
-
-export function RLock() {
-  return window['go']['cfg']['Config']['RLock']();
-}
-
-export function RLocker() {
-  return window['go']['cfg']['Config']['RLocker']();
-}
-
-export function RUnlock() {
-  return window['go']['cfg']['Config']['RUnlock']();
-}
-
 export function RemoveFilterList(arg1) {
   return window['go']['cfg']['Config']['RemoveFilterList'](arg1);
 }
@@ -120,16 +104,4 @@ export function SetUpdatePolicy(arg1) {
 
 export function ToggleFilterList(arg1, arg2) {
   return window['go']['cfg']['Config']['ToggleFilterList'](arg1, arg2);
-}
-
-export function TryLock() {
-  return window['go']['cfg']['Config']['TryLock']();
-}
-
-export function TryRLock() {
-  return window['go']['cfg']['Config']['TryRLock']();
-}
-
-export function Unlock() {
-  return window['go']['cfg']['Config']['Unlock']();
 }

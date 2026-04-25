@@ -68,7 +68,7 @@ type FilterList struct {
 // Although all fields are public, this is only for use by the JSON marshaller.
 // All access to the Config should be done through the exported methods.
 type Config struct {
-	sync.RWMutex
+	mu sync.RWMutex
 
 	Filter struct {
 		FilterLists []FilterList `json:"filterLists"`
@@ -102,8 +102,8 @@ type DebugData struct {
 }
 
 func (c *Config) ExportDebugData() (string, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	var enabledFilterListURLs []string
 	for _, filterList := range c.Filter.FilterLists {
 		if filterList.Enabled {
@@ -193,8 +193,8 @@ func NewConfig() (*Config, error) {
 
 // GetFilterLists returns the list of enabled filter lists.
 func (c *Config) GetFilterLists() []FilterList {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Filter.FilterLists
 }
@@ -248,8 +248,8 @@ func (c *Config) ToggleFilterList(url string, enabled bool) error {
 
 // GetTargetTypeFilterLists returns the list of filter lists with particular type.
 func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterList {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	var filterLists []FilterList
 	for _, filterList := range c.Filter.FilterLists {
@@ -261,8 +261,8 @@ func (c *Config) GetTargetTypeFilterLists(targetType FilterListType) []FilterLis
 }
 
 func (c *Config) GetFilterListsByLocales(searchLocales []string) []FilterList {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	if len(searchLocales) == 0 {
 		return nil
@@ -304,8 +304,8 @@ outer:
 }
 
 func (c *Config) GetRules() []string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Filter.Rules
 }
@@ -319,8 +319,8 @@ func (c *Config) SetRules(rules []string) error {
 
 // GetPort returns the port the proxy is set to listen on.
 func (c *Config) GetPort() int {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Proxy.Port
 }
@@ -335,8 +335,8 @@ func (c *Config) SetPort(port int) error {
 
 // GetIgnoredHosts returns the list of ignored hosts.
 func (c *Config) GetIgnoredHosts() []string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Proxy.IgnoredHosts
 }
@@ -351,8 +351,8 @@ func (c *Config) SetIgnoredHosts(hosts []string) error {
 
 // GetCAInstalled returns whether the CA is installed.
 func (c *Config) GetCAInstalled() bool {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Certmanager.CAInstalled
 }
@@ -366,16 +366,16 @@ func (c *Config) SetCAInstalled(caInstalled bool) {
 }
 
 func (c *Config) GetPACPort() int {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Proxy.PACPort
 }
 
 // GetAssetPort returns the port the asset server is set to listen on.
 func (c *Config) GetAssetPort() int {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Filter.AssetPort
 }
@@ -397,8 +397,8 @@ func (c *Config) GetVersion() string {
 }
 
 func (c *Config) GetUpdatePolicy() UpdatePolicyType {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.UpdatePolicy
 }
@@ -411,8 +411,8 @@ func (c *Config) SetUpdatePolicy(p UpdatePolicyType) {
 }
 
 func (c *Config) GetLocale() string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.Locale
 }
@@ -425,8 +425,8 @@ func (c *Config) SetLocale(l string) {
 }
 
 func (c *Config) GetFirstLaunch() bool {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	return c.firstLaunch
 }
@@ -455,8 +455,8 @@ func GetCacheDir() (string, error) {
 // Any error encountered is returned to the caller. The callback is expected
 // to modify the config and must not acquire the lock itself.
 func (c *Config) update(fn func() error) error {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if err := fn(); err != nil {
 		log.Printf("config update failed: %v", err)
