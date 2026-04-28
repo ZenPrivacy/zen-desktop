@@ -16,6 +16,17 @@
       "updateAvailable": "Zen'in yeni bir sürümü mevcut."
     }
   },
+  "appRoutingSettings": {
+    "addApp": "Uygulama ekle",
+    "allowlistMode": "Yalnızca seçili uygulamaları proxy üzerinden yönlendir",
+    "blocklistMode": "Seçilinler hariç tüm uygulamaları proxy üzerinden yönlendir",
+    "description": "Zen'in proxy'sini hangi uygulamaların kullanacağını seçin.",
+    "emptyAllowlistWarning": "Hiç uygulama seçilmedi. Tüm trafik Zen'i atlayacak.",
+    "label": "Uygulama yönlendirme",
+    "removeApp": "Uygulamayı kaldır",
+    "saveError": "Uygulama yönlendirme ayarları kaydedilemedi: {{error}}",
+    "selectError": "Uygulama seçilemedi: {{error}}"
+  },
   "assetPortInput": {
     "description": "Script ve stil enjeksiyonu için kullanılan dahili varlık sunucusunun portu.",
     "helper": "1024'ün altında bir port kullanmak yükseltilmiş ayrıcalıklar gerektirebilir.",

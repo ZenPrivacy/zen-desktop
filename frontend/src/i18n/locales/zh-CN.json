@@ -16,6 +16,17 @@
       "updateAvailable": "Zen 有新版本可用。"
     }
   },
+  "appRoutingSettings": {
+    "addApp": "添加应用",
+    "allowlistMode": "仅代理选中的应用",
+    "blocklistMode": "代理除选中项以外的所有应用",
+    "description": "选择哪些应用应使用 Zen 的代理。",
+    "emptyAllowlistWarning": "未选择任何应用。所有流量都将绕过 Zen。",
+    "label": "应用路由",
+    "removeApp": "移除应用",
+    "saveError": "保存应用路由设置失败：{{error}}",
+    "selectError": "选择应用失败：{{error}}"
+  },
   "assetPortInput": {
     "description": "内部资源服务器用于注入脚本和样式的端口。",
     "helper": "使用 1024 以下的端口可能需要管理员权限。",

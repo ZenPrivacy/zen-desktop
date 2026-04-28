@@ -16,6 +16,17 @@
       "updateAvailable": "È disponibile una nuova versione di Zen."
     }
   },
+  "appRoutingSettings": {
+    "addApp": "Aggiungi app",
+    "allowlistMode": "Usa il proxy solo per le app selezionate",
+    "blocklistMode": "Usa il proxy per tutte le app tranne quelle selezionate",
+    "description": "Scegli quali app devono usare il proxy di Zen.",
+    "emptyAllowlistWarning": "Nessuna app selezionata. Tutto il traffico bypasserà Zen.",
+    "label": "Instradamento delle app",
+    "removeApp": "Rimuovi app",
+    "saveError": "Impossibile salvare le impostazioni di instradamento delle app: {{error}}",
+    "selectError": "Impossibile selezionare l'app: {{error}}"
+  },
   "assetPortInput": {
     "description": "La porta utilizzata dal server asset interno per iniettare script e stili.",
     "helper": "L'uso di una porta inferiore a 1024 potrebbe richiedere privilegi elevati.",

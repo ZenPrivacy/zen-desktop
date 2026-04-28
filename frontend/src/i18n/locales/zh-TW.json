@@ -16,6 +16,17 @@
       "updateAvailable": "Zen 有新版本可用。"
     }
   },
+  "appRoutingSettings": {
+    "addApp": "新增應用程式",
+    "allowlistMode": "僅代理選取的應用程式",
+    "blocklistMode": "代理除選取項目以外的所有應用程式",
+    "description": "選擇哪些應用程式應使用 Zen 的代理伺服器。",
+    "emptyAllowlistWarning": "未選取任何應用程式。所有流量都將繞過 Zen。",
+    "label": "應用程式路由",
+    "removeApp": "移除應用程式",
+    "saveError": "儲存應用程式路由設定失敗：{{error}}",
+    "selectError": "選擇應用程式失敗：{{error}}"
+  },
   "assetPortInput": {
     "description": "內部資源伺服器用於注入腳本和樣式的連接埠。",
     "helper": "使用 1024 以下的連接埠可能需要系統管理員權限。",
