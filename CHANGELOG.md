@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.21.0
+
+### What's New
+- **App allow- and block-listing**
+  The new **"App routing"** setting gives you the ability to choose which apps should use Zen's proxy. It gives you the ability to exclude a developer tool which has trouble with proxying, a gaming app where you want maximum performance, or a browser with built-in ad-blocking.
+- Other minor improvements.
+
+**Full Changelog**: https://github.com/irbis-sh/zen-desktop/compare/v0.20.0...v0.21.0
+
 ## v0.20.0
 
 ### What's new
