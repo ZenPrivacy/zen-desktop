@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.21.1
+
+### What's New
+
+This is a hotfix for `0.21.0`, which had an incorrect version number in the file manifest.
+
+**Full Changelog**: https://github.com/irbis-sh/zen-desktop/compare/v0.21.0...v0.21.1
+
 ## v0.21.0
 
 ### What's New
