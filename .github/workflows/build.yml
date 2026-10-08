@@ -184,7 +184,7 @@ jobs:
             ci-upload/unsigned/Zen-installer.exe
       - name: Sign with SignPath
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: signpath/github-action-submit-signing-request@4f13d373e8f0cd8d3c0465ff4877feff27aed2ae # v1.2
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
         with:
           api-token:                    ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id:              ${{ env.SIGNPATH_ORG_ID }}
@@ -261,20 +261,20 @@ jobs:
     needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: linux-*
           path: artifacts
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: macos-*
           path: artifacts
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: windows-final-*
           path: artifacts
       - name: Generate artifact attestations
-        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: artifacts/**
       - name: Create GitHub Release
