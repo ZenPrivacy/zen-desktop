@@ -19,23 +19,19 @@ type Rule struct {
 	// FilterName is the name of the filter that the rule belongs to.
 	FilterName *string
 
-	// mods is nil for rules without condition, action or query modifiers, which are most of them.
-	// Keeping the slices behind a pointer shrinks Rule from 128 to 40 bytes.
+	// mods is nil for rules without modifiers, which are most of them.
+	// Keeping the modifiers behind a pointer shrinks Rule from 128 to 32 bytes.
 	mods *ruleModifiers
-
-	// Document shows if rule has Document modifier.
-	Document bool
-	// Important shows if rule has Important modifier.
-	Important bool
-	// All shows if rule has All modifier.
-	// On primary rules, it implies Document. It is kept separate so that "@@...$all" exceptions,
-	// which share this struct, still cancel non-document rules.
-	All bool
 }
 
 // TODO: The split between And and Or modifiers is somewhat convoluted and exists only to support ContentType.
 // Remove it by grouping multiple ContentTypes into a single modifier and evaluating all modifiers with AND logic.
 
+// ruleModifiers is a rule's parsed modifiers.
+//
+// ModifierInterner shares one block between all rules with the same modifier text,
+// so a block must not be modified after parsing. A feature that edits a rule's
+// modifiers must copy the block first.
 type ruleModifiers struct {
 	// and are modifiers that must all match for the rule to apply.
 	and []rulemodifiers.ConditionModifier
@@ -43,6 +39,27 @@ type ruleModifiers struct {
 	or      []rulemodifiers.ConditionModifier
 	actions []rulemodifiers.ActionModifier
 	queries []rulemodifiers.QueryModifier
+
+	document  bool
+	important bool
+	all       bool
+}
+
+// Document reports whether the rule has the document modifier.
+func (rm *Rule) Document() bool {
+	return rm.mods != nil && rm.mods.document
+}
+
+// Important reports whether the rule has the important modifier.
+func (rm *Rule) Important() bool {
+	return rm.mods != nil && rm.mods.important
+}
+
+// All reports whether the rule has the all modifier.
+// On primary rules, it implies Document. It is kept separate so that "@@...$all" exceptions,
+// which embed Rule, still cancel non-document rules.
+func (rm *Rule) All() bool {
+	return rm.mods != nil && rm.mods.all
 }
 
 // AndModifiers returns the condition modifiers that must all match for the rule to apply.
@@ -79,9 +96,10 @@ func (rm *Rule) QueryModifiers() []rulemodifiers.QueryModifier {
 
 // ParseModifiers parses modifiers into the rule. Call it once, on a freshly constructed Rule.
 func (rm *Rule) ParseModifiers(modifiers []string) error {
-	// Parse into a local block and attach it only if it ends up non-empty,
-	// so rules with just flag modifiers (e.g. "$document") keep mods nil.
+	// Parse into a local block and attach it only if some modifier is not a noop,
+	// so rules like "||example.com^$_" keep mods nil.
 	var mods ruleModifiers
+	empty := true
 
 	for _, m := range modifiers {
 		if len(m) == 0 {
@@ -92,6 +110,7 @@ func (rm *Rule) ParseModifiers(modifiers []string) error {
 		if isNoopModifier(m) {
 			continue
 		}
+		empty = false
 
 		name, hasValue := cutModifierName(m)
 
@@ -102,10 +121,10 @@ func (rm *Rule) ParseModifiers(modifiers []string) error {
 			// Flag modifiers.
 			switch name {
 			case "document", "doc":
-				rm.Document = true
+				mods.document = true
 				continue
 			case "important":
-				rm.Important = true
+				mods.important = true
 				continue
 			case "xmlhttprequest",
 				"xhr",
@@ -127,7 +146,7 @@ func (rm *Rule) ParseModifiers(modifiers []string) error {
 				modifier = &rulemodifiers.RemoveParamModifier{}
 			case "all":
 				// TODO: should also act as "popup" modifier once it gets implemented
-				rm.All = true
+				mods.all = true
 				continue
 			default:
 				return fmt.Errorf("unknown modifier %q", m)
@@ -176,11 +195,49 @@ func (rm *Rule) ParseModifiers(modifiers []string) error {
 		}
 	}
 
-	if len(mods.and) > 0 || len(mods.or) > 0 || len(mods.actions) > 0 || len(mods.queries) > 0 {
+	if !empty {
 		rm.mods = &mods
 	}
 
 	return nil
+}
+
+// splitModifiers splits by unescaped commas.
+// Empty fields are preserved (like strings.Split).
+func splitModifiers(s string) []string {
+	var res []string
+	var b strings.Builder
+	escaped := false
+
+	for _, r := range s {
+		switch r {
+		case '\\':
+			if escaped {
+				b.WriteRune('\\')
+			}
+			escaped = !escaped
+		case ',':
+			if escaped {
+				b.WriteRune(',')
+				escaped = false
+			} else {
+				res = append(res, b.String())
+				b.Reset()
+			}
+		default:
+			if escaped {
+				b.WriteRune('\\')
+				escaped = false
+			}
+			b.WriteRune(r)
+		}
+	}
+
+	if escaped {
+		b.WriteRune('\\')
+	}
+	res = append(res, b.String())
+	return res
 }
 
 // isNoopModifier returns true if modifier is one or more underscores.
@@ -203,7 +260,7 @@ func cutModifierName(modifier string) (name string, hasValue bool) {
 
 // ShouldMatchReq returns true if the rule should match the request.
 func (rm *Rule) ShouldMatchReq(req *http.Request) bool {
-	if req.Header.Get("Sec-Fetch-User") == "?1" && req.Header.Get("Sec-Fetch-Dest") == "document" && !rm.Document && !rm.All {
+	if req.Header.Get("Sec-Fetch-User") == "?1" && req.Header.Get("Sec-Fetch-Dest") == "document" && !rm.Document() && !rm.All() {
 		return false
 	}
 

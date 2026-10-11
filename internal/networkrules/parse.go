@@ -33,11 +33,14 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 			}
 
 			pattern := fmt.Sprintf("||%s^", host)
-			if err := nr.primaryStore.Insert(pattern, &rule.Rule{
+			r := &rule.Rule{
 				RawRule:    pattern + "$document",
 				FilterName: filterName,
-				Document:   true,
-			}); err != nil {
+			}
+			if err := nr.interner.Parse(r, "document"); err != nil {
+				return false, fmt.Errorf("parse hosts rule modifiers: %v", err)
+			}
+			if err := nr.primaryStore.Insert(pattern, r); err != nil {
 				return false, fmt.Errorf("insert hosts rule: %w", err)
 			}
 		}
@@ -53,9 +56,9 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 			},
 		}
 
-		pattern, modifiers := parseRuleParts(rawRule[2:])
-		if modifiers != nil {
-			if err := r.ParseModifiers(modifiers); err != nil {
+		pattern, rawModifiers, hasModifiers := parseRuleParts(rawRule[2:])
+		if hasModifiers {
+			if err := nr.interner.Parse(&r.Rule, rawModifiers); err != nil {
 				return false, fmt.Errorf("parse modifiers: %v", err)
 			}
 		}
@@ -71,9 +74,9 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 		FilterName: filterName,
 	}
 
-	pattern, modifiers := parseRuleParts(rawRule)
-	if modifiers != nil {
-		if err := r.ParseModifiers(modifiers); err != nil {
+	pattern, rawModifiers, hasModifiers := parseRuleParts(rawRule)
+	if hasModifiers {
+		if err := nr.interner.Parse(r, rawModifiers); err != nil {
 			return false, fmt.Errorf("parse modifiers: %v", err)
 		}
 	}
@@ -84,36 +87,17 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 	return false, nil
 }
 
-// parseRuleParts splits rawRule into its pattern and modifier list.
-func parseRuleParts(rawRule string) (pattern string, modifiers []string) {
-	if pattern, modifiers, ok := parseRegexpRuleParts(rawRule); ok {
-		return pattern, modifiers
+// parseRuleParts splits rawRule into its pattern and unsplit modifier text.
+func parseRuleParts(rawRule string) (pattern, rawModifiers string, hasModifiers bool) {
+	// A regexp pattern may contain '$', so cut only after its closing slash,
+	// which regexpPatternEnd guarantees is followed by '$' or nothing.
+	if strings.HasPrefix(rawRule, "/") {
+		if end := regexpPatternEnd(rawRule); end != -1 {
+			_, rawModifiers, hasModifiers = strings.Cut(rawRule[end+1:], "$")
+			return rawRule[:end+1], rawModifiers, hasModifiers
+		}
 	}
-
-	pattern, rawModifiers, found := strings.Cut(rawRule, "$")
-	if found {
-		modifiers = splitModifiers(rawModifiers)
-	}
-	return pattern, modifiers
-}
-
-// parseRegexpRuleParts splits a slash-delimited regexp rule into its pattern and modifier list.
-// Reports ok only if the rule looks like a regexp rule.
-func parseRegexpRuleParts(rawRule string) (pattern string, modifiers []string, ok bool) {
-	if len(rawRule) < 2 || rawRule[0] != '/' {
-		return "", nil, false
-	}
-
-	end := regexpPatternEnd(rawRule)
-	if end == -1 {
-		return "", nil, false
-	}
-
-	pattern = rawRule[:end+1]
-	if end+1 < len(rawRule) {
-		modifiers = splitModifiers(rawRule[end+2:])
-	}
-	return pattern, modifiers, true
+	return strings.Cut(rawRule, "$")
 }
 
 func regexpPatternEnd(s string) int {
@@ -135,42 +119,4 @@ func regexpPatternEnd(s string) int {
 		}
 	}
 	return -1
-}
-
-// splitModifiers splits by unescaped commas.
-// Empty fields are preserved (like strings.Split).
-func splitModifiers(s string) []string {
-	var res []string
-	var b strings.Builder
-	escaped := false
-
-	for _, r := range s {
-		switch r {
-		case '\\':
-			if escaped {
-				b.WriteRune('\\')
-			}
-			escaped = !escaped
-		case ',':
-			if escaped {
-				b.WriteRune(',')
-				escaped = false
-			} else {
-				res = append(res, b.String())
-				b.Reset()
-			}
-		default:
-			if escaped {
-				b.WriteRune('\\')
-				escaped = false
-			}
-			b.WriteRune(r)
-		}
-	}
-
-	if escaped {
-		b.WriteRune('\\')
-	}
-	res = append(res, b.String())
-	return res
 }

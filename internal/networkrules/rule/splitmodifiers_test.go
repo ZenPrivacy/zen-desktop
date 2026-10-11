@@ -1,4 +1,4 @@
-package networkrules
+package rule
 
 import (
 	"reflect"
