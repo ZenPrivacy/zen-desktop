@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.27.0
+
+### What's New
+
+* **Fewer bot checks and block pages**
+  Some sites, such as Etsy and Yelp, use bot-detection services that sometimes mistook Zen's connections for bot traffic and showed a block page. Zen now mimics your browser's TLS fingerprint, so these pages load normally. Thanks to @ThisIsJeron for reporting this!
+* **More accurate filter lists**
+  Zen now understands the `!#if` blocks in filter lists and loads only the rules that apply to Zen. AdGuard Base and AdGuard Spyware now load from AdGuard's Windows builds, which are made for proxy-based blockers like Zen. Before, Zen loaded about 5,000 rules meant for iOS, Safari and Android.
+* **Lower memory use**
+  Zen now uses about 60 MB less memory with the default filter lists.
+* Other minor bugfixes and improvements.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/irbis-sh/zen-desktop/compare/v0.26.0...v0.27.0
+
 ## v0.26.0
 
 ### What's New
