@@ -12,12 +12,15 @@ import (
 type NetworkRules struct {
 	primaryStore   *ruleStore[*rule.Rule]
 	exceptionStore *ruleStore[*exceptionrule.ExceptionRule]
+	// interner is nil after Compact.
+	interner *rule.ModifierInterner
 }
 
 func New() *NetworkRules {
 	return &NetworkRules{
 		primaryStore:   newRuleStore[*rule.Rule](),
 		exceptionStore: newRuleStore[*exceptionrule.ExceptionRule](),
+		interner:       rule.NewModifierInterner(),
 	}
 }
 
@@ -121,6 +124,9 @@ outer:
 }
 
 func (nr *NetworkRules) Compact() {
+	// Rules added after Compact, such as allowlist exceptions, are too few to be
+	// worth sharing, so free the interner's map.
+	nr.interner = nil
 	nr.primaryStore.Compact()
 	nr.exceptionStore.Compact()
 }

@@ -447,6 +447,80 @@ func TestExceptionRules(t *testing.T) {
 	})
 }
 
+func TestSharedModifiers(t *testing.T) {
+	t.Parallel()
+
+	navigationHeaders := http.Header{
+		"Sec-Fetch-Dest": []string{"document"},
+		"Sec-Fetch-User": []string{"?1"},
+	}
+
+	t.Run("second document rule blocks navigation", func(t *testing.T) {
+		t.Parallel()
+
+		nr := New()
+		for _, r := range []string{`||a.example^$document`, `||b.example^$document`} {
+			if _, err := nr.ParseRule(r, nil); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		_, shouldBlock, _ := nr.ModifyReq(newTestRequest(t, "https://b.example/", navigationHeaders))
+		if !shouldBlock {
+			t.Fatal("expected second document rule to block navigation")
+		}
+	})
+
+	t.Run("second hosts rule blocks navigation", func(t *testing.T) {
+		t.Parallel()
+
+		nr := New()
+		if _, err := nr.ParseRule(`0.0.0.0 a.example b.example`, nil); err != nil {
+			t.Fatal(err)
+		}
+
+		_, shouldBlock, _ := nr.ModifyReq(newTestRequest(t, "https://b.example/", navigationHeaders))
+		if !shouldBlock {
+			t.Fatal("expected second hosts rule to block navigation")
+		}
+	})
+
+	t.Run("second important rule resists non-important exception", func(t *testing.T) {
+		t.Parallel()
+
+		nr := New()
+		for _, r := range []string{`||a.example^$image,important`, `||b.example^$image,important`, `@@||b.example^$image`} {
+			if _, err := nr.ParseRule(r, nil); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		headers := http.Header{"Sec-Fetch-Dest": []string{"image"}}
+		_, shouldBlock, _ := nr.ModifyReq(newTestRequest(t, "https://b.example/pixel.png", headers))
+		if !shouldBlock {
+			t.Fatal("expected second important rule to block despite non-important exception")
+		}
+	})
+
+	t.Run("exception added after Compact applies", func(t *testing.T) {
+		t.Parallel()
+
+		nr := New()
+		if _, err := nr.ParseRule(`||example.com^$document`, nil); err != nil {
+			t.Fatal(err)
+		}
+		nr.Compact()
+		if _, err := nr.ParseRule(`@@||example.com^$document`, nil); err != nil {
+			t.Fatal(err)
+		}
+
+		_, shouldBlock, _ := nr.ModifyReq(newTestRequest(t, "https://example.com/", navigationHeaders))
+		if shouldBlock {
+			t.Fatal("expected exception added after Compact to cancel document rule")
+		}
+	})
+}
+
 func newTestRequest(t *testing.T, rawURL string, headers http.Header) *http.Request {
 	t.Helper()
 

@@ -11,11 +11,11 @@ type ExceptionRule struct {
 }
 
 func (er *ExceptionRule) Cancels(r *rule.Rule) bool {
-	if r.Important && !er.Important {
+	if r.Important() && !er.Important() {
 		return false
 	}
 
-	if er.Document && !r.Document && !r.All {
+	if er.Document() && !r.Document() && !r.All() {
 		return false
 	}
 

@@ -33,11 +33,11 @@ func TestParseModifiers(t *testing.T) {
 		assertRuleBuckets(t, &r, true, false, nil, nil, nil, nil)
 	})
 
-	t.Run("flag-only modifiers do not allocate a modifier block", func(t *testing.T) {
+	t.Run("noop modifiers do not allocate a modifier block", func(t *testing.T) {
 		t.Parallel()
 
 		var r Rule
-		if err := r.ParseModifiers([]string{"document", "important", "all", "_"}); err != nil {
+		if err := r.ParseModifiers([]string{"_", "___"}); err != nil {
 			t.Fatalf("ParseModifiers() = %v, want nil", err)
 		}
 
@@ -291,11 +291,11 @@ func TestShouldMatchReq(t *testing.T) {
 func assertRuleBuckets(t *testing.T, r *Rule, wantImportant, wantDocument bool, wantAnd, wantOr, wantQuery, wantActions []string) {
 	t.Helper()
 
-	if r.Important != wantImportant {
-		t.Errorf("Important = %v, want %v", r.Important, wantImportant)
+	if r.Important() != wantImportant {
+		t.Errorf("Important() = %v, want %v", r.Important(), wantImportant)
 	}
-	if r.Document != wantDocument {
-		t.Errorf("Document = %v, want %v", r.Document, wantDocument)
+	if r.Document() != wantDocument {
+		t.Errorf("Document() = %v, want %v", r.Document(), wantDocument)
 	}
 	if got := typeNames(r.AndModifiers()); !reflect.DeepEqual(got, wantAnd) {
 		t.Errorf("AND modifiers = %#v, want %#v", got, wantAnd)
