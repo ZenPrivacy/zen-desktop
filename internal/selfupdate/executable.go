@@ -6,32 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"github.com/irbis-sh/zen-desktop/internal/constants"
 )
-
-func replaceExecutable(tempDir string) error {
-	expectedExecName := constants.AppName
-	if runtime.GOOS == "windows" {
-		expectedExecName += ".exe"
-	}
-	newExecPath := filepath.Join(tempDir, expectedExecName)
-
-	if _, err := os.Stat(newExecPath); os.IsNotExist(err) {
-		return fmt.Errorf("expected executable '%s' not found", expectedExecName)
-	}
-
-	currentExecPath, err := getExecPath()
-	if err != nil {
-		return fmt.Errorf("get exec path: %w", err)
-	}
-
-	if err := os.Rename(newExecPath, currentExecPath); err != nil {
-		return fmt.Errorf("move new executable: %w", err)
-	}
-
-	return nil
-}
 
 func getExecPath() (string, error) {
 	execPath, err := os.Executable()

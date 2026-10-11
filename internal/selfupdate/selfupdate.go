@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/irbis-sh/zen-desktop/internal/config"
+	"github.com/irbis-sh/zen-desktop/internal/constants"
 )
 
 // NoSelfUpdate is set to "true" for builds distributed to package managers to prevent auto-updating. It is typed as a string because the linker allows only setting string variables at compile time (see https://pkg.go.dev/cmd/link).
@@ -32,6 +33,8 @@ const (
 	checkInterval = 6 * time.Hour
 	// httpTimeout is the timeout for HTTP requests when checking for updates and downloading update files.
 	httpTimeout = 5 * time.Minute
+	// stagingDirPattern is the name pattern of the directory, created next to the executable, that updates are unarchived into.
+	stagingDirPattern = ".zen-update-*"
 )
 
 type release struct {
@@ -360,19 +363,49 @@ func (su *SelfUpdater) applyUpdateForDarwin(tmpFile string) error {
 }
 
 func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
-	tempDir, err := os.MkdirTemp("", "unarchive-*")
+	// Resolve the executable path before renaming the running executable. On Linux,
+	// os.Executable reads /proc/self/exe, which follows the rename and would point
+	// at the backup afterwards.
+	currentExecPath, err := getExecPath()
+	if err != nil {
+		return fmt.Errorf("get exec path: %w", err)
+	}
+
+	return installExecutable(tmpFile, currentExecPath)
+}
+
+// installExecutable replaces the executable at currentExecPath with the one contained in the archive at archivePath.
+func installExecutable(archivePath, currentExecPath string) error {
+	execDir := filepath.Dir(currentExecPath)
+
+	// Staging dirs are only removed by a deferred call, so an update interrupted by
+	// the app exiting leaves one behind.
+	staleDirs, err := filepath.Glob(filepath.Join(execDir, stagingDirPattern))
+	if err != nil {
+		return fmt.Errorf("find stale staging dirs: %w", err)
+	}
+	for _, dir := range staleDirs {
+		if err := os.RemoveAll(dir); err != nil {
+			log.Printf("failed to remove stale staging dir %s: %v", dir, err)
+		}
+	}
+
+	// Unarchive next to the executable rather than in os.TempDir. The new executable
+	// is moved into place with a rename, which fails if the source and destination
+	// are on different filesystems, e.g. when /tmp is a tmpfs.
+	tempDir, err := os.MkdirTemp(execDir, stagingDirPattern)
 	if err != nil {
 		return fmt.Errorf("create temp unarchive dir: %w", err)
 	}
 	defer os.RemoveAll(tempDir)
 
-	if err := unarchive(tmpFile, tempDir); err != nil {
-		return fmt.Errorf("unzip file: %w", err)
+	if err := unarchive(archivePath, tempDir); err != nil {
+		return fmt.Errorf("unarchive file: %w", err)
 	}
 
-	currentExecPath, err := getExecPath()
-	if err != nil {
-		return fmt.Errorf("get exec path: %w", err)
+	newExecPath := filepath.Join(tempDir, constants.AppName)
+	if runtime.GOOS == "windows" {
+		newExecPath += ".exe"
 	}
 
 	oldExecPath := generateBackupName(currentExecPath)
@@ -401,9 +434,9 @@ func (su *SelfUpdater) applyUpdateForWindowsOrLinux(tmpFile string) error {
 		}
 	}()
 
-	if err := replaceExecutable(tempDir); err != nil {
+	if err := os.Rename(newExecPath, currentExecPath); err != nil {
 		rollback = true
-		return fmt.Errorf("replace executable: %w", err)
+		return fmt.Errorf("move new executable: %w", err)
 	}
 
 	return nil
