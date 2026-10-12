@@ -28,7 +28,7 @@ Zen is an open-source system-wide ad-blocker and privacy guard for Windows, macO
 
 ## Downloads
 
-During the first run, Zen will prompt you to install a root certificate. This is required for Zen to be able to intercept and modify HTTPS requests. This certificate is generated locally and never leaves your device. For details on how this works and the steps we take to secure it, see our [security architecture](/docs/explanation/security-architecture.md).
+During the first run, Zen will prompt you to install a root certificate. This is required for Zen to be able to intercept and modify HTTPS requests. This certificate is generated locally and never leaves your device. For details on how this works and the steps we take to secure it, see our [security architecture](https://docs.irbis.sh/docs/zen/explanation/security-architecture/).
 
 ### Windows
 
