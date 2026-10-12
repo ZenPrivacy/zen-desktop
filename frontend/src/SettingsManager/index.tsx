@@ -25,6 +25,7 @@ import { UninstallCADialog } from './UninstallCADialog';
 
 const GITHUB_URL = 'https://github.com/irbis-sh/zen-desktop';
 const CHANGELOG_URL = `${GITHUB_URL}/blob/master/CHANGELOG.md`;
+const DOCS_URL = 'https://docs.irbis.sh/docs/zen/';
 
 export function SettingsManager() {
   const { t } = useTranslation();
@@ -96,8 +97,17 @@ export function SettingsManager() {
         <Button
           variant="minimal"
           size="small"
+          icon="manual"
+          className="settings-manager__about-button"
+          onClick={() => BrowserOpenURL(DOCS_URL)}
+        >
+          {t('settings.about.docs')}
+        </Button>
+        <Button
+          variant="minimal"
+          size="small"
           icon="git-branch"
-          className="settings-manager__about-github-button"
+          className="settings-manager__about-button"
           onClick={() => BrowserOpenURL(GITHUB_URL)}
         >
           GitHub

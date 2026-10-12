@@ -152,6 +152,7 @@
   "settings": {
     "about": {
       "changelog": "変更履歴",
+      "docs": "ドキュメント",
       "tagline": "包括的な広告ブロッカーとプライバシーガード",
       "version": "バージョン"
     },

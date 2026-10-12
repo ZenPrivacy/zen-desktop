@@ -152,6 +152,7 @@
   "settings": {
     "about": {
       "changelog": "Änderungsprotokoll",
+      "docs": "Dokumentation",
       "tagline": "Ihr umfassender Werbeblocker und Datenschutzwächter",
       "version": "Version"
     },

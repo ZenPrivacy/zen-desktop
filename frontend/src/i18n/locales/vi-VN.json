@@ -152,6 +152,7 @@
   "settings": {
     "about": {
       "changelog": "nhật ký thay đổi",
+      "docs": "Tài liệu",
       "tagline": "Trình chặn quảng cáo và bảo vệ quyền riêng tư toàn diện của bạn",
       "version": "Phiên bản"
     },
