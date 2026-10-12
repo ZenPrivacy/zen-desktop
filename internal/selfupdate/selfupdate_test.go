@@ -202,7 +202,7 @@ func TestInstallExecutable(t *testing.T) {
 		if err := os.WriteFile(execPath, []byte("old"), 0600); err != nil {
 			t.Fatalf("write current executable: %v", err)
 		}
-		archivePath := writeTarGz(t, execName, "new")
+		archivePath := writeTarGz(t, execName)
 		setMissingTempDir(t)
 
 		if err := installExecutable(archivePath, execPath); err != nil {
@@ -232,7 +232,7 @@ func TestInstallExecutable(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(staleDir, execName), []byte("partial"), 0600); err != nil {
 			t.Fatalf("write stale executable: %v", err)
 		}
-		archivePath := writeTarGz(t, execName, "new")
+		archivePath := writeTarGz(t, execName)
 		setMissingTempDir(t)
 
 		if err := installExecutable(archivePath, execPath); err != nil {
@@ -242,13 +242,38 @@ func TestInstallExecutable(t *testing.T) {
 		assertDirEntries(t, execDir, execName)
 	})
 
+	t.Run("replaces executable when exec dir is not a valid glob pattern", func(t *testing.T) {
+		execDir := filepath.Join(t.TempDir(), "zen[")
+		if err := os.Mkdir(execDir, 0700); err != nil {
+			t.Fatalf("create exec dir: %v", err)
+		}
+		execPath := filepath.Join(execDir, execName)
+		if err := os.WriteFile(execPath, []byte("old"), 0600); err != nil {
+			t.Fatalf("write current executable: %v", err)
+		}
+		archivePath := writeTarGz(t, execName)
+		setMissingTempDir(t)
+
+		if err := installExecutable(archivePath, execPath); err != nil {
+			t.Fatalf("installExecutable: %v", err)
+		}
+
+		got, err := os.ReadFile(execPath)
+		if err != nil {
+			t.Fatalf("read executable: %v", err)
+		}
+		if string(got) != "new" {
+			t.Errorf("executable content: got %q, want %q", got, "new")
+		}
+	})
+
 	t.Run("restores executable on failure", func(t *testing.T) {
 		execDir := t.TempDir()
 		execPath := filepath.Join(execDir, execName)
 		if err := os.WriteFile(execPath, []byte("old"), 0600); err != nil {
 			t.Fatalf("write current executable: %v", err)
 		}
-		archivePath := writeTarGz(t, "not-"+execName, "new")
+		archivePath := writeTarGz(t, "not-"+execName)
 		setMissingTempDir(t)
 
 		if err := installExecutable(archivePath, execPath); err == nil {
@@ -279,9 +304,12 @@ func setMissingTempDir(t *testing.T) {
 	t.Setenv("TEMP", missingDir)
 }
 
-func writeTarGz(t *testing.T, name, content string) string {
+// writeTarGz writes a .tar.gz archive containing a single file with the given name
+// and the content "new", and returns its path.
+func writeTarGz(t *testing.T, name string) string {
 	t.Helper()
 
+	content := "new"
 	var buf bytes.Buffer
 	gw := gzip.NewWriter(&buf)
 	tw := tar.NewWriter(gw)

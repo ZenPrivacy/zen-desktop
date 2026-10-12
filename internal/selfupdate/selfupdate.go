@@ -380,9 +380,11 @@ func installExecutable(archivePath, currentExecPath string) error {
 
 	// Staging dirs are only removed by a deferred call, so an update interrupted by
 	// the app exiting leaves one behind.
+	// Glob also parses execDir as a pattern, so a directory name with an unmatched
+	// "[" makes it fail. Cleanup is best-effort and must not block the update.
 	staleDirs, err := filepath.Glob(filepath.Join(execDir, stagingDirPattern))
 	if err != nil {
-		return fmt.Errorf("find stale staging dirs: %w", err)
+		log.Printf("failed to find stale staging dirs: %v", err)
 	}
 	for _, dir := range staleDirs {
 		if err := os.RemoveAll(dir); err != nil {
