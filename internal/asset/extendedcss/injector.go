@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/irbis-sh/zen-desktop/internal/hostmatch"
@@ -15,9 +14,6 @@ import (
 )
 
 var (
-	primaryRuleRegex   = regexp.MustCompile(`(.+?)#\??#(.+)`)
-	exceptionRuleRegex = regexp.MustCompile(`(.+?)#@\??#(.+)`)
-
 	//go:embed bundle.js
 	defaultExtendedCSSBundle []byte
 )

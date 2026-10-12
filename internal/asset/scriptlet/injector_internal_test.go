@@ -132,6 +132,47 @@ func TestAddRule(t *testing.T) {
 		}
 	})
 
+	t.Run("splits at the first marker when an argument contains another marker", func(t *testing.T) {
+		t.Parallel()
+
+		tests := []struct {
+			rule      string
+			exception bool
+		}{
+			{`example.org#%#//scriptlet('set-attr', 'a', 'title', '#%#//scriptlet(x)')`, false},
+			{`example.org#@%#//scriptlet('set-attr', 'a', 'title', '#@%#//scriptlet(x)')`, true},
+			{`example.org##+js(remove-attr, title, a[title="##+js(x)"])`, false},
+			{`example.org#@#+js(remove-attr, title, a[title="#@#+js(x)"])`, true},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.rule, func(t *testing.T) {
+				t.Parallel()
+
+				spyStore := &spyScriptletStore{}
+				injector, err := newInjector([]byte{}, spyStore)
+				if err != nil {
+					t.Fatalf("failed to create injector: %v", err)
+				}
+
+				if err := injector.AddRule(tt.rule, false); err != nil {
+					t.Fatalf("failed to add rule: %v", err)
+				}
+
+				entries, other := spyStore.PrimaryEntries, spyStore.ExceptionEntries
+				if tt.exception {
+					entries, other = other, entries
+				}
+				if len(entries) != 1 || len(other) != 0 {
+					t.Fatalf("expected exactly one entry with exception = %v, got primary %v, exception %v", tt.exception, spyStore.PrimaryEntries, spyStore.ExceptionEntries)
+				}
+				if entries[0].HostnamePatterns != "example.org" {
+					t.Errorf("expected hostname to be collected, got %q", entries[0].HostnamePatterns)
+				}
+			})
+		}
+	})
+
 	t.Run("preserves backslashes in rule arguments through the generated injection", func(t *testing.T) {
 		t.Parallel()
 

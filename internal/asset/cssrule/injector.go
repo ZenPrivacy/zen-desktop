@@ -12,9 +12,12 @@ import (
 )
 
 var (
-	RuleRegex          = regexp.MustCompile(`.*#@?\$#.+`)
-	primaryRuleRegex   = regexp.MustCompile(`(.*?)#\$#(.*)`)
-	exceptionRuleRegex = regexp.MustCompile(`(.*?)#@\$#(.+)`)
+	// RuleRegex matches CSS injection rules (#$# and #@$#). Like the injector's
+	// split regexes, it treats the first '#' as the start of the marker,
+	// because domain lists never contain '#'.
+	RuleRegex          = regexp.MustCompile(`^[^#]*#@?\$#.+`)
+	primaryRuleRegex   = regexp.MustCompile(`^([^#]*)#\$#(.*)`)
+	exceptionRuleRegex = regexp.MustCompile(`^([^#]*)#@\$#(.+)`)
 )
 
 type store interface {

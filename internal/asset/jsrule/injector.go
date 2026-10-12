@@ -21,9 +21,14 @@ type Injector struct {
 }
 
 var (
-	RuleRegex          = regexp.MustCompile(`.*#@?%#.+`)
-	primaryRuleRegex   = regexp.MustCompile(`(.*)#%#(.+)`)
-	exceptionRuleRegex = regexp.MustCompile(`(.*)#@%#(.+)`)
+	// RuleRegex matches JS rules (#%# and #@%#). Like the injector's split
+	// regexes, it treats the first '#' as the start of the marker, because
+	// domain lists never contain '#'. Otherwise a marker inside the script,
+	// such as the "#%#" in example.com#%#var s = "#%#", would move the split
+	// into the script.
+	RuleRegex          = regexp.MustCompile(`^[^#]*#@?%#.+`)
+	primaryRuleRegex   = regexp.MustCompile(`^([^#]*)#%#(.+)`)
+	exceptionRuleRegex = regexp.MustCompile(`^([^#]*)#@%#(.+)`)
 
 	injectionStart = []byte("(function(){")
 	injectionEnd   = []byte("})();")
