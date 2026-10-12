@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/irbis-sh/zen-desktop/internal/asset/cosmetic"
 	"github.com/irbis-sh/zen-desktop/internal/asset/cssrule"
@@ -73,6 +74,13 @@ func NewEngine(host string) (*Engine, error) {
 
 // AddRule attempts to add a non-network rule. Returns handled=true if consumed.
 func (e *Engine) AddRule(rule string, filterListTrusted bool) (handled bool, err error) {
+	// Every marker handled below contains '#', and most lines are network
+	// rules without one. Rejecting those here skips four or five regexes per
+	// line, which took most of the time spent building the default lists.
+	if !strings.Contains(rule, "#") {
+		return false, nil
+	}
+
 	switch {
 	case scriptlet.RuleRegex.MatchString(rule):
 		if err := e.scriptlets.AddRule(rule, filterListTrusted); err != nil {
