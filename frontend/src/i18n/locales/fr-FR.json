@@ -152,7 +152,8 @@
   "settings": {
     "about": {
       "changelog": "Notes de version",
-      "tagline": "Votre Bloqueur de Publicité et Gardien de votre Vie Privée",
+      "docs": "Documentation",
+      "tagline": "Votre bloqueur de publicité et gardien de votre vie privée",
       "version": "Version"
     },
     "ca": {

@@ -152,6 +152,7 @@
   "settings": {
     "about": {
       "changelog": "更新日志",
+      "docs": "文档",
       "tagline": "您的全面广告拦截与隐私保护工具",
       "version": "版本"
     },

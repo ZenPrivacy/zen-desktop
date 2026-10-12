@@ -152,6 +152,7 @@
   "settings": {
     "about": {
       "changelog": "registro modifiche",
+      "docs": "Documentazione",
       "tagline": "Il tuo Ad-Blocker completo e guardiano della privacy",
       "version": "Versione"
     },
