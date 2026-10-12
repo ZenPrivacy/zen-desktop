@@ -12,12 +12,18 @@ var (
 	//
 	//  1. #%#//scriptlet or #@%#//scriptlet for canonical rules.
 	//  2. ##+js or #@#+js for uBlock-style rules.
-	RuleRegex = regexp.MustCompile(`(?:#@?%#\/\/scriptlet)|(?:#@?#\+js)`)
+	//
+	// Domain lists never contain '#', so the first '#' always starts the
+	// marker. Matching the domains with ^[^#]* stops a marker-like string
+	// elsewhere in the line from being read as the marker. Without it, the
+	// cosmetic rule example.com##a[title="##+js(x)"] would be claimed here,
+	// as RuleRegex runs before the other rule types.
+	RuleRegex = regexp.MustCompile(`^[^#]*(?:#@?%#\/\/scriptlet|#@?#\+js)`)
 
-	canonicalPrimary        = regexp.MustCompile(`(.*)#%#\/\/scriptlet\((.+)\)`)
-	canonicalExceptionRegex = regexp.MustCompile(`(.*)#@%#\/\/scriptlet\((.+)\)`)
-	ublockPrimaryRegex      = regexp.MustCompile(`(.*)##\+js\((.+)\)`)
-	ublockExceptionRegex    = regexp.MustCompile(`(.*)#@#\+js\((.+)\)`)
+	canonicalPrimary        = regexp.MustCompile(`^([^#]*)#%#\/\/scriptlet\((.+)\)`)
+	canonicalExceptionRegex = regexp.MustCompile(`^([^#]*)#@%#\/\/scriptlet\((.+)\)`)
+	ublockPrimaryRegex      = regexp.MustCompile(`^([^#]*)##\+js\((.+)\)`)
+	ublockExceptionRegex    = regexp.MustCompile(`^([^#]*)#@#\+js\((.+)\)`)
 	errUnsupportedSyntax    = errors.New("unsupported syntax")
 	errUntrusted            = errors.New("trusted scriptlet in an untrusted filter list")
 )
