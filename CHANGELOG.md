@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.27.1
+
+  ## What's New
+  
+  * **Self-updates now work on systems with multiple partitions**
+    Updates failed if Zen was installed on a different drive or partition from the system's temporary folder. This is now fixed. Thanks to @unpacman for reporting!
+  * Other minor bugfixes and performance improvements.
+  
+  Thank you for using Zen!
+  
+  **Full Changelog**: https://github.com/irbis-sh/zen-desktop/compare/v0.27.0...v0.27.1
+
 ## v0.27.0
 
 ### What's New
