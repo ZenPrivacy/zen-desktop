@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ .L.Lang }}">
   <head>
     <meta charset="utf-8" />
     <title>{{ .Title }}</title>
@@ -26,16 +26,16 @@
       <div class="card">
         <h1>{{ .Title }}</h1>
         <p>{{ .Message }}</p>
-        <p><strong>URL:</strong> <code id="url"></code></p>
+        <p><strong>{{ .L.T "common.url" }}</strong> <code id="url"></code></p>
         <details>
-          <summary>Technical details</summary>
+          <summary>{{ .L.T "errorPage.technicalDetails" }}</summary>
           <pre>{{ .Detail }}</pre>
         </details>
 
         <div class="actions">
-          <a class="btn" href="">Retry</a>
+          <a class="btn" href="">{{ .L.T "errorPage.retry" }}</a>
           <button type="button" class="btn secondary" onclick="window.history.back()">
-            Go back
+            {{ .L.T "common.goBack" }}
           </button>
         </div>
       </div>

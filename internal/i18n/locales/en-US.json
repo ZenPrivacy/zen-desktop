@@ -1,0 +1,45 @@
+{
+  "common": {
+    "url": "URL:",
+    "goBack": "Go back"
+  },
+  "blockPage": {
+    "title": "Request blocked",
+    "heading": "Blocked by Zen",
+    "rule": "Rule:",
+    "filterList": "Filter list:",
+    "allow": "Allow"
+  },
+  "errorPage": {
+    "technicalDetails": "Technical details",
+    "retry": "Retry",
+    "timeout": {
+      "title": "This site took too long to respond",
+      "message": "The server didn't respond in time. It might be overloaded, or there may be a problem with your connection."
+    },
+    "notFound": {
+      "title": "Server not found",
+      "message": "Zen couldn't find a server at this address. Check the address for typos, or try again in a moment."
+    },
+    "refused": {
+      "title": "Connection refused",
+      "message": "The server refused the connection. The site might be down, or it may not accept connections on this port."
+    },
+    "reset": {
+      "title": "Connection was reset",
+      "message": "The connection to the server was interrupted. This is usually temporary."
+    },
+    "tls": {
+      "title": "Secure connection failed",
+      "message": "Zen couldn't establish a secure connection to this site. Retrying may reconnect without Zen's filtering for this site."
+    },
+    "unreachable": {
+      "title": "This site can't be reached",
+      "message": "Zen couldn't reach the server. Check your connection, or try again in a moment."
+    },
+    "internal": {
+      "title": "Something went wrong",
+      "message": "Zen hit an internal error while processing this page. Retrying might help."
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "common": {
+    "url": "網址：",
+    "goBack": "返回"
+  },
+  "blockPage": {
+    "title": "請求已被攔截",
+    "heading": "已被 Zen 攔截",
+    "rule": "規則：",
+    "filterList": "過濾清單：",
+    "allow": "允許"
+  },
+  "errorPage": {
+    "technicalDetails": "技術詳細資訊",
+    "retry": "重試",
+    "timeout": {
+      "title": "此網站回應時間過長",
+      "message": "伺服器未能及時回應。伺服器可能負載過重，或您的網路連線有問題。"
+    },
+    "notFound": {
+      "title": "找不到伺服器",
+      "message": "Zen 找不到此網址的伺服器。請檢查網址是否有錯字，或稍後再試。"
+    },
+    "refused": {
+      "title": "連線遭拒",
+      "message": "伺服器拒絕了連線。網站可能已停止運作，或不接受此連接埠上的連線。"
+    },
+    "reset": {
+      "title": "連線已重設",
+      "message": "與伺服器的連線已中斷。這通常是暫時的。"
+    },
+    "tls": {
+      "title": "安全連線失敗",
+      "message": "Zen 無法與此網站建立安全連線。重試後可能會在沒有 Zen 過濾的情況下連線到此網站。"
+    },
+    "unreachable": {
+      "title": "無法連上這個網站",
+      "message": "Zen 無法連線到伺服器。請檢查您的網路連線，或稍後再試。"
+    },
+    "internal": {
+      "title": "發生錯誤",
+      "message": "Zen 在處理此頁面時發生內部錯誤。重試或許能解決問題。"
+    }
+  }
+}

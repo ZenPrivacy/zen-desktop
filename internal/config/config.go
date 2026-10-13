@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/irbis-sh/zen-desktop/internal/constants"
+	"github.com/irbis-sh/zen-desktop/internal/i18n"
 )
 
 var (
@@ -234,6 +235,7 @@ func New() (*Config, error) {
 	if err := json.Unmarshal(configData, c); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %v", err)
 	}
+	i18n.SetLocale(c.Locale)
 
 	return c, nil
 }
@@ -505,6 +507,9 @@ func (c *Config) GetLocale() string {
 func (c *Config) SetLocale(l string) error {
 	return c.update(func() error {
 		c.Locale = l
+		// Before the save rather than after, so that a failed save leaves the
+		// pages matching the in-memory locale, which the frontend already shows.
+		i18n.SetLocale(l)
 		return nil
 	})
 }

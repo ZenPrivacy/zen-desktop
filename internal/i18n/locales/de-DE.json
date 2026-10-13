@@ -1,0 +1,45 @@
+{
+  "common": {
+    "url": "URL:",
+    "goBack": "Zurück"
+  },
+  "blockPage": {
+    "title": "Anfrage blockiert",
+    "heading": "Von Zen blockiert",
+    "rule": "Regel:",
+    "filterList": "Filterliste:",
+    "allow": "Zulassen"
+  },
+  "errorPage": {
+    "technicalDetails": "Technische Details",
+    "retry": "Erneut versuchen",
+    "timeout": {
+      "title": "Diese Website hat zu lange gebraucht, um zu antworten",
+      "message": "Der Server hat nicht rechtzeitig geantwortet. Möglicherweise ist er überlastet oder es gibt ein Problem mit Ihrer Verbindung."
+    },
+    "notFound": {
+      "title": "Server nicht gefunden",
+      "message": "Zen konnte unter dieser Adresse keinen Server finden. Prüfen Sie die Adresse auf Tippfehler oder versuchen Sie es gleich noch einmal."
+    },
+    "refused": {
+      "title": "Verbindung abgelehnt",
+      "message": "Der Server hat die Verbindung abgelehnt. Die Website ist möglicherweise nicht verfügbar oder nimmt auf diesem Port keine Verbindungen an."
+    },
+    "reset": {
+      "title": "Verbindung wurde zurückgesetzt",
+      "message": "Die Verbindung zum Server wurde unterbrochen. Das ist meist nur vorübergehend."
+    },
+    "tls": {
+      "title": "Sichere Verbindung fehlgeschlagen",
+      "message": "Zen konnte keine sichere Verbindung zu dieser Website herstellen. Bei einem erneuten Versuch wird die Verbindung möglicherweise ohne die Filterung von Zen hergestellt."
+    },
+    "unreachable": {
+      "title": "Diese Website ist nicht erreichbar",
+      "message": "Zen konnte den Server nicht erreichen. Prüfen Sie Ihre Verbindung oder versuchen Sie es gleich noch einmal."
+    },
+    "internal": {
+      "title": "Etwas ist schiefgelaufen",
+      "message": "Bei der Verarbeitung dieser Seite ist in Zen ein interner Fehler aufgetreten. Ein erneuter Versuch könnte helfen."
+    }
+  }
+}

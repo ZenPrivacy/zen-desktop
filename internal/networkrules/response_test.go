@@ -41,4 +41,14 @@ func TestCreateBlockPageResponse(t *testing.T) {
 	if !strings.Contains(page, ".card {") {
 		t.Error("body does not contain the shared stylesheet")
 	}
+	// Checking en-US is enough: T falls back to en-US, and the i18n tests check
+	// that every catalogue has the same keys as en-US.
+	for _, prefix := range []string{"common.", "blockPage."} {
+		if strings.Contains(page, prefix) {
+			t.Errorf("body contains an untranslated %s key", prefix)
+		}
+	}
+	if !strings.Contains(page, `lang="en-US"`) {
+		t.Error(`body does not contain lang="en-US"`)
+	}
 }

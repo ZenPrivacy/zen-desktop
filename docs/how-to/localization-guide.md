@@ -6,6 +6,7 @@ This guide will help you contribute translations to Zen.
 
 - Zen uses the [i18next](https://www.i18next.com/) framework for localization, as well as [react-i18next](https://react.i18next.com/) for easy integration with React.
 - Translation files are stored as JSON files in the [`frontend/src/i18n/locales`](/frontend/src/i18n/locales) directory.
+- The pages Zen shows inside the browser, such as the block page, have their own, much smaller translation files in [`internal/i18n/locales`](/internal/i18n/locales). They live there because Go can only embed files from its own package directory.
 - The main language is English, and the default locale is `en-US`.
 - Zen uses locales rather than languages. [Learn more about the difference](https://poeditor.com/blog/locale-vs-language/).
 
@@ -19,7 +20,7 @@ To add a new locale to Zen, you'll need to:
 
 1. Fork the repository
 2. Set up your development environment
-3. Create a new translation file
+3. Create new translation files
 4. Update the i18n configuration
 5. Test your translations
 6. Submit a Pull Request
@@ -33,14 +34,15 @@ Follow [these instructions](https://docs.github.com/en/pull-requests/collaborati
 1. Install Go, Node.js with npm, Wails, and optionally Task as described in [requirements.md](../reference/requirements.md)
 2. In the project root directory, run `wails dev` (or `task` if you have Task installed) to start the development server
 
-### Step 3: Create a new translation file
+### Step 3: Create new translation files
 
 1. Copy the English template at [`en-US.json`](/frontend/src/i18n/locales/en-US.json) to a new file named according to your locale code (e.g., `de-DE.json` for German)
 2. Translate all strings in the new file, keeping the JSON structure intact
+3. Do the same for the browser pages: copy [`internal/i18n/locales/en-US.json`](/internal/i18n/locales/en-US.json) to a file with the same name in that directory, and translate it. Where a term also appears in the app, such as "Rule" or "Filter list", use the same translation in both files.
 
 ### Step 4: Update the i18n configuration
 
-You'll need to modify two files:
+You'll need to modify three files:
 
 1. In [`frontend/i18next.config.ts`](/frontend/i18next.config.ts), add your locale code to the `locales` array:
 
@@ -86,10 +88,21 @@ locales: ['en-US', ..., 'your-locale-code'],
     },
   ```
 
+3. In [`internal/i18n/i18n.go`](/internal/i18n/i18n.go), add the same base-language mapping to the `bareLocales` map, so that the browser pages pick the same translation as the app:
+
+   ```go
+   var bareLocales = map[string]string{
+   	..., // Existing mappings
+   	"aa": "aa-AA",
+   }
+   ```
+
 ### Step 5: Test your translations
 
 1. Navigate to Settings > Language to switch to your locale
 2. Test the application thoroughly with your locale enabled
+3. Visit a blocked address and an address that doesn't exist (e.g., `http://nonexistent.invalid`) to check the block page and the error page
+4. Run `go test ./internal/i18n/` to check that your Go translation file exists, has every key from the English one, and has its `bareLocales` entry
 
 ### Step 6: Submit a Pull Request
 
@@ -114,6 +127,8 @@ task frontend:extract-translations
 ```
 
 This will scan the source code and update the translation files with new keys.
+
+This only covers the frontend. Text for the pages shown in the browser goes in [`internal/i18n/locales`](/internal/i18n/locales) by hand. Add each new key to every file there, in English if you can't translate it, because the tests require all files to have the same keys.
 
 ## Need help?
 

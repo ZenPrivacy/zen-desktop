@@ -1,0 +1,45 @@
+{
+  "common": {
+    "url": "URL:",
+    "goBack": "Indietro"
+  },
+  "blockPage": {
+    "title": "Richiesta bloccata",
+    "heading": "Bloccato da Zen",
+    "rule": "Regola:",
+    "filterList": "Lista di filtri:",
+    "allow": "Consenti"
+  },
+  "errorPage": {
+    "technicalDetails": "Dettagli tecnici",
+    "retry": "Riprova",
+    "timeout": {
+      "title": "Il sito ha impiegato troppo tempo a rispondere",
+      "message": "Il server non ha risposto in tempo. Potrebbe essere sovraccarico, oppure potrebbe esserci un problema con la tua connessione."
+    },
+    "notFound": {
+      "title": "Server non trovato",
+      "message": "Zen non ha trovato nessun server a questo indirizzo. Controlla che l'indirizzo non contenga errori di battitura, oppure riprova tra poco."
+    },
+    "refused": {
+      "title": "Connessione rifiutata",
+      "message": "Il server ha rifiutato la connessione. Il sito potrebbe non essere attivo, oppure potrebbe non accettare connessioni su questa porta."
+    },
+    "reset": {
+      "title": "La connessione è stata reimpostata",
+      "message": "La connessione al server è stata interrotta. Di solito è un problema temporaneo."
+    },
+    "tls": {
+      "title": "Connessione sicura non riuscita",
+      "message": "Zen non è riuscito a stabilire una connessione sicura con questo sito. Se riprovi, la connessione potrebbe essere stabilita senza il filtraggio di Zen per questo sito."
+    },
+    "unreachable": {
+      "title": "Impossibile raggiungere il sito",
+      "message": "Zen non è riuscito a raggiungere il server. Controlla la tua connessione, oppure riprova tra poco."
+    },
+    "internal": {
+      "title": "Qualcosa è andato storto",
+      "message": "Zen ha riscontrato un errore interno durante l'elaborazione di questa pagina. Riprovare potrebbe aiutare."
+    }
+  }
+}
