@@ -170,6 +170,9 @@ func loadTree() (*ruletree.Tree[string], error) {
 			return nil, fmt.Errorf("scan %s: %v", filename, err)
 		}
 	}
+	// Match against the compacted tree, as the app does after loading its
+	// lists. Compact changes how ||domain^ patterns are looked up.
+	tree.Compact()
 	return tree, nil
 }
 

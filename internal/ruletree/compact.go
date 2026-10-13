@@ -1,11 +1,16 @@
 package ruletree
 
-import "github.com/irbis-sh/zen-desktop/internal/trimslice"
+import (
+	"slices"
+	"strings"
 
-// Compact shrinks internal slice capacities to reduce memory usage.
+	"github.com/irbis-sh/zen-desktop/internal/trimslice"
+)
+
+// Compact moves bucketed domains into their compact sorted form and shrinks
+// internal slice capacities to reduce memory usage.
 func (t *Tree[T]) Compact() {
-	t.insertMu.Lock()
-	defer t.insertMu.Unlock()
+	t.freezeDomains()
 
 	stack := []*node[T]{
 		t.anchorRoot,
@@ -37,4 +42,29 @@ func (t *Tree[T]) Compact() {
 			stack = append(stack, e.node)
 		}
 	}
+}
+
+// freezeDomains moves the domains map into frozen.
+func (t *Tree[T]) freezeDomains() {
+	if len(t.domains) == 0 {
+		return
+	}
+
+	n := len(t.frozen)
+	for _, vals := range t.domains {
+		n += len(vals)
+	}
+	frozen := append(make([]domainEntry[T], 0, n), t.frozen...)
+	for key, vals := range t.domains {
+		for _, v := range vals {
+			frozen = append(frozen, domainEntry[T]{key, v})
+		}
+	}
+	slices.SortFunc(frozen, func(a, b domainEntry[T]) int {
+		return strings.Compare(a.key, b.key)
+	})
+
+	t.frozen = frozen
+	// A fresh map, because clear() would keep the old one's slots allocated.
+	t.domains = make(map[string][]T)
 }

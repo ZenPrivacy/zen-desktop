@@ -3,6 +3,7 @@ package networkrules
 import (
 	"fmt"
 	"regexp"
+	"sync"
 
 	"github.com/irbis-sh/zen-desktop/internal/ruletree"
 	"github.com/irbis-sh/zen-desktop/internal/trimslice"
@@ -10,6 +11,10 @@ import (
 
 // ruleStore matches URLs against ad-block style patterns with associated data.
 type ruleStore[T comparable] struct {
+	// mu guards tree, generic and regexp. Rules are inserted from several
+	// goroutines while lists load, and while requests are matched, e.g. from
+	// the block page's allow button.
+	mu   sync.RWMutex
 	tree *ruletree.Tree[T]
 	// generic is rules with an empty pattern, which match for every URL.
 	generic []T
@@ -31,7 +36,9 @@ func (s *ruleStore[T]) Insert(pattern string, v T) error {
 	// The pattern is either generic (empty), regexp, or regular.
 	switch {
 	case pattern == "":
+		s.mu.Lock()
 		s.generic = append(s.generic, v)
+		s.mu.Unlock()
 	case len(pattern) > 1 && pattern[0] == '/' && pattern[len(pattern)-1] == '/':
 		body := pattern[1 : len(pattern)-1]
 		if body == "" {
@@ -41,18 +48,25 @@ func (s *ruleStore[T]) Insert(pattern string, v T) error {
 		if err != nil {
 			return fmt.Errorf("compile regexp rule: %w", err)
 		}
+		s.mu.Lock()
 		s.regexp = append(s.regexp, regexpRule[T]{
 			regexp: re,
 			value:  v,
 		})
+		s.mu.Unlock()
 	default:
+		s.mu.Lock()
 		s.tree.Insert(pattern, v)
+		s.mu.Unlock()
 	}
 
 	return nil
 }
 
 func (s *ruleStore[T]) Get(url string) []T {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
 	matches := s.tree.Get(url)
 	res := make([]T, 0, len(s.generic)+len(matches))
 	res = append(res, s.generic...)
@@ -66,6 +80,9 @@ func (s *ruleStore[T]) Get(url string) []T {
 }
 
 func (s *ruleStore[T]) Compact() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.generic = trimslice.TrimSlice(s.generic)
 	s.regexp = trimslice.TrimSlice(s.regexp)
 	s.tree.Compact()

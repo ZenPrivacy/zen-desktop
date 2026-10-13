@@ -1,10 +1,6 @@
 package ruletree
 
-import (
-	"bufio"
-	"os"
-	"testing"
-)
+import "testing"
 
 func TestInsert(t *testing.T) {
 	t.Parallel()
@@ -506,33 +502,12 @@ func TestPatternMatching(t *testing.T) {
 func buildTestTree(t *testing.T) *Tree[string] {
 	t.Helper()
 
-	filterLists := []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"}
-
 	tr := New[string]()
-
-	for _, list := range filterLists {
-		f, err := os.Open(list)
-		if err != nil {
-			t.Fatalf("open %q: %v", list, err)
-		}
-		defer f.Close()
-
-		scanner := bufio.NewScanner(f)
-
-		for scanner.Scan() {
-			line := scanner.Text()
-			if line == "" {
-				continue
-			}
-
+	for _, list := range []string{"testdata/easylist.txt", "testdata/easyprivacy.txt"} {
+		for _, line := range readLines(t, list) {
 			tr.Insert(line, line)
 		}
-
-		if err := scanner.Err(); err != nil {
-			t.Fatalf("scan: %v", err)
-		}
 	}
-
 	return tr
 }
 
