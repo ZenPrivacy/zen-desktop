@@ -32,12 +32,16 @@ func (nr *NetworkRules) ParseRule(rawRule string, filterName *string) (isExcepti
 				continue
 			}
 
-			pattern := fmt.Sprintf("||%s^", host)
+			// Derive the pattern from the raw rule so the rule tree's domain
+			// key shares the raw rule's memory instead of keeping a copy.
+			const modifiers = "$document"
+			hostsRule := "||" + host + "^" + modifiers
+			pattern := hostsRule[:len(hostsRule)-len(modifiers)]
 			r := &rule.Rule{
-				RawRule:    pattern + "$document",
+				RawRule:    hostsRule,
 				FilterName: filterName,
 			}
-			if err := nr.interner.Parse(r, "document"); err != nil {
+			if err := nr.interner.Parse(r, modifiers[1:]); err != nil {
 				return false, fmt.Errorf("parse hosts rule modifiers: %v", err)
 			}
 			if err := nr.primaryStore.Insert(pattern, r); err != nil {
