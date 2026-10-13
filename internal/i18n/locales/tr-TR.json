@@ -1,0 +1,45 @@
+{
+  "common": {
+    "url": "URL:",
+    "goBack": "Geri dön"
+  },
+  "blockPage": {
+    "title": "İstek engellendi",
+    "heading": "Zen tarafından engellendi",
+    "rule": "Kural:",
+    "filterList": "Filtre listesi:",
+    "allow": "İzin ver"
+  },
+  "errorPage": {
+    "technicalDetails": "Teknik ayrıntılar",
+    "retry": "Yeniden dene",
+    "timeout": {
+      "title": "Bu sitenin yanıt vermesi çok uzun sürdü",
+      "message": "Sunucu zamanında yanıt vermedi. Aşırı yüklenmiş olabilir veya bağlantınızda bir sorun olabilir."
+    },
+    "notFound": {
+      "title": "Sunucu bulunamadı",
+      "message": "Zen bu adreste bir sunucu bulamadı. Adreste yazım hatası olup olmadığını kontrol edin veya birazdan tekrar deneyin."
+    },
+    "refused": {
+      "title": "Bağlantı reddedildi",
+      "message": "Sunucu bağlantıyı reddetti. Site çalışmıyor olabilir veya bu portta bağlantı kabul etmiyor olabilir."
+    },
+    "reset": {
+      "title": "Bağlantı sıfırlandı",
+      "message": "Sunucuyla bağlantı kesildi. Bu genellikle geçicidir."
+    },
+    "tls": {
+      "title": "Güvenli bağlantı kurulamadı",
+      "message": "Zen bu siteyle güvenli bir bağlantı kuramadı. Yeniden denediğinizde bu siteye Zen'in filtrelemesi olmadan bağlanılabilir."
+    },
+    "unreachable": {
+      "title": "Bu siteye ulaşılamıyor",
+      "message": "Zen sunucuya ulaşamadı. Bağlantınızı kontrol edin veya birazdan tekrar deneyin."
+    },
+    "internal": {
+      "title": "Bir şeyler ters gitti",
+      "message": "Zen bu sayfayı işlerken dahili bir hatayla karşılaştı. Yeniden denemek işe yarayabilir."
+    }
+  }
+}

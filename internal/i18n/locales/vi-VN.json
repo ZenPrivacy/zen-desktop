@@ -1,0 +1,45 @@
+{
+  "common": {
+    "url": "URL:",
+    "goBack": "Quay lại"
+  },
+  "blockPage": {
+    "title": "Yêu cầu bị chặn",
+    "heading": "Bị chặn bởi Zen",
+    "rule": "Quy tắc:",
+    "filterList": "Danh sách bộ lọc:",
+    "allow": "Cho phép"
+  },
+  "errorPage": {
+    "technicalDetails": "Chi tiết kỹ thuật",
+    "retry": "Thử lại",
+    "timeout": {
+      "title": "Trang web này phản hồi quá lâu",
+      "message": "Máy chủ không phản hồi kịp thời. Máy chủ có thể đang quá tải, hoặc kết nối của bạn đang gặp sự cố."
+    },
+    "notFound": {
+      "title": "Không tìm thấy máy chủ",
+      "message": "Zen không tìm thấy máy chủ tại địa chỉ này. Hãy kiểm tra xem địa chỉ có lỗi chính tả không, hoặc thử lại sau giây lát."
+    },
+    "refused": {
+      "title": "Kết nối bị từ chối",
+      "message": "Máy chủ đã từ chối kết nối. Trang web có thể đang ngừng hoạt động, hoặc không chấp nhận kết nối trên cổng này."
+    },
+    "reset": {
+      "title": "Kết nối đã bị đặt lại",
+      "message": "Kết nối tới máy chủ đã bị gián đoạn. Đây thường chỉ là sự cố tạm thời."
+    },
+    "tls": {
+      "title": "Kết nối bảo mật thất bại",
+      "message": "Zen không thể thiết lập kết nối bảo mật tới trang web này. Khi thử lại, trang web này có thể được kết nối mà không có bộ lọc của Zen."
+    },
+    "unreachable": {
+      "title": "Không thể truy cập trang web này",
+      "message": "Zen không thể kết nối tới máy chủ. Hãy kiểm tra kết nối của bạn, hoặc thử lại sau giây lát."
+    },
+    "internal": {
+      "title": "Đã xảy ra lỗi",
+      "message": "Zen gặp lỗi nội bộ khi xử lý trang này. Thử lại có thể giúp khắc phục."
+    }
+  }
+}

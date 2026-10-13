@@ -1,0 +1,45 @@
+{
+  "common": {
+    "url": "网址：",
+    "goBack": "返回"
+  },
+  "blockPage": {
+    "title": "请求已被拦截",
+    "heading": "已被 Zen 拦截",
+    "rule": "规则：",
+    "filterList": "过滤列表：",
+    "allow": "允许"
+  },
+  "errorPage": {
+    "technicalDetails": "技术详情",
+    "retry": "重试",
+    "timeout": {
+      "title": "此网站响应时间过长",
+      "message": "服务器未能及时响应。服务器可能负载过高，或者您的网络连接存在问题。"
+    },
+    "notFound": {
+      "title": "找不到服务器",
+      "message": "Zen 在此地址找不到服务器。请检查地址是否有拼写错误，或稍后重试。"
+    },
+    "refused": {
+      "title": "连接被拒绝",
+      "message": "服务器拒绝了连接。该网站可能已停止运行，或者不接受此端口上的连接。"
+    },
+    "reset": {
+      "title": "连接已重置",
+      "message": "与服务器的连接已中断。这通常是暂时的。"
+    },
+    "tls": {
+      "title": "安全连接失败",
+      "message": "Zen 无法与此网站建立安全连接。重试后可能会在没有 Zen 过滤的情况下连接到此网站。"
+    },
+    "unreachable": {
+      "title": "无法访问此网站",
+      "message": "Zen 无法连接到服务器。请检查您的网络连接，或稍后重试。"
+    },
+    "internal": {
+      "title": "出现错误",
+      "message": "Zen 在处理此页面时遇到内部错误。重试可能会有所帮助。"
+    }
+  }
+}

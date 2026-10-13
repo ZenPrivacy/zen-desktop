@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ .L.Lang }}">
   <head>
     <meta charset="utf-8" />
-    <title>Request blocked</title>
+    <title>{{ .L.T "blockPage.title" }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="Cache-Control" content="no-store" />
     <style>
@@ -12,17 +12,17 @@
   <body>
     <div class="wrap">
       <div class="card">
-        <h1>Blocked by Zen</h1>
-        <p><strong>URL:</strong> <code id="url"></code></p>
+        <h1>{{ .L.T "blockPage.heading" }}</h1>
+        <p><strong>{{ .L.T "common.url" }}</strong> <code id="url"></code></p>
         {{ if .Rule }}
-        <p><strong>Rule:</strong> <code>{{ .Rule }}</code></p>
+        <p><strong>{{ .L.T "blockPage.rule" }}</strong> <code>{{ .Rule }}</code></p>
         {{ end }} {{ if .FilterList }}
-        <p><strong>Filter list:</strong> {{ .FilterList }}</p>
+        <p><strong>{{ .L.T "blockPage.filterList" }}</strong> {{ .FilterList }}</p>
         {{ end }}
 
         <div class="actions">
-          <a id="allowLink" class="btn" onclick="allow()">Allow</a>
-          <a class="btn secondary" onclick="window.history.back()">Go back</a>
+          <a id="allowLink" class="btn" onclick="allow()">{{ .L.T "blockPage.allow" }}</a>
+          <a class="btn secondary" onclick="window.history.back()">{{ .L.T "common.goBack" }}</a>
         </div>
       </div>
     </div>
