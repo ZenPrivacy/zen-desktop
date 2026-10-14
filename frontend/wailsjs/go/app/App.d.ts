@@ -3,11 +3,11 @@
 import {options} from '../models';
 import {config} from '../models';
 
-export function ExportCustomFilterLists():Promise<void>;
+export function ExportCustomFilterLists():Promise<boolean>;
 
 export function HardwareKeyUnavailableReason():Promise<string>;
 
-export function ImportCustomFilterLists():Promise<void>;
+export function ImportCustomFilterLists():Promise<boolean>;
 
 export function IsNoSelfUpdate():Promise<boolean>;
 

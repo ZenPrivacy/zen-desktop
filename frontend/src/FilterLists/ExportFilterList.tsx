@@ -12,7 +12,10 @@ export function ExportFilterList() {
   const handleExport = async () => {
     setLoading(true);
     try {
-      await ExportCustomFilterLists();
+      const exported = await ExportCustomFilterLists();
+      if (!exported) {
+        return;
+      }
       AppToaster.show({
         message: t('exportFilterList.successMessage'),
         intent: 'success',

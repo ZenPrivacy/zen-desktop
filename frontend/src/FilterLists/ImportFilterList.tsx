@@ -12,7 +12,10 @@ export function ImportFilterList({ onAdd }: { onAdd: () => void }) {
   const handleImport = async () => {
     setLoading(true);
     try {
-      await ImportCustomFilterLists();
+      const imported = await ImportCustomFilterLists();
+      if (!imported) {
+        return;
+      }
       AppToaster.show({
         message: t('importFilterList.successMessage'),
         intent: 'success',
