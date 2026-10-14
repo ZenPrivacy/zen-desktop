@@ -74,29 +74,3 @@ func (m *methodModifierEntry) Parse(modifier string) {
 func (m *methodModifierEntry) MatchesMethod(method string) bool {
 	return m.method == method
 }
-
-func (m *MethodModifier) Cancels(modifier Modifier) bool {
-	other, ok := modifier.(*MethodModifier)
-	if !ok {
-		return false
-	}
-
-	if len(m.entries) != len(other.entries) {
-		return false
-	}
-
-	for _, entry := range m.entries {
-		found := false
-		for _, otherEntry := range other.entries {
-			if entry.method == otherEntry.method {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-
-	return other.inverted == m.inverted
-}

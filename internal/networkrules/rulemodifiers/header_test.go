@@ -2,7 +2,6 @@ package rulemodifiers
 
 import (
 	"net/http"
-	"regexp"
 	"testing"
 )
 
@@ -157,123 +156,6 @@ func TestHeaderModifier(t *testing.T) {
 		res.Header.Set("Content-Type", "text/plain")
 		if m.ShouldMatchRes(res) {
 			t.Error("headerModifier.ShouldMatchRes(res) = true, want false")
-		}
-	})
-
-	t.Run("Cancels", func(t *testing.T) {
-		t.Parallel()
-
-		tests := []struct {
-			name string
-			a    HeaderModifier
-			b    HeaderModifier
-			want bool
-		}{
-			{
-				"Should cancel - identical modifiers",
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value",
-					regexp: regexp.MustCompile("^value$"),
-				},
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value",
-					regexp: regexp.MustCompile("^value$"),
-				},
-				true,
-			},
-			{
-				"Should cancel - empty",
-				HeaderModifier{},
-				HeaderModifier{},
-				true,
-			},
-			{
-				"Should cancel - header names differ only by case",
-				func() HeaderModifier {
-					m := HeaderModifier{}
-					if err := m.Parse("header=x-test:value"); err != nil {
-						t.Fatal(err)
-					}
-					return m
-				}(),
-				func() HeaderModifier {
-					m := HeaderModifier{}
-					if err := m.Parse("header=X-Test:value"); err != nil {
-						t.Fatal(err)
-					}
-					return m
-				}(),
-				true,
-			},
-			{
-				"Should not cancel - different header names",
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value",
-					regexp: regexp.MustCompile("^value$"),
-				},
-				HeaderModifier{
-					name:   "X-Different",
-					exact:  "value",
-					regexp: regexp.MustCompile("^value$"),
-				},
-				false,
-			},
-			{
-				"Should not cancel - different exact values",
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value1",
-					regexp: regexp.MustCompile("^value$"),
-				},
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value2",
-					regexp: regexp.MustCompile("^value$"),
-				},
-				false,
-			},
-			{
-				"Should not cancel - different regex values",
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value",
-					regexp: regexp.MustCompile("^value1$"),
-				},
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value",
-					regexp: regexp.MustCompile("^value2$"),
-				},
-				false,
-			},
-			{
-				"Should not cancel - one regex is nil",
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value",
-					regexp: nil,
-				},
-				HeaderModifier{
-					name:   "X-Test",
-					exact:  "value",
-					regexp: regexp.MustCompile("^value$"),
-				},
-				false,
-			},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				t.Parallel()
-
-				result := tt.a.Cancels(&tt.b)
-				if result != tt.want {
-					t.Errorf("HeaderModifier.Cancels() = %t, want %t", result, tt.want)
-				}
-			})
 		}
 	})
 }

@@ -134,15 +134,6 @@ func mapResponseContentTypeToModifier(mimeType string) (string, bool) {
 	return "", false
 }
 
-func (m *ContentTypeModifier) Cancels(modifier Modifier) bool {
-	other, ok := modifier.(*ContentTypeModifier)
-	if !ok {
-		return false
-	}
-
-	return other.inverted == m.inverted && other.contentType == m.contentType
-}
-
 func headerContains(h http.Header, name, value string) bool {
 	for _, v := range h[name] {
 		for _, s := range strings.Split(v, ",") {
