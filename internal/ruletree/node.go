@@ -7,8 +7,8 @@ import (
 	"github.com/irbis-sh/zen-desktop/internal/ruletree/byteset"
 )
 
-type litEdge[T Data] struct {
-	label byte
+type edge[T Data] struct {
+	label token
 	node  *node[T]
 }
 
@@ -16,17 +16,13 @@ type node[T Data] struct {
 	// leaf stores a possible leaf.
 	leaf []T
 
-	// prefix is the common prefix.
-	prefix []token
+	// prefix is the common prefix: a substring of a tokenized pattern, so a
+	// pattern's nodes share its memory. Copying it, e.g. to trim it in
+	// Compact, would undo that saving.
+	prefix string
 
-	// Special-token edges.
-
-	wildcard  *node[T]
-	separator *node[T]
-	anchor    *node[T]
-
-	// edges stores literal-character edges in sorted order.
-	edges []litEdge[T]
+	// edges stores child edges sorted by label.
+	edges []edge[T]
 }
 
 func (n *node[T]) isLeaf() bool {
@@ -34,68 +30,36 @@ func (n *node[T]) isLeaf() bool {
 }
 
 func (n *node[T]) addEdge(label token, e *node[T]) {
-	switch label {
-	case tokenWildcard:
-		n.wildcard = e
-		return
-	case tokenSeparator:
-		n.separator = e
-		return
-	case tokenAnchor:
-		n.anchor = e
-		return
-	default:
-		bLabel := byte(label) // #nosec G115 -- label is guaranteed to be <=255 past this point
-		idx := sort.Search(len(n.edges), func(i int) bool {
-			return n.edges[i].label >= bLabel
-		})
+	idx := sort.Search(len(n.edges), func(i int) bool {
+		return n.edges[i].label >= label
+	})
 
-		n.edges = append(n.edges, litEdge[T]{})
-		copy(n.edges[idx+1:], n.edges[idx:])
-		n.edges[idx] = litEdge[T]{bLabel, e}
-	}
+	n.edges = append(n.edges, edge[T]{})
+	copy(n.edges[idx+1:], n.edges[idx:])
+	n.edges[idx] = edge[T]{label, e}
 }
 
 func (n *node[T]) updateEdge(label token, node *node[T]) {
-	switch label {
-	case tokenWildcard:
-		n.wildcard = node
-		return
-	case tokenSeparator:
-		n.separator = node
-		return
-	case tokenAnchor:
-		n.anchor = node
-		return
-	default:
-		bLabel := byte(label) // #nosec G115 -- label is guaranteed to be <=255 past this point
-		idx := sort.Search(len(n.edges), func(i int) bool {
-			return n.edges[i].label >= bLabel
-		})
-		if idx < len(n.edges) && n.edges[idx].label == bLabel {
-			n.edges[idx].node = node
-		}
+	idx := sort.Search(len(n.edges), func(i int) bool {
+		return n.edges[i].label >= label
+	})
+	if idx < len(n.edges) && n.edges[idx].label == label {
+		n.edges[idx].node = node
 	}
 }
 
+// getEdge scans linearly: most nodes have at most a few edges, where a
+// binary search measured about 15% slower on BenchmarkMatch.
 func (n *node[T]) getEdge(label token) *node[T] {
-	switch label {
-	case tokenWildcard:
-		return n.wildcard
-	case tokenSeparator:
-		return n.separator
-	case tokenAnchor:
-		return n.anchor
-	default:
-		bLabel := byte(label) // #nosec G115 -- label is guaranteed to be <=255 past this point
-		idx := sort.Search(len(n.edges), func(i int) bool {
-			return n.edges[i].label >= bLabel
-		})
-		if idx < len(n.edges) && n.edges[idx].label == bLabel {
-			return n.edges[idx].node
+	for _, e := range n.edges {
+		if e.label == label {
+			return e.node
 		}
-		return nil
+		if e.label > label {
+			break
+		}
 	}
+	return nil
 }
 
 // traverser holds the state for a single traverse() call.
@@ -113,30 +77,32 @@ func (n *node[T]) traverse(url string) []T {
 	return t.data
 }
 
-func (t *traverser[T]) traversePrefix(prefix []token, url string) {
+func (t *traverser[T]) traversePrefix(prefix string, url string) {
 	if len(prefix) == 0 {
 		if t.n.isLeaf() {
 			t.data = append(t.data, t.n.leaf...)
 		}
 		if url == "" {
-			if t.n.anchor != nil {
-				t.data = append(t.data, t.n.anchor.traverse("")...)
+			if anchor := t.n.getEdge(tokenAnchor); anchor != nil {
+				t.data = append(t.data, anchor.traverse("")...)
 			}
-			if t.n.wildcard != nil {
-				t.data = append(t.data, t.n.wildcard.traverse("")...)
+			if wildcard := t.n.getEdge(tokenWildcard); wildcard != nil {
+				t.data = append(t.data, wildcard.traverse("")...)
 			}
-			if t.n.separator != nil {
-				t.data = append(t.data, t.n.separator.traverse("")...)
+			if separator := t.n.getEdge(tokenSeparator); separator != nil {
+				t.data = append(t.data, separator.traverse("")...)
 			}
 		} else {
 			firstCh := url[0]
-			if isSeparator(firstCh) && t.n.separator != nil {
-				t.data = append(t.data, t.n.separator.traverse(url)...)
+			if isSeparator(firstCh) {
+				if separator := t.n.getEdge(tokenSeparator); separator != nil {
+					t.data = append(t.data, separator.traverse(url)...)
+				}
 			}
-			if t.n.wildcard != nil {
-				t.data = append(t.data, t.n.wildcard.traverse(url)...)
+			if wildcard := t.n.getEdge(tokenWildcard); wildcard != nil {
+				t.data = append(t.data, wildcard.traverse(url)...)
 			}
-			if ch := t.n.getEdge(token(firstCh)); ch != nil {
+			if ch := t.n.getEdge(firstCh); ch != nil {
 				t.data = append(t.data, ch.traverse(url)...)
 			}
 		}
@@ -164,7 +130,7 @@ func (t *traverser[T]) traversePrefix(prefix []token, url string) {
 					}
 				}
 			default:
-				target := byte(prefix[1]) // #nosec G115 -- literal character tokens are always in ASCII byte range
+				target := prefix[1]
 				off := 0
 				for off < len(url) {
 					idx := strings.IndexByte(url[off:], target)
@@ -192,42 +158,44 @@ func (t *traverser[T]) traversePrefix(prefix []token, url string) {
 			t.traversePrefix(prefix[1:], url[i:])
 		}
 	default:
-		if prefix[0] == token(url[0]) {
+		if prefix[0] == url[0] {
 			t.traversePrefix(prefix[1:], url[1:])
 		}
 	}
 }
 
 // traverseWildcardTail handles a wildcard at the end of a node's prefix.
-// Instead of calling traversePrefix(nil, url[i:]) for every i, it
+// Instead of calling traversePrefix("", url[i:]) for every i, it
 // collects the set of characters that can actually start a child edge
 // and only dispatches on positions where those characters appear.
 func (t *traverser[T]) traverseWildcardTail(url string) {
 	n := t.n
 
 	// Wildcard matches the entire remaining URL.
-	t.traversePrefix(nil, "")
+	t.traversePrefix("", "")
 
-	hasSep := n.separator != nil
-	hasWild := n.wildcard != nil
+	separator := n.getEdge(tokenSeparator)
+	wildcard := n.getEdge(tokenWildcard)
 
 	// Build a set of literal first-characters from the node's edges.
 	var literalSet byteset.Set
 	for _, e := range n.edges {
-		literalSet.Add(e.label)
+		if e.label > tokenMaxSpecial {
+			literalSet.Add(e.label)
+		}
 	}
 
 	for i := 0; i < len(url); i++ {
 		ch := url[i]
 
-		if hasSep && isSeparator(ch) {
-			t.data = append(t.data, n.separator.traverse(url[i:])...)
+		if separator != nil && isSeparator(ch) {
+			t.data = append(t.data, separator.traverse(url[i:])...)
 		}
-		if hasWild {
-			t.data = append(t.data, n.wildcard.traverse(url[i:])...)
+		if wildcard != nil {
+			t.data = append(t.data, wildcard.traverse(url[i:])...)
 		}
 		if literalSet.Has(ch) {
-			if child := n.getEdge(token(ch)); child != nil {
+			if child := n.getEdge(ch); child != nil {
 				t.data = append(t.data, child.traverse(url[i:])...)
 			}
 		}
