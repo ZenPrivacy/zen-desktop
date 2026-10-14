@@ -10,6 +10,10 @@ type ExceptionRule struct {
 	rule.Rule
 }
 
+// Cancels reports whether er cancels r. The caller has already matched both rules against
+// the request or response, so their condition modifiers take no part here: they decide
+// whether the exception applies, not which rules it cancels. A broad block rule such as
+// "||ads.example^" is therefore cancelled by "@@||ads.example^$script,domain=a.com".
 func (er *ExceptionRule) Cancels(r *rule.Rule) bool {
 	if r.Important() && !er.Important() {
 		return false
@@ -17,37 +21,6 @@ func (er *ExceptionRule) Cancels(r *rule.Rule) bool {
 
 	if er.Document() && !r.Document() && !r.All() {
 		return false
-	}
-
-	for _, exc := range er.AndModifiers() {
-		found := false
-		for _, basic := range r.AndModifiers() {
-			if exc.Cancels(basic) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-
-	if len(er.OrModifiers()) > 0 {
-		found := false
-		for _, exc := range er.OrModifiers() {
-			for _, basic := range r.OrModifiers() {
-				if exc.Cancels(basic) {
-					found = true
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-		if !found {
-			return false
-		}
 	}
 
 	for _, exc := range er.ActionModifiers() {

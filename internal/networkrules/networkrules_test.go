@@ -412,6 +412,23 @@ func TestExceptionRules(t *testing.T) {
 		}
 	})
 
+	t.Run("action exception does not unblock", func(t *testing.T) {
+		t.Parallel()
+
+		nr := New()
+		if _, err := nr.ParseRule(`||example.com^`, nil); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := nr.ParseRule(`@@||example.com^$removeparam=utm_source`, nil); err != nil {
+			t.Fatal(err)
+		}
+
+		_, shouldBlock, _ := nr.ModifyReq(newTestRequest(t, "https://example.com/?utm_source=ad", nil))
+		if !shouldBlock {
+			t.Fatal("expected action exception NOT to cancel blocking primary rule")
+		}
+	})
+
 	t.Run("normal exception does not cancel important primary", func(t *testing.T) {
 		t.Parallel()
 
@@ -443,6 +460,163 @@ func TestExceptionRules(t *testing.T) {
 		_, shouldBlock, _ := nr.ModifyReq(newTestRequest(t, "https://example.com/", nil))
 		if shouldBlock {
 			t.Fatal("expected important exception to cancel important primary rule")
+		}
+	})
+}
+
+func TestExceptionConditions(t *testing.T) {
+	t.Parallel()
+
+	moatRules := []string{`||moatads.com^`, `@@||moatads.com^$script,domain=imsa.com|nascar.com`}
+
+	tests := []struct {
+		name         string
+		rules        []string
+		url          string
+		headers      http.Header
+		wantBlock    bool
+		wantRedirect string
+	}{
+		{
+			name:  "scoped exception cancels broader primary",
+			rules: moatRules,
+			url:   "https://z.moatads.com/x.js",
+			headers: http.Header{
+				"Referer":        []string{"https://www.nascar.com/"},
+				"Sec-Fetch-Dest": []string{"script"},
+			},
+			wantBlock: false,
+		},
+		{
+			name:  "scoped exception does not apply from another domain",
+			rules: moatRules,
+			url:   "https://z.moatads.com/x.js",
+			headers: http.Header{
+				"Referer":        []string{"https://other.example/"},
+				"Sec-Fetch-Dest": []string{"script"},
+			},
+			wantBlock: true,
+		},
+		{
+			name:  "scoped exception does not apply to another content type",
+			rules: moatRules,
+			url:   "https://z.moatads.com/x.gif",
+			headers: http.Header{
+				"Referer":        []string{"https://www.nascar.com/"},
+				"Sec-Fetch-Dest": []string{"image"},
+			},
+			wantBlock: true,
+		},
+		{
+			name:      "exception with fewer domains cancels primary on its domain",
+			rules:     []string{`||ads.example^$domain=a.com|b.com`, `@@||ads.example^$domain=a.com`},
+			url:       "https://ads.example/",
+			headers:   http.Header{"Referer": []string{"https://a.com/"}},
+			wantBlock: false,
+		},
+		{
+			name:      "exception with fewer domains does not cancel primary on other domains",
+			rules:     []string{`||ads.example^$domain=a.com|b.com`, `@@||ads.example^$domain=a.com`},
+			url:       "https://ads.example/",
+			headers:   http.Header{"Referer": []string{"https://b.com/"}},
+			wantBlock: true,
+		},
+		{
+			name:      "third-party exception cancels primary on cross-site request",
+			rules:     []string{`||ads.example^`, `@@||ads.example^$third-party`},
+			url:       "https://ads.example/",
+			headers:   http.Header{"Sec-Fetch-Site": []string{"cross-site"}},
+			wantBlock: false,
+		},
+		{
+			name:      "third-party exception does not cancel primary on same-origin request",
+			rules:     []string{`||ads.example^`, `@@||ads.example^$third-party`},
+			url:       "https://ads.example/",
+			headers:   http.Header{"Sec-Fetch-Site": []string{"same-origin"}},
+			wantBlock: true,
+		},
+		{
+			name:    "scoped action exception cancels query modification on its domain",
+			rules:   []string{`||example.com^$removeparam=utm_source`, `@@||example.com^$removeparam=utm_source,domain=a.com`},
+			url:     "https://example.com/?utm_source=ad&id=1",
+			headers: http.Header{"Referer": []string{"https://a.com/"}},
+		},
+		{
+			name:         "scoped action exception does not cancel query modification on other domains",
+			rules:        []string{`||example.com^$removeparam=utm_source`, `@@||example.com^$removeparam=utm_source,domain=a.com`},
+			url:          "https://example.com/?utm_source=ad&id=1",
+			headers:      http.Header{"Referer": []string{"https://b.com/"}},
+			wantRedirect: "https://example.com/?id=1",
+		},
+		{
+			// $domain is read from the Referer, so on a clicked navigation it names the page the
+			// click came from. AdGuard does the same; uBO checks the page being opened and would block.
+			name:  "scoped exception cancels document primary on navigation from its domain",
+			rules: []string{`||tracker.example^$document`, `@@||tracker.example^$domain=a.com`},
+			url:   "https://tracker.example/",
+			headers: http.Header{
+				"Referer":        []string{"https://a.com/"},
+				"Sec-Fetch-Dest": []string{"document"},
+				"Sec-Fetch-User": []string{"?1"},
+			},
+			wantBlock: false,
+		},
+		{
+			name:      "scoped exception does not cancel important primary",
+			rules:     []string{`||example.com^$important`, `@@||example.com^$domain=a.com`},
+			url:       "https://example.com/",
+			headers:   http.Header{"Referer": []string{"https://a.com/"}},
+			wantBlock: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			nr := New()
+			for _, r := range tt.rules {
+				if _, err := nr.ParseRule(r, nil); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			_, shouldBlock, redirectURL := nr.ModifyReq(newTestRequest(t, tt.url, tt.headers))
+			if shouldBlock != tt.wantBlock {
+				t.Errorf("shouldBlock = %t, want %t", shouldBlock, tt.wantBlock)
+			}
+			if redirectURL != tt.wantRedirect {
+				t.Errorf("redirect URL = %q, want %q", redirectURL, tt.wantRedirect)
+			}
+		})
+	}
+
+	// In ModifyRes, $domain, $third-party and $method never match, so only exceptions
+	// conditioned on content type or $header apply to responses.
+	t.Run("only content type and header conditions apply to responses", func(t *testing.T) {
+		t.Parallel()
+
+		for exception, wantHeader := range map[string]string{
+			`@@||cdn.example^$removeheader=X-Test,script`:       "1",
+			`@@||cdn.example^$removeheader=X-Test,domain=a.com`: "",
+		} {
+			nr := New()
+			for _, r := range []string{`||cdn.example^$removeheader=X-Test`, exception} {
+				if _, err := nr.ParseRule(r, nil); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			res := &http.Response{Header: http.Header{
+				"Content-Type": []string{"text/javascript"},
+				"X-Test":       []string{"1"},
+			}}
+			if _, err := nr.ModifyRes(newTestRequest(t, "https://cdn.example/x.js", nil), res); err != nil {
+				t.Fatal(err)
+			}
+			if got := res.Header.Get("X-Test"); got != wantHeader {
+				t.Errorf("with %s: X-Test = %q, want %q", exception, got, wantHeader)
+			}
 		}
 	})
 }

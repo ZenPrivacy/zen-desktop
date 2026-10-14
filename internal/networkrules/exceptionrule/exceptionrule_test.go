@@ -150,4 +150,29 @@ func TestExceptionRule(t *testing.T) {
 			t.Errorf("'%s'.Cancels('%s') = %t, want %t", er.RawRule, r.RawRule, got, want)
 		}
 	})
+
+	t.Run("'@@||page$domain=a.com' should cancel '||page'", func(t *testing.T) {
+		t.Parallel()
+
+		filterName := "test"
+
+		er := &ExceptionRule{
+			Rule: rule.Rule{
+				RawRule:    "@@||example.com$domain=a.com",
+				FilterName: &filterName,
+			},
+		}
+		r := &rule.Rule{
+			RawRule:    "||example.com",
+			FilterName: &filterName,
+		}
+		if err := er.ParseModifiers([]string{"domain=a.com"}); err != nil {
+			t.Fatal(err)
+		}
+
+		want := true
+		if got := er.Cancels(r); got != want {
+			t.Errorf("'%s'.Cancels('%s') = %t, want %t", er.RawRule, r.RawRule, got, want)
+		}
+	})
 }

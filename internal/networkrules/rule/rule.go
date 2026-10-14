@@ -62,16 +62,16 @@ func (rm *Rule) All() bool {
 	return rm.mods != nil && rm.mods.all
 }
 
-// AndModifiers returns the condition modifiers that must all match for the rule to apply.
-func (rm *Rule) AndModifiers() []rulemodifiers.ConditionModifier {
+// andModifiers returns the condition modifiers that must all match for the rule to apply.
+func (rm *Rule) andModifiers() []rulemodifiers.ConditionModifier {
 	if rm.mods == nil {
 		return nil
 	}
 	return rm.mods.and
 }
 
-// OrModifiers returns the condition modifiers of which at least one must match for the rule to apply.
-func (rm *Rule) OrModifiers() []rulemodifiers.ConditionModifier {
+// orModifiers returns the condition modifiers of which at least one must match for the rule to apply.
+func (rm *Rule) orModifiers() []rulemodifiers.ConditionModifier {
 	if rm.mods == nil {
 		return nil
 	}
@@ -269,16 +269,16 @@ func (rm *Rule) ShouldMatchReq(req *http.Request) bool {
 
 // ModifiersMatchReq returns true if the rule's matching modifiers match the request.
 func (rm *Rule) ModifiersMatchReq(req *http.Request) bool {
-	// AndModifiers: All must match.
-	for _, m := range rm.AndModifiers() {
+	// andModifiers: All must match.
+	for _, m := range rm.andModifiers() {
 		if !m.ShouldMatchReq(req) {
 			return false
 		}
 	}
 
-	// OrModifiers: At least one must match.
-	if len(rm.OrModifiers()) > 0 {
-		for _, m := range rm.OrModifiers() {
+	// orModifiers: At least one must match.
+	if len(rm.orModifiers()) > 0 {
+		for _, m := range rm.orModifiers() {
 			if m.ShouldMatchReq(req) {
 				return true
 			}
@@ -296,14 +296,14 @@ func (rm *Rule) ShouldMatchRes(res *http.Response) bool {
 
 // ModifiersMatchRes returns true if the rule's matching modifiers match the response.
 func (rm *Rule) ModifiersMatchRes(res *http.Response) bool {
-	for _, m := range rm.AndModifiers() {
+	for _, m := range rm.andModifiers() {
 		if !m.ShouldMatchRes(res) {
 			return false
 		}
 	}
 
-	if len(rm.OrModifiers()) > 0 {
-		for _, m := range rm.OrModifiers() {
+	if len(rm.orModifiers()) > 0 {
+		for _, m := range rm.orModifiers() {
 			if m.ShouldMatchRes(res) {
 				return true
 			}
