@@ -1,9 +1,6 @@
 package ruletree
 
-import (
-	"reflect"
-	"testing"
-)
+import "testing"
 
 func TestTokenize(t *testing.T) {
 	t.Parallel()
@@ -82,8 +79,8 @@ func TestTokenize(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if got := tokenize(test.s); !reflect.DeepEqual(got, test.tokens) {
-			t.Errorf("Tokenize(%q) = %#v, want %#v", test.s, got, test.tokens)
+		if got := tokenize(test.s); got != string(test.tokens) {
+			t.Errorf("tokenize(%q) = %q, want %q", test.s, got, test.tokens)
 		}
 	}
 }

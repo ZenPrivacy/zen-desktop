@@ -61,16 +61,21 @@ func (t *Tree[T]) insertTree(pattern string, v T) {
 		return
 	}
 
-	var parent *node[T]
-	var n *node[T]
-
-	tokens := tokenize(pattern)
-
-	for i := 1; i < len(tokens); i++ {
-		if tokens[i] == tokenDomainBoundary {
+	// Special tokens are control bytes, so a literal one in the pattern would
+	// be read as a special token.
+	for i := 0; i < len(pattern); i++ {
+		if pattern[i] <= tokenMaxSpecial {
 			return
 		}
 	}
+
+	tokens := tokenize(pattern)
+	if strings.IndexByte(tokens[1:], tokenDomainBoundary) >= 0 {
+		return
+	}
+
+	var parent *node[T]
+	var n *node[T]
 
 	switch tokens[0] {
 	case tokenDomainBoundary:
@@ -239,7 +244,7 @@ func (t *Tree[T]) matchDomainBoundary(s string, into map[T]struct{}) {
 	}
 }
 
-func longestPrefix(a, b []token) int {
+func longestPrefix(a, b string) int {
 	maxLen := len(a)
 	if l := len(b); l < maxLen {
 		maxLen = l
