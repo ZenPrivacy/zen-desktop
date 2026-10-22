@@ -106,7 +106,11 @@ Section
     
     !insertmacro wails.files
 
+    # Per-user Start menu. A shared Programs folder would point other accounts at this profile.
+    SetShellVarContext current
     CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    !insertmacro wails.setShellContext
+
     CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 
     !insertmacro wails.writeUninstaller
@@ -126,7 +130,11 @@ Section "uninstall"
 
     RMDir /r "$LOCALAPPDATA\${INFO_PRODUCTNAME}"
 
+    # Match the per-user Start menu shortcut. Leave any shared shortcut from an older install.
+    SetShellVarContext current
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
+    !insertmacro wails.setShellContext
+
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
 
     !insertmacro wails.deleteUninstaller
