@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.28.0
+
+### What's New
+
+* **Translated block and error pages**
+  Before, the block page and the error pages Zen shows when a site fails to load were always in English. They now use the language you chose in the app.
+* **Exception rule fixes**
+  Filter lists often allow something on just one site, with a rule like `@@||moatads.com^$script,domain=nascar.com`. Zen ignored most of these rules unless a block rule had exactly the same modifiers, which was incorrect behaviour. Zen now applies them the same way uBlock Origin and AdGuard do.
+* **Lower memory use**
+  Zen now uses about 60 MB less memory with the default filter lists.
+* **Security update**
+  Zen is now built with Go 1.27.3, which rejects certificates issued through compromised intermediate CAs (CVE-2026-111943). Your system's certificate store should already reject them, but this adds a second check.
+* Other minor bugfixes and improvements.
+
+Thank you for using Zen!
+
+**Full Changelog**: https://github.com/irbis-sh/zen-desktop/compare/v0.27.1...v0.28.0
+
 ## v0.27.1
 
   ## What's New
