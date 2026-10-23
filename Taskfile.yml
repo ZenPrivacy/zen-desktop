@@ -60,3 +60,17 @@ tasks:
     desc: Pull the updates from the zen-https-exclusions repository.
     cmds:
       - git subtree pull --prefix=internal/sysproxy/exclusions https://github.com/irbis-sh/zen-https-exclusions master --squash
+
+  update-flake:
+    desc: Update the nixpkgs input in flake.lock. Runs Nix in Docker when it is not installed.
+    # Mounting only the flake files avoids copying the whole checkout, node_modules
+    # included, into the Nix store, and works in git worktrees, whose .git points
+    # outside the mount. :z relabels the files so the container can access them under SELinux.
+    cmds:
+      - |
+        if command -v nix >/dev/null; then
+          nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs
+        else
+          docker run --rm -v "$PWD/flake.nix:/src/flake.nix:ro,z" -v "$PWD/flake.lock:/src/flake.lock:z" \
+            nixos/nix:2.35.2 nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs --flake path:/src
+        fi
