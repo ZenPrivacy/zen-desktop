@@ -15,6 +15,7 @@ Use `task` commands when available.
 - Lint (frontend only): `task frontend:lint`
 - Format (Go): `task fmt-go`
 - Format check (frontend): `task frontend:fmt`
+- Update flake.lock: `task update-flake`
 
 ## File structure
 
